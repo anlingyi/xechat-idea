@@ -1,0 +1,24 @@
+<idea-plugin>
+    <id>cn.xeblog.xechat.plugin</id>
+    <name>XEChat</name>
+    <version>2.0-alpha</version>
+    <vendor email="1090172196@qq.com" url="https://xeblog.cn">AnLingYi</vendor>
+
+    <description><![CDATA[
+        <p>在IDEA里享受即时聊天的乐趣！</p>
+        <p>努力工作，请勿摸鱼！</p>
+        <p>凑字数，还不够？？？吗？</p>
+    ]]></description>
+
+    <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="XEChat" anchor="bottom" secondary="true" doNotActivateOnStart="true" factoryClass="cn.xeblog.factory.MainWindowFactory" icon="/images/logo.png"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+</idea-plugin>
