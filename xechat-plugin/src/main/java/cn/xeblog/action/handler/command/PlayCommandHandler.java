@@ -68,7 +68,10 @@ public class PlayCommandHandler extends AbstractCommandHandler {
                         timer.cancel();
                     }
                     if (timeout) {
-                        MessageAction.send(RequestBuilder.build(new GameInviteResultDTO(InviteStatus.TIMEOUT), Action.GAME_INVITE_RESULT));
+                        GameInviteResultDTO result = new GameInviteResultDTO(InviteStatus.TIMEOUT);
+                        result.setGame(GameAction.getGame());
+                        result.setOpponentId(DataCache.userMap.get(GameAction.getOpponent()));
+                        MessageAction.send(RequestBuilder.build(result, Action.GAME_INVITE_RESULT));
                     }
                 }
             }, 0, 1000);

@@ -4,6 +4,7 @@ import cn.xeblog.action.ConsoleAction;
 import cn.xeblog.action.GameAction;
 import cn.xeblog.action.MessageAction;
 import cn.xeblog.builder.RequestBuilder;
+import cn.xeblog.cache.DataCache;
 import cn.xeblog.entity.GameInviteResultDTO;
 import cn.xeblog.enums.Action;
 import cn.xeblog.enums.InviteStatus;
@@ -29,6 +30,8 @@ public class JoinCommandHandler extends AbstractCommandHandler {
             }
 
             GameInviteResultDTO gameInviteResultDTO = new GameInviteResultDTO(InviteStatus.ACCEPT);
+            gameInviteResultDTO.setGame(GameAction.getGame());
+            gameInviteResultDTO.setOpponentId(DataCache.userMap.get(opponent));
 
             if (args.length > 1) {
                 gameInviteResultDTO.setStatus(InviteStatus.REJECT);
