@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>cn.xeblog.xechat.plugin</id>
     <name>XEChat</name>
-    <version>2.0-alpha</version>
+    <version>1.0-beta</version>
     <vendor email="1090172196@qq.com" url="https://xeblog.cn">AnLingYi</vendor>
 
     <description><![CDATA[
@@ -15,7 +15,8 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="XEChat" anchor="bottom" secondary="true" doNotActivateOnStart="true" factoryClass="cn.xeblog.factory.MainWindowFactory" icon="/images/logo.png"/>
+        <toolWindow id="XEChat" anchor="bottom" secondary="true" doNotActivateOnStart="true"
+                    factoryClass="cn.xeblog.plugin.factory.MainWindowFactory" icon="/images/logo.png"/>
     </extensions>
 
     <actions>
