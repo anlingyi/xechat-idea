@@ -1,6 +1,6 @@
-package cn.xeblog.entity;
+package cn.xeblog.commons.entity;
 
-import cn.xeblog.enums.Action;
+import cn.xeblog.commons.enums.Action;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,4 +21,5 @@ public class Request<T> implements Serializable {
     private T body;
 
     private Action action;
+
 }

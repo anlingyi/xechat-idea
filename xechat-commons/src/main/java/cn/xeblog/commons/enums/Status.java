@@ -1,4 +1,4 @@
-package cn.xeblog.enums;
+package cn.xeblog.commons.enums;
 
 /**
  * @author anlingyi

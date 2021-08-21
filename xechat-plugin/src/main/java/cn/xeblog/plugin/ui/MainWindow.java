@@ -56,7 +56,7 @@ public class MainWindow {
 
             @Override
             public void keyReleased(KeyEvent e) {
-                if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_V) {
+                if ((e.isControlDown() || e.isMetaDown()) && e.getKeyCode() == KeyEvent.VK_V) {
                     // 粘贴图片
                     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                     Transferable transferable = clipboard.getContents(null);
