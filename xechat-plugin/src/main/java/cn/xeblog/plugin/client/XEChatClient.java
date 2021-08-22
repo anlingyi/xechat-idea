@@ -17,16 +17,28 @@ public class XEChatClient {
 
     private static final String HOST = "localhost";
 
-    public static void run() {
-        EventLoopGroup group = new NioEventLoopGroup();
+    private static final int PORT = 1024;
 
+    public static void run() {
+        run(HOST, PORT);
+    }
+
+    public static void run(String host, int port) {
+        if (host == null) {
+            host = HOST;
+        }
+        if (port == 0) {
+            port = PORT;
+        }
+
+        EventLoopGroup group = new NioEventLoopGroup();
         try {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.group(group)
                     .channel(NioSocketChannel.class)
                     .option(ChannelOption.TCP_NODELAY, true)
                     .handler(new DefaultChannelInitializer());
-            ChannelFuture channelFuture = bootstrap.connect(HOST, 1024).sync();
+            ChannelFuture channelFuture = bootstrap.connect(host, port).sync();
             channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
             ConsoleAction.showSimpleMsg("连接服务器失败！");
