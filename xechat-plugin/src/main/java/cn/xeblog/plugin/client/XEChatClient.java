@@ -21,8 +21,24 @@ import java.io.File;
 public class XEChatClient {
 
     private static final String HOST = "localhost";
-
     private static final int PORT = 1024;
+
+    private static final File CERT_CHAIN_FILE = new File(XEChatClient.class.getResource("/ssl/client.crt").getFile());
+    private static final File KEY_FILE = new File(XEChatClient.class.getResource("/ssl/pkcs8_client.key").getFile());
+    private static final File ROOT_FILE = new File(XEChatClient.class.getResource("/ssl/ca.crt").getFile());
+
+    private static SslContext sslContext;
+
+    static {
+        try {
+            sslContext = SslContextBuilder.forClient()
+                    .keyManager(CERT_CHAIN_FILE, KEY_FILE)
+                    .trustManager(ROOT_FILE)
+                    .build();
+        } catch (SSLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void run() {
         run(HOST, PORT);
