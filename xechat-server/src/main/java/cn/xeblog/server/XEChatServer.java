@@ -7,8 +7,14 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.ssl.ClientAuth;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.SslProvider;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.net.ssl.SSLException;
+import java.io.File;
 import java.net.InetSocketAddress;
 
 /**
@@ -24,6 +30,25 @@ public class XEChatServer {
         this.port = port;
     }
 
+    private static final String SSL_FILES = XEChatServer.class.getResource("/ssl").getFile();
+    private static final File CERT_CHAIN_FILE = new File(SSL_FILES + "/server.crt");
+    private static final File KEY_FILE = new File(SSL_FILES + "/pkcs8_server.key");
+    private static final File ROOT_FILE = new File(SSL_FILES + "/ca.crt");
+
+    private static SslContext sslContext;
+
+    static {
+        try {
+            sslContext = SslContextBuilder.forServer(CERT_CHAIN_FILE, KEY_FILE)
+                    .trustManager(ROOT_FILE)
+                    .clientAuth(ClientAuth.REQUIRE)
+                    .sslProvider(SslProvider.JDK)
+                    .build();
+        } catch (SSLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void run() {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workGroup = new NioEventLoopGroup();
@@ -32,7 +57,7 @@ public class XEChatServer {
         serverBootstrap.group(bossGroup, workGroup)
                 .channel(NioServerSocketChannel.class)
                 .localAddress(new InetSocketAddress(port))
-                .childHandler(new DefaultChannelInitializer())
+                .childHandler(new DefaultChannelInitializer(sslContext))
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
 

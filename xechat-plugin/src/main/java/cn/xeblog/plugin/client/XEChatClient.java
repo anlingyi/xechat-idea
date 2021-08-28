@@ -8,6 +8,11 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+
+import javax.net.ssl.SSLException;
+import java.io.File;
 
 /**
  * @author anlingyi
@@ -37,7 +42,7 @@ public class XEChatClient {
             bootstrap.group(group)
                     .channel(NioSocketChannel.class)
                     .option(ChannelOption.TCP_NODELAY, true)
-                    .handler(new DefaultChannelInitializer());
+                    .handler(new DefaultChannelInitializer(sslContext));
             ChannelFuture channelFuture = bootstrap.connect(host, port).sync();
             channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
