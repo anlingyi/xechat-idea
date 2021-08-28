@@ -1,10 +1,10 @@
 package cn.xeblog.server.handler;
 
+import cn.xeblog.commons.codec.ProtostuffDecoder;
+import cn.xeblog.commons.codec.ProtostuffEncoder;
+import cn.xeblog.commons.entity.Request;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.serialization.ClassResolvers;
-import io.netty.handler.codec.serialization.ObjectDecoder;
-import io.netty.handler.codec.serialization.ObjectEncoder;
 
 /**
  * @author anlingyi
@@ -12,12 +12,10 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
  */
 public class DefaultChannelInitializer extends ChannelInitializer<SocketChannel> {
 
-    private static final int OBJECT_MAX_SIZE = 1024 * 1024;
-
     protected void initChannel(SocketChannel ch) throws Exception {
         ch.pipeline()
-                .addLast(new ObjectDecoder(OBJECT_MAX_SIZE, ClassResolvers.cacheDisabled(this.getClass().getClassLoader())))
-                .addLast(new ObjectEncoder())
+                .addLast(new ProtostuffDecoder(Request.class))
+                .addLast(new ProtostuffEncoder())
                 .addLast(new XEChatServerHandler());
     }
 

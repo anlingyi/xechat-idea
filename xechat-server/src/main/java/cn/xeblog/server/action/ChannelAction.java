@@ -1,5 +1,6 @@
 package cn.xeblog.server.action;
 
+import cn.xeblog.commons.entity.Response;
 import cn.xeblog.server.builder.ResponseBuilder;
 import cn.xeblog.server.cache.UserCache;
 import cn.xeblog.commons.entity.User;
@@ -20,7 +21,7 @@ public class ChannelAction {
 
     private static final ChannelGroup GROUP = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
-    public static void writeAndFlush(Object resp) {
+    public static void writeAndFlush(Response resp) {
         GROUP.writeAndFlush(resp);
     }
 
