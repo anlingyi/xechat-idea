@@ -11,8 +11,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 
-import javax.net.ssl.SSLException;
-import java.io.File;
+import java.io.InputStream;
 
 /**
  * @author anlingyi
@@ -23,19 +22,19 @@ public class XEChatClient {
     private static final String HOST = "localhost";
     private static final int PORT = 1024;
 
-    private static final File CERT_CHAIN_FILE = new File(XEChatClient.class.getResource("/ssl/client.crt").getFile());
-    private static final File KEY_FILE = new File(XEChatClient.class.getResource("/ssl/pkcs8_client.key").getFile());
-    private static final File ROOT_FILE = new File(XEChatClient.class.getResource("/ssl/ca.crt").getFile());
-
     private static SslContext sslContext;
 
     static {
-        try {
+        try (
+                InputStream certIn = XEChatClient.class.getResourceAsStream("/ssl/client.crt");
+                InputStream keyIn = XEChatClient.class.getResourceAsStream("/ssl/pkcs8_client.key");
+                InputStream caIn = XEChatClient.class.getResourceAsStream("/ssl/ca.crt")
+        ) {
             sslContext = SslContextBuilder.forClient()
-                    .keyManager(CERT_CHAIN_FILE, KEY_FILE)
-                    .trustManager(ROOT_FILE)
+                    .keyManager(certIn, keyIn)
+                    .trustManager(caIn)
                     .build();
-        } catch (SSLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

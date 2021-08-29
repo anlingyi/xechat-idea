@@ -13,8 +13,7 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslProvider;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.net.ssl.SSLException;
-import java.io.File;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 
 /**
@@ -30,21 +29,20 @@ public class XEChatServer {
         this.port = port;
     }
 
-    private static final String SSL_FILES = XEChatServer.class.getResource("/ssl").getFile();
-    private static final File CERT_CHAIN_FILE = new File(SSL_FILES + "/server.crt");
-    private static final File KEY_FILE = new File(SSL_FILES + "/pkcs8_server.key");
-    private static final File ROOT_FILE = new File(SSL_FILES + "/ca.crt");
-
     private static SslContext sslContext;
 
     static {
-        try {
-            sslContext = SslContextBuilder.forServer(CERT_CHAIN_FILE, KEY_FILE)
-                    .trustManager(ROOT_FILE)
+        try (
+                InputStream certIn = XEChatServer.class.getResourceAsStream("/ssl/server.crt");
+                InputStream keyIn = XEChatServer.class.getResourceAsStream("/ssl/pkcs8_server.key");
+                InputStream caIn = XEChatServer.class.getResourceAsStream("/ssl/ca.crt")
+        ) {
+            sslContext = SslContextBuilder.forServer(certIn, keyIn)
+                    .trustManager(caIn)
                     .clientAuth(ClientAuth.REQUIRE)
                     .sslProvider(SslProvider.JDK)
                     .build();
-        } catch (SSLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
