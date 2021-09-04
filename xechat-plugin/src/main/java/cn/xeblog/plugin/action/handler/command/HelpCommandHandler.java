@@ -2,6 +2,7 @@ package cn.xeblog.plugin.action.handler.command;
 
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.enums.Command;
+import cn.xeblog.plugin.util.IdeaUtils;
 
 /**
  * @author anlingyi
@@ -17,6 +18,7 @@ public class HelpCommandHandler extends AbstractCommandHandler {
             sb.append("· ").append(command.getCommand()).append("：")
                     .append(command.getDesc()).append("\n");
         }
+        sb.append("[当前版本：v").append(IdeaUtils.getPluginVersion()).append("]");
         ConsoleAction.showSimpleMsg(sb.toString());
     }
 
