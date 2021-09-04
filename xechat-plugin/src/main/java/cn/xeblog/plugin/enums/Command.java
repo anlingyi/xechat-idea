@@ -23,6 +23,7 @@ public enum Command {
     GAME_OVER("gameover", "结束游戏", GameOverCommandHandler.class),
     MODE("mode", "模式设置，mode {模式编号}", ModeCommandHandler.class),
     SHOW_MODE("showMode", "查看模式选项", ShowModeCommandHandler.class),
+    CLEAN("clean", "清屏", CleanCommandHandler.class),
     HELP("help", "帮助", HelpCommandHandler.class);
 
     private String command;
