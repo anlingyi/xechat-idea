@@ -93,8 +93,8 @@ public class MainWindow {
             return;
         }
 
-        if (content.length() > 100) {
-            ConsoleAction.showSimpleMsg("发送的内容长度不能超过100字符！");
+        if (content.length() > 500) {
+            ConsoleAction.showSimpleMsg("发送的内容长度不能超过500字符！");
         } else {
             if (content.startsWith(Command.COMMAND_PREFIX)) {
                 ConsoleAction.showSimpleMsg(content);
