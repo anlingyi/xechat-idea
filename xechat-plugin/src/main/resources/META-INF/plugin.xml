@@ -22,4 +22,10 @@
     <actions>
         <!-- Add your actions here -->
     </actions>
+
+    <projectListeners>
+        <listener class="cn.xeblog.plugin.listener.ProjectEventListener"
+                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
+    </projectListeners>
+
 </idea-plugin>

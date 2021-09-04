@@ -43,6 +43,7 @@ public class MainWindow {
         AbstractGame.setMainPanel(rightPanel);
 
         Command.HELP.exec(null);
+        Command.ALIVE.exec(new String[]{"1"});
 
         contentArea.addKeyListener(new KeyAdapter() {
             @Override

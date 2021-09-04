@@ -39,7 +39,6 @@ public class XEChatClientHandler extends SimpleChannelInboundHandler<Response> {
         DataCache.isOnline = false;
         DataCache.userMap = null;
         GameAction.over();
-        ConsoleAction.clean();
         ConsoleAction.showSimpleMsg("已断开连接！");
         ConsoleAction.setConsoleTitle("控制台");
     }

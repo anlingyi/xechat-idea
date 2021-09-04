@@ -22,12 +22,12 @@ public class LoginCommandHandler extends AbstractCommandHandler {
 
         this.args = args;
         int len = args.length;
-        if (len < 2) {
+        if (len < 1) {
             ConsoleAction.showSimpleMsg("用户名不能为空！");
             return;
         }
 
-        String username = args[1];
+        String username = args[0];
 
         if (StringUtils.isBlank(username)) {
             ConsoleAction.showSimpleMsg("用户名不能为空！");
@@ -39,11 +39,11 @@ public class LoginCommandHandler extends AbstractCommandHandler {
         }
 
         ConnectionAction conn = new ConnectionAction();
-        if (len > 3) {
-            setConnection(2, conn);
+        if (len > 2) {
+            setConnection(1, conn);
         }
-        if (len > 5) {
-            setConnection(4, conn);
+        if (len > 4) {
+            setConnection(3, conn);
         }
 
         DataCache.username = username;

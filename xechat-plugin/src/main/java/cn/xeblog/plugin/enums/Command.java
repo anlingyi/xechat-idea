@@ -24,6 +24,7 @@ public enum Command {
     MODE("mode", "模式设置，mode {模式编号}", ModeCommandHandler.class),
     SHOW_MODE("showMode", "查看模式选项", ShowModeCommandHandler.class),
     CLEAN("clean", "清屏", CleanCommandHandler.class),
+    ALIVE("alive", "活着，0.关闭｜1.开启", AliveCommandHandler.class),
     HELP("help", "帮助", HelpCommandHandler.class);
 
     private String command;
@@ -36,10 +37,16 @@ public enum Command {
     public static final String COMMAND_PREFIX = "#";
 
     public static void handle(String command) {
-        String[] args = command.split(" ");
-        if (args.length > 0) {
+        String[] strs = command.split(" ");
+        if (strs.length > 0) {
             for (Command cmd : values()) {
-                if (cmd.getCommand().equals(args[0])) {
+                if (cmd.getCommand().equals(strs[0])) {
+                    String[] args = null;
+                    if (strs.length > 1) {
+                        args = new String[strs.length - 1];
+                        System.arraycopy(strs, 1, args, 0, args.length);
+                    }
+
                     cmd.exec(args);
                     return;
                 }
@@ -50,6 +57,10 @@ public enum Command {
     }
 
     public void exec(String[] args) {
+        if (args == null) {
+            args = new String[0];
+        }
+
         CommandHandlerFactory.INSTANCE.produce(this).handle(args);
     }
 

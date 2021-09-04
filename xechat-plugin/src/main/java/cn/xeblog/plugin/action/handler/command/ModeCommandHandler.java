@@ -12,11 +12,11 @@ public class ModeCommandHandler extends AbstractCommandHandler {
 
     @Override
     public void handle(String[] args) {
-        if (args.length < 2) {
+        if (args.length < 1) {
             return;
         }
 
-        ModeEnum mode = ModeEnum.getMode(Integer.parseInt(args[1]));
+        ModeEnum mode = ModeEnum.getMode(Integer.parseInt(args[0]));
         if (mode == null) {
             return;
         }

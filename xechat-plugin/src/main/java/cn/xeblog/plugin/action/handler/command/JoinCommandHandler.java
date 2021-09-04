@@ -33,7 +33,7 @@ public class JoinCommandHandler extends AbstractCommandHandler {
             gameInviteResultDTO.setGame(GameAction.getGame());
             gameInviteResultDTO.setOpponentId(DataCache.userMap.get(opponent));
 
-            if (args.length > 1) {
+            if (args.length > 0) {
                 gameInviteResultDTO.setStatus(InviteStatus.REJECT);
                 ConsoleAction.showSimpleMsg("你拒绝了" + opponent + "的游戏邀请！");
                 GameAction.clean();

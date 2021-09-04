@@ -15,12 +15,12 @@ public class SetStatusCommandHandler extends AbstractCommandHandler {
     @Override
     public void handle(String[] args) {
         if (checkOnline()) {
-            if (args.length < 2) {
+            if (args.length < 1) {
                 ConsoleAction.showSimpleMsg("状态值不能为空！");
                 return;
             }
 
-            int status = Integer.parseInt(args[1]);
+            int status = Integer.parseInt(args[0]);
             UserStatus userStatus = getUserStatus(status);
             if (userStatus == null) {
                 ConsoleAction.showSimpleMsg("状态值不存在");

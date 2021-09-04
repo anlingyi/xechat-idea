@@ -24,12 +24,12 @@ public class PlayCommandHandler extends AbstractCommandHandler {
     public void handle(String[] args) {
         int len = args.length;
         if (checkOnline()) {
-            if (len < 2) {
+            if (len < 1) {
                 ConsoleAction.showSimpleMsg("用户名不能为空！");
                 return;
             }
 
-            if (DataCache.username.equals(args[1])) {
+            if (DataCache.username.equals(args[0])) {
                 ConsoleAction.showSimpleMsg("自娱自乐？？？");
                 return;
             }
@@ -39,22 +39,22 @@ public class PlayCommandHandler extends AbstractCommandHandler {
                 return;
             }
 
-            String id = DataCache.userMap.get(args[1]);
+            String id = DataCache.userMap.get(args[0]);
             if (id == null) {
                 ConsoleAction.showSimpleMsg("该用户不存在！");
                 return;
             }
 
             Game game = null;
-            if (len > 2) {
-                game = Game.getGame(Integer.parseInt(args[2]));
+            if (len > 1) {
+                game = Game.getGame(Integer.parseInt(args[1]));
             }
             if (game == null) {
                 game = Game.GOBANG;
             }
 
             MessageAction.send(RequestBuilder.build(new GameInviteDTO(id, game), Action.GAME_INVITE));
-            GameAction.setOpponent(args[1]);
+            GameAction.setOpponent(args[0]);
             GameAction.setProactive(true);
             GameAction.setGame(game);
 
