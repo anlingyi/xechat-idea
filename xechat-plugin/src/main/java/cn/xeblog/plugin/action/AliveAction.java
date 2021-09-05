@@ -18,14 +18,29 @@ import java.util.TimerTask;
  */
 public class AliveAction {
 
-    private static boolean RUNNING;
+    /**
+     * 是否正在运行
+     */
+    private static boolean running;
 
+    /**
+     * 是否开启该功能
+     */
     private static boolean enabled;
 
+    /**
+     * 工作时间，单位：秒
+     */
     private static int workTime = 1 * 60 * 60;
 
-    private static int restTime = 10;
+    /**
+     * 休息时间，单位：秒
+     */
+    private static int restTime = 10 * 60;
 
+    /**
+     * 下一次提醒的时间（精确到秒的时间戳）
+     */
     private static long nextStartTime;
 
     private static final String GAN = "我只想搞钱";
@@ -47,24 +62,49 @@ public class AliveAction {
     }
 
     public static void setEnabled(boolean bool) {
-        if (!enabled && bool) {
-            setNextStartTime();
-            run();
+        if (bool) {
+            if (!enabled) {
+                setNextStartTime();
+                run();
+            }
+        } else {
+            running = false;
         }
 
         enabled = bool;
     }
 
+    private static long getNowTimeSecond() {
+        return System.currentTimeMillis() / 1000;
+    }
+
+    public static boolean flushNextStartTime() {
+        if (getNowTimeSecond() > nextStartTime) {
+            setNextStartTime();
+            return true;
+        }
+
+        return false;
+    }
+
     private static void setNextStartTime() {
-        nextStartTime = System.currentTimeMillis() / 1000 + workTime;
+        nextStartTime = getNowTimeSecond() + workTime;
+    }
+
+    public static long getNextStartTime() {
+        return nextStartTime;
+    }
+
+    public static boolean isEnabled() {
+        return enabled;
     }
 
     public static boolean isContinued() {
-        return enabled && RUNNING;
+        return enabled && running;
     }
 
     private static void run() {
-        Timer timer = new Timer();
+        Timer timer = new Timer(true);
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -73,15 +113,15 @@ public class AliveAction {
                     return;
                 }
 
-                if (System.currentTimeMillis() / 1000 == nextStartTime) {
-                    ApplicationManager.getApplication().invokeLater(() -> AreYouOk());
+                if (getNowTimeSecond() == nextStartTime) {
+                    ApplicationManager.getApplication().invokeLater(() -> areYouOk());
                 }
             }
         }, 0, 1000);
     }
 
-    private static void AreYouOk() {
-        if (RUNNING) {
+    private static void areYouOk() {
+        if (running) {
             return;
         }
 
@@ -170,11 +210,13 @@ public class AliveAction {
                     if (--time < 0 || !isContinued()) {
                         timer.cancel();
                         stop(false);
+
                         input.setEnabled(false);
                         button.setEnabled(true);
                         button.setText("I'm Fine.");
                         button.setForeground(new Color(0x21BD21));
                         button.addActionListener(e -> stop(true));
+
                         return;
                     }
 
@@ -207,7 +249,7 @@ public class AliveAction {
         }
 
         private void stop(boolean exit) {
-            RUNNING = false;
+            running = false;
 
             if (exit) {
                 setNextStartTime();
@@ -216,11 +258,11 @@ public class AliveAction {
         }
 
         public void show() {
-            if (RUNNING) {
+            if (running) {
                 return;
             }
 
-            RUNNING = true;
+            running = true;
             countdown();
             super.show();
         }
