@@ -5,6 +5,8 @@ import cn.xeblog.server.builder.ResponseBuilder;
 import cn.xeblog.server.cache.UserCache;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.enums.MessageType;
+import cn.xeblog.server.factory.ObjectFactory;
+import cn.xeblog.server.service.AbstractResponseHistoryService;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.group.ChannelGroup;
@@ -22,6 +24,10 @@ public class ChannelAction {
     private static final ChannelGroup GROUP = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     public static void writeAndFlush(Response resp) {
+        if (resp.getType() == MessageType.SYSTEM || resp.getType() == MessageType.USER) {
+            ObjectFactory.getObject(AbstractResponseHistoryService.class).addHistory(resp);
+        }
+
         GROUP.writeAndFlush(resp);
     }
 

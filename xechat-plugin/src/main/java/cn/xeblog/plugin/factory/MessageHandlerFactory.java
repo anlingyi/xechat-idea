@@ -24,6 +24,7 @@ public class MessageHandlerFactory extends AbstractSingletonFactory<MessageType,
         registry.add(MessageType.GAME_INVITE, GameInviteMessageHandler.class);
         registry.add(MessageType.GAME_INVITE_RESULT, GameInviteResultMessageHandler.class);
         registry.add(MessageType.GAME_OVER, GameOverMessageHandler.class);
+        registry.add(MessageType.HISTORY_MSG, HistoryMessageHandler.class);
     }
 
 }

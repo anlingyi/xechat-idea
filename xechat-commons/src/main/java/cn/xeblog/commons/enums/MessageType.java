@@ -11,6 +11,6 @@ public enum MessageType {
     GAME,
     GAME_INVITE,
     GAME_INVITE_RESULT,
-    GAME_OVER
-    ;
+    GAME_OVER,
+    HISTORY_MSG;
 }

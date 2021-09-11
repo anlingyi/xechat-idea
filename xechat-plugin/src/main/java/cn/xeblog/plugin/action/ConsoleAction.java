@@ -66,6 +66,7 @@ public class ConsoleAction {
     public static void gotoConsoleLow() {
         JScrollBar scrollBar = consoleScroll.getVerticalScrollBar();
         scrollBar.setValue(scrollBar.getMaximum());
+        consoleScroll.updateUI();
     }
 
     public static void showErrorMsg() {

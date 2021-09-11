@@ -1,11 +1,18 @@
 package cn.xeblog.server.action.handler;
 
+import cn.xeblog.commons.entity.HistoryMsgDTO;
+import cn.xeblog.commons.entity.Response;
+import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.server.action.AbstractAction;
 import cn.xeblog.server.builder.ResponseBuilder;
 import cn.xeblog.server.cache.UserCache;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.enums.UserStatus;
+import cn.xeblog.server.factory.ObjectFactory;
+import cn.xeblog.server.service.AbstractResponseHistoryService;
 import io.netty.channel.ChannelHandlerContext;
+
+import java.util.List;
 
 /**
  * @author anlingyi
@@ -23,6 +30,12 @@ public class LoginActionHandler extends AbstractAction<String> {
 
         User user = new User(username, UserStatus.FISHING, ctx.channel());
         UserCache.add(id, user);
+
+        List<Response> historyMsgList = ObjectFactory.getObject(AbstractResponseHistoryService.class).getHistory();
+        if (historyMsgList != null && historyMsgList.size() > 0) {
+            ctx.writeAndFlush(ResponseBuilder.build(null, new HistoryMsgDTO(historyMsgList), MessageType.HISTORY_MSG));
+        }
+
         sendOnlineUsers();
         writeAndFlush(ResponseBuilder.system(user.getUsername() + "进入了鱼塘！"));
     }
