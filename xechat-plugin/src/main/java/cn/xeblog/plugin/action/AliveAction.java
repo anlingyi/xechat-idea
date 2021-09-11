@@ -162,11 +162,11 @@ public class AliveAction {
 
             JLabel tipsLabel = new JLabel("休息一下，马上回来...");
             tipsLabel.setFont(new Font(null, 0, 14));
-            int tipsWidth = getFontWidth(tipsLabel.getFont(), tipsLabel.getText());
+            int tipsWidth = getFontWidth(tipsLabel);
             tipsLabel.setBounds(widthHalf - tipsWidth / 2, 0, tipsWidth, 20);
 
             timeLabel.setFont(new Font(null, 1, 18));
-            int timeWidth = getFontWidth(timeLabel.getFont(), timeLabel.getText());
+            int timeWidth = getFontWidth(timeLabel);
             timeLabel.setBounds(widthHalf - timeWidth / 2, 20, timeWidth, 35);
 
             input.setBounds(10, 60, 180, 30);
@@ -188,11 +188,10 @@ public class AliveAction {
             return main;
         }
 
-        private final FontRenderContext fontRenderContext = new FontRenderContext(new AffineTransform(),
-                true, true);
-
-        private int getFontWidth(Font font, String text) {
-            return (int) Math.ceil(font.getStringBounds(text, fontRenderContext).getWidth());
+        private int getFontWidth(JLabel label) {
+            String text = label.getText();
+            int width = label.getFontMetrics(label.getFont()).stringWidth(text);
+            return width + width / text.length();
         }
 
         @Override
