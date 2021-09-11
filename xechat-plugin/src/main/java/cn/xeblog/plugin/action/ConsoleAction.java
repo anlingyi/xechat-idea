@@ -58,12 +58,12 @@ public class ConsoleAction {
         console.setText("");
     }
 
-    public static void setConsoleTitle(String title) {
+    public synchronized static void setConsoleTitle(String title) {
         ((TitledBorder) panel.getBorder()).setTitle(title);
         panel.updateUI();
     }
 
-    public static void gotoConsoleLow() {
+    public synchronized static void gotoConsoleLow() {
         JScrollBar scrollBar = consoleScroll.getVerticalScrollBar();
         scrollBar.setValue(scrollBar.getMaximum());
         consoleScroll.updateUI();

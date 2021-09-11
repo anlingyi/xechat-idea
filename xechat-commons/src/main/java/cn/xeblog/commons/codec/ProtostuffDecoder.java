@@ -23,9 +23,23 @@ public class ProtostuffDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
-        byte[] data = new byte[byteBuf.readableBytes()];
-        byteBuf.readBytes(data);
-        list.add(ProtostuffUtils.deserialize(data, clazz));
+        byteBuf.markReaderIndex();
+        int preIndex = byteBuf.readerIndex();
+        int length = byteBuf.readInt();
+
+        if (preIndex == byteBuf.readerIndex()) {
+            return;
+        }
+
+        if (length > 0) {
+            if (byteBuf.readableBytes() < length) {
+                byteBuf.resetReaderIndex();
+            } else {
+                byte[] data = new byte[length];
+                byteBuf.readRetainedSlice(length).readBytes(data);
+                list.add(ProtostuffUtils.deserialize(data, clazz));
+            }
+        }
     }
 
 }
