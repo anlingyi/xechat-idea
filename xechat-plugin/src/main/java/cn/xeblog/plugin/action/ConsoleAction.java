@@ -59,7 +59,8 @@ public class ConsoleAction {
     }
 
     public static void setConsoleTitle(String title) {
-        ((TitledBorder)panel.getBorder()).setTitle(title);
+        ((TitledBorder) panel.getBorder()).setTitle(title);
+        panel.updateUI();
     }
 
     public static void gotoConsoleLow() {
