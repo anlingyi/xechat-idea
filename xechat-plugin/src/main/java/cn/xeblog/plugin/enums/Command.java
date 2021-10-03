@@ -1,7 +1,6 @@
 package cn.xeblog.plugin.enums;
 
 import cn.xeblog.plugin.action.ConsoleAction;
-import cn.xeblog.plugin.action.handler.command.*;
 import cn.xeblog.plugin.factory.CommandHandlerFactory;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,23 +12,22 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Command {
-    LOGIN("login", "登录，login {昵称}", LoginCommandHandler.class),
-    LOGOUT("logout", "退出", LogoutCommandHandler.class),
-    SHOW_STATUS("showStatus", "查看可用状态值", ShowStatusCommandHandler.class),
-    SET_STATUS("setStatus", "设置当前状态", SetStatusCommandHandler.class),
-    SHOW_GAME("showGame", "游戏列表", ShowGameCommandHandler.class),
-    PLAY("play", "游戏邀请，play {对方昵称} {游戏编号}", PlayCommandHandler.class),
-    JOIN("join", "加入游戏 | 拒绝邀请：此命令后加任意字符", JoinCommandHandler.class),
-    GAME_OVER("gameover", "结束游戏", GameOverCommandHandler.class),
-    MODE("mode", "模式设置，mode {模式编号}", ModeCommandHandler.class),
-    SHOW_MODE("showMode", "查看模式选项", ShowModeCommandHandler.class),
-    CLEAN("clean", "清屏", CleanCommandHandler.class),
-    ALIVE("alive", "活着，0.关闭｜1.开启", AliveCommandHandler.class),
-    HELP("help", "帮助", HelpCommandHandler.class);
+    LOGIN("login", "登录，login {昵称}"),
+    LOGOUT("logout", "退出"),
+    SHOW_STATUS("showStatus", "查看可用状态值"),
+    SET_STATUS("setStatus", "设置当前状态"),
+    SHOW_GAME("showGame", "游戏列表"),
+    PLAY("play", "游戏邀请，play {对方昵称} {游戏编号}"),
+    JOIN("join", "加入游戏 | 拒绝邀请：此命令后加任意字符"),
+    GAME_OVER("gameover", "结束游戏"),
+    MODE("mode", "模式设置，mode {模式编号}"),
+    SHOW_MODE("showMode", "查看模式选项"),
+    CLEAN("clean", "清屏"),
+    ALIVE("alive", "活着，0.关闭｜1.开启"),
+    HELP("help", "帮助");
 
     private String command;
     private String desc;
-    private Class handlerClass;
 
     /**
      * 触发命令的前缀

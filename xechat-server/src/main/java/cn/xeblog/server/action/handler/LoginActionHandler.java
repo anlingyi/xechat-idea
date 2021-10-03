@@ -2,8 +2,10 @@ package cn.xeblog.server.action.handler;
 
 import cn.xeblog.commons.entity.HistoryMsgDTO;
 import cn.xeblog.commons.entity.Response;
+import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.server.action.AbstractAction;
+import cn.xeblog.server.annotation.DoAction;
 import cn.xeblog.server.builder.ResponseBuilder;
 import cn.xeblog.server.cache.UserCache;
 import cn.xeblog.commons.entity.User;
@@ -18,6 +20,7 @@ import java.util.List;
  * @author anlingyi
  * @date 2020/8/14
  */
+@DoAction(Action.LOGIN)
 public class LoginActionHandler extends AbstractAction<String> {
 
     @Override

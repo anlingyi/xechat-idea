@@ -2,14 +2,17 @@ package cn.xeblog.plugin.action.handler.command;
 
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.MessageAction;
+import cn.xeblog.plugin.annotation.DoCommand;
 import cn.xeblog.plugin.builder.RequestBuilder;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.UserStatus;
+import cn.xeblog.plugin.enums.Command;
 
 /**
  * @author anlingyi
  * @date 2020/8/19
  */
+@DoCommand(Command.SET_STATUS)
 public class SetStatusCommandHandler extends AbstractCommandHandler {
 
     @Override

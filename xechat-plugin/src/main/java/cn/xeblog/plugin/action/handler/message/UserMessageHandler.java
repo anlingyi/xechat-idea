@@ -1,14 +1,17 @@
 package cn.xeblog.plugin.action.handler.message;
 
+import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.commons.entity.Response;
 import cn.xeblog.commons.entity.User;
+import cn.xeblog.plugin.annotation.DoMessage;
 import cn.xeblog.plugin.enums.Style;
 
 /**
  * @author anlingyi
  * @date 2020/8/19
  */
+@DoMessage(MessageType.USER)
 public class UserMessageHandler extends AbstractMessageHandler<String> {
 
     @Override

@@ -2,6 +2,8 @@ package cn.xeblog.plugin.action.handler.command;
 
 import cn.xeblog.plugin.action.AliveAction;
 import cn.xeblog.plugin.action.ConsoleAction;
+import cn.xeblog.plugin.annotation.DoCommand;
+import cn.xeblog.plugin.enums.Command;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -12,6 +14,7 @@ import java.time.format.DateTimeFormatter;
  * @author anlingyi
  * @date 2021/9/4 8:16 下午
  */
+@DoCommand(Command.ALIVE)
 public class AliveCommandHandler extends AbstractCommandHandler {
 
     @Override

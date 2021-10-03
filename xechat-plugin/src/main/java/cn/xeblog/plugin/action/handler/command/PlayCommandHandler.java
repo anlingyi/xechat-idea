@@ -3,6 +3,7 @@ package cn.xeblog.plugin.action.handler.command;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.plugin.action.MessageAction;
+import cn.xeblog.plugin.annotation.DoCommand;
 import cn.xeblog.plugin.builder.RequestBuilder;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.commons.entity.GameInviteDTO;
@@ -10,6 +11,7 @@ import cn.xeblog.commons.entity.GameInviteResultDTO;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.Game;
 import cn.xeblog.commons.enums.InviteStatus;
+import cn.xeblog.plugin.enums.Command;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -18,6 +20,7 @@ import java.util.TimerTask;
  * @author anlingyi
  * @date 2020/8/19
  */
+@DoCommand(Command.PLAY)
 public class PlayCommandHandler extends AbstractCommandHandler {
 
     @Override

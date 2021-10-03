@@ -2,11 +2,14 @@ package cn.xeblog.plugin.action.handler.command;
 
 import cn.xeblog.commons.enums.Game;
 import cn.xeblog.plugin.action.ConsoleAction;
+import cn.xeblog.plugin.annotation.DoCommand;
+import cn.xeblog.plugin.enums.Command;
 
 /**
  * @author anlingyi
  * @date 2020/9/11
  */
+@DoCommand(Command.SHOW_GAME)
 public class ShowGameCommandHandler extends AbstractCommandHandler {
 
     @Override

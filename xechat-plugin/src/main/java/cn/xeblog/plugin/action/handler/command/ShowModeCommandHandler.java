@@ -1,6 +1,8 @@
 package cn.xeblog.plugin.action.handler.command;
 
 import cn.xeblog.plugin.action.ConsoleAction;
+import cn.xeblog.plugin.annotation.DoCommand;
+import cn.xeblog.plugin.enums.Command;
 import cn.xeblog.plugin.mode.ModeContext;
 import cn.xeblog.plugin.mode.ModeEnum;
 
@@ -8,6 +10,7 @@ import cn.xeblog.plugin.mode.ModeEnum;
  * @author anlingyi
  * @date 2020/9/1
  */
+@DoCommand(Command.SHOW_MODE)
 public class ShowModeCommandHandler extends AbstractCommandHandler {
 
     @Override

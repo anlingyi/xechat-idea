@@ -63,6 +63,11 @@
             <artifactId>protostuff-runtime</artifactId>
             <version>1.7.4</version>
         </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.7.12</version>
+        </dependency>
     </dependencies>
 
 </project>

@@ -2,13 +2,16 @@ package cn.xeblog.plugin.action.handler.command;
 
 import cn.xeblog.plugin.action.ConnectionAction;
 import cn.xeblog.plugin.action.ConsoleAction;
+import cn.xeblog.plugin.annotation.DoCommand;
 import cn.xeblog.plugin.cache.DataCache;
+import cn.xeblog.plugin.enums.Command;
 import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author anlingyi
  * @date 2020/8/19
  */
+@DoCommand(Command.LOGIN)
 public class LoginCommandHandler extends AbstractCommandHandler {
 
     private String[] args;
