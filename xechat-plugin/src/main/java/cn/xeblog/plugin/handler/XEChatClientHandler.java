@@ -3,7 +3,7 @@ package cn.xeblog.plugin.handler;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
-import cn.xeblog.plugin.builder.RequestBuilder;
+import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.commons.entity.Response;
 import io.netty.channel.ChannelHandlerContext;
@@ -20,7 +20,7 @@ public class XEChatClientHandler extends SimpleChannelInboundHandler<Response> {
         DataCache.ctx = ctx;
         DataCache.isOnline = true;
         ConsoleAction.clean();
-        ctx.channel().writeAndFlush(RequestBuilder.build(DataCache.username, Action.LOGIN));
+        MessageAction.send(DataCache.username, Action.LOGIN);
     }
 
     @Override

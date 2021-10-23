@@ -17,7 +17,7 @@ public class LoginCommandHandler extends AbstractCommandHandler {
     private String[] args;
 
     @Override
-    public void handle(String[] args) {
+    public void process(String[] args) {
         if (DataCache.isOnline) {
             ConsoleAction.showSimpleMsg("已是登录状态！");
             return;
@@ -66,4 +66,8 @@ public class LoginCommandHandler extends AbstractCommandHandler {
         }
     }
 
+    @Override
+    protected boolean check(String[] args) {
+        return true;
+    }
 }

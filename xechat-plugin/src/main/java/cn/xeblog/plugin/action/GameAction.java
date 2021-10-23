@@ -23,10 +23,6 @@ public class GameAction {
         GameAction.game = game;
     }
 
-    public static void setAction(AbstractGame action) {
-        GameAction.action = action;
-    }
-
     public static void setOpponent(String opponent) {
         GameAction.opponent = opponent;
     }

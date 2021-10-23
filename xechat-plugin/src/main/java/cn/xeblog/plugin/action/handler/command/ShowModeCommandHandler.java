@@ -14,7 +14,7 @@ import cn.xeblog.plugin.mode.ModeEnum;
 public class ShowModeCommandHandler extends AbstractCommandHandler {
 
     @Override
-    public void handle(String[] args) {
+    public void process(String[] args) {
         ModeEnum[] modes = ModeEnum.values();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < modes.length; i++) {
@@ -27,4 +27,8 @@ public class ShowModeCommandHandler extends AbstractCommandHandler {
         return ModeContext.getMode() == modeEnum ? "（已设置）" : "";
     }
 
+    @Override
+    protected boolean check(String[] args) {
+        return true;
+    }
 }

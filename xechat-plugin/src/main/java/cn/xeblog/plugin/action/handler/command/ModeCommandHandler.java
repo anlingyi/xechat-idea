@@ -14,7 +14,7 @@ import cn.xeblog.plugin.mode.ModeEnum;
 public class ModeCommandHandler extends AbstractCommandHandler {
 
     @Override
-    public void handle(String[] args) {
+    public void process(String[] args) {
         if (args.length < 1) {
             return;
         }
@@ -28,4 +28,8 @@ public class ModeCommandHandler extends AbstractCommandHandler {
         ConsoleAction.showSimpleMsg("【" + mode.getName() + "】模式设置成功！");
     }
 
+    @Override
+    protected boolean check(String[] args) {
+        return true;
+    }
 }

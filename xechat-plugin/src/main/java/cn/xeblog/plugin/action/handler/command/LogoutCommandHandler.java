@@ -14,16 +14,15 @@ import cn.xeblog.plugin.enums.Command;
 public class LogoutCommandHandler extends AbstractCommandHandler {
 
     @Override
-    public void handle(String[] args) {
+    public void process(String[] args) {
         if (!DataCache.isOnline) {
             ConsoleAction.showSimpleMsg("已是离线状态！");
             return;
         }
 
-        if (GameAction.getOpponent() != null) {
+        if (GameAction.playing()) {
             // 结束游戏
             Command.GAME_OVER.exec(args);
-            GameAction.over();
         }
 
         ConsoleAction.showSimpleMsg("正在退出中...");

@@ -16,27 +16,25 @@ import cn.xeblog.plugin.enums.Command;
 public class SetStatusCommandHandler extends AbstractCommandHandler {
 
     @Override
-    public void handle(String[] args) {
-        if (checkOnline()) {
-            if (args.length < 1) {
-                ConsoleAction.showSimpleMsg("状态值不能为空！");
-                return;
-            }
-
-            int status = Integer.parseInt(args[0]);
-            UserStatus userStatus = getUserStatus(status);
-            if (userStatus == null) {
-                ConsoleAction.showSimpleMsg("状态值不存在");
-                return;
-            }
-
-            MessageAction.send(RequestBuilder.build(userStatus, Action.SET_STATUS));
+    public void process(String[] args) {
+        if (args.length < 1) {
+            ConsoleAction.showSimpleMsg("状态值不能为空！");
+            return;
         }
+
+        int status = Integer.parseInt(args[0]);
+        UserStatus userStatus = getUserStatus(status);
+        if (userStatus == null) {
+            ConsoleAction.showSimpleMsg("状态值不存在");
+            return;
+        }
+
+        MessageAction.send(userStatus, Action.SET_STATUS);
     }
 
     private static UserStatus getUserStatus(int index) {
         UserStatus[] userStatuses = UserStatus.values();
-        if (index < 0 || index > userStatuses.length - 1) {
+        if (index < 0 || index >= userStatuses.length) {
             return null;
         }
 

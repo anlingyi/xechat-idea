@@ -13,22 +13,20 @@ import cn.xeblog.plugin.enums.Command;
 public class ShowStatusCommandHandler extends AbstractCommandHandler {
 
     @Override
-    public void handle(String[] args) {
-        if (checkOnline()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("状态值：");
-            UserStatus[] userStatuses = UserStatus.values();
-            for (int i = 0; i < userStatuses.length; i++) {
-                if (userStatuses[i] == UserStatus.PLAYING) {
-                    // 暂时不能修改为游戏中状态
-                    continue;
-                }
-
-                sb.append(i).append(".").append(userStatuses[i].alias()).append(" ");
+    public void process(String[] args) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("状态值：");
+        UserStatus[] userStatuses = UserStatus.values();
+        for (int i = 0; i < userStatuses.length; i++) {
+            if (userStatuses[i] == UserStatus.PLAYING) {
+                // 暂时不能修改为游戏中状态
+                continue;
             }
 
-            ConsoleAction.showSimpleMsg(sb.toString());
+            sb.append(i).append(".").append(userStatuses[i].alias()).append(" ");
         }
+
+        ConsoleAction.showSimpleMsg(sb.toString());
     }
 
 }

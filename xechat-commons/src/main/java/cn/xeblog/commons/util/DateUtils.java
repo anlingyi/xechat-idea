@@ -9,12 +9,14 @@ import java.time.format.DateTimeFormatter;
  */
 public class DateUtils {
 
+    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
+
     private DateUtils() {
 
     }
 
     public static String getTime() {
-        return DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm").format(LocalDateTime.now());
+        return FORMATTER.format(LocalDateTime.now());
     }
 
 }

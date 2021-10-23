@@ -121,7 +121,7 @@ public class UploadUtils {
                 return;
             }
 
-            MessageAction.send(RequestBuilder.build(url, Action.CHAT));
+            MessageAction.send(url, Action.CHAT);
         }).start();
     }
 }
