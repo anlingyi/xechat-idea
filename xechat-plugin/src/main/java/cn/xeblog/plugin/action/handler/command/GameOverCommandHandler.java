@@ -16,16 +16,16 @@ import cn.xeblog.plugin.enums.Command;
 public class GameOverCommandHandler extends AbstractCommandHandler {
 
     @Override
-    public void handle(String[] args) {
-        if (checkOnline()) {
-            String opponent = GameAction.getOpponent();
-            if (opponent == null) {
-                ConsoleAction.showSimpleMsg("结束个寂寞？");
-                return;
-            }
-
-            MessageAction.send(DataCache.userMap.get(opponent), Action.GAME_OVER);
+    public void process(String[] args) {
+        if (!GameAction.playing()) {
+            ConsoleAction.showSimpleMsg("结束个寂寞？");
+            return;
         }
+
+        String opponent = GameAction.getOpponent();
+        MessageAction.send(DataCache.userMap.get(opponent), Action.GAME_OVER);
+
+        GameAction.over();
     }
 
 }

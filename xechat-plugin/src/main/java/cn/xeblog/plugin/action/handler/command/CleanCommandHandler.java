@@ -12,9 +12,14 @@ import cn.xeblog.plugin.enums.Command;
 public class CleanCommandHandler extends AbstractCommandHandler {
 
     @Override
-    public void handle(String[] args) {
+    public void process(String[] args) {
         ConsoleAction.clean();
         ConsoleAction.showSimpleMsg("粉骨碎身浑不怕，要留清白在人间。");
+    }
+
+    @Override
+    protected boolean check(String[] args) {
+        return true;
     }
 
 }

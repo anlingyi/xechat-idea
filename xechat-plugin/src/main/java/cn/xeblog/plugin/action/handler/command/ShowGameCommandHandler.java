@@ -13,7 +13,7 @@ import cn.xeblog.plugin.enums.Command;
 public class ShowGameCommandHandler extends AbstractCommandHandler {
 
     @Override
-    public void handle(String[] args) {
+    public void process(String[] args) {
         StringBuilder sb = new StringBuilder();
         Game[] games = Game.values();
         for (int i = 0; i < games.length; i++) {
@@ -23,4 +23,8 @@ public class ShowGameCommandHandler extends AbstractCommandHandler {
         ConsoleAction.showSimpleMsg(sb.toString());
     }
 
+    @Override
+    protected boolean check(String[] args) {
+        return true;
+    }
 }

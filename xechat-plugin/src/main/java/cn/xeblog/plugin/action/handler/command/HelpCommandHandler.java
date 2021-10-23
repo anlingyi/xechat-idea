@@ -13,7 +13,7 @@ import cn.xeblog.plugin.util.IdeaUtils;
 public class HelpCommandHandler extends AbstractCommandHandler {
 
     @Override
-    public void handle(String[] args) {
+    public void process(String[] args) {
         StringBuilder sb = new StringBuilder();
         sb.append("支持的命令（命令参数使用空格分开）\n");
         for (Command command : Command.values()) {
@@ -24,4 +24,8 @@ public class HelpCommandHandler extends AbstractCommandHandler {
         ConsoleAction.showSimpleMsg(sb.toString());
     }
 
+    @Override
+    protected boolean check(String[] args) {
+        return true;
+    }
 }

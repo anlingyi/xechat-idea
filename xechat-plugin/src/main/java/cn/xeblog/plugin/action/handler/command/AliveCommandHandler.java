@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter;
 public class AliveCommandHandler extends AbstractCommandHandler {
 
     @Override
-    public void handle(String[] args) {
+    public void process(String[] args) {
         if (args.length < 1) {
             ConsoleAction.showSimpleMsg("[活着]当前状态：" + (AliveAction.isEnabled() ? "已开启" : "已关闭"));
         } else {
@@ -36,6 +36,11 @@ public class AliveCommandHandler extends AbstractCommandHandler {
     private static String getNextStartTime() {
         return DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
                 .format(LocalDateTime.ofInstant(Instant.ofEpochSecond(AliveAction.getNextStartTime()), ZoneId.systemDefault()));
+    }
+
+    @Override
+    protected boolean check(String[] args) {
+        return true;
     }
 
 }

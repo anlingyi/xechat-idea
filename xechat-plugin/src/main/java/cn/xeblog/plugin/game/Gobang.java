@@ -12,6 +12,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 五子棋
@@ -51,12 +53,16 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
     private boolean put;
 
+    // 高亮棋子
+    Map<String, Boolean> chessHighlight;
+
     @Override
     public void handle(Response<GobangDTO> response) {
         GobangDTO gobangDTO = response.getBody();
         User user = response.getUser();
 
-        if (putChess(gobangDTO.getX(), gobangDTO.getY(), gobangDTO.getType(), false)) {
+        if (putChess(gobangDTO.getX(), gobangDTO.getY(), gobangDTO.getType())) {
+            put = false;
             showTips(DataCache.username + "(你)：思考中...");
         }
 
@@ -106,7 +112,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
                     return;
                 }
 
-                if (putChess(e.getX(), e.getY(), type, true)) {
+                if (putChess(e.getX(), e.getY(), type)) {
+                    put = true;
                     send(e.getX(), e.getY());
                 }
             }
@@ -130,14 +137,14 @@ public class Gobang extends AbstractGame<GobangDTO> {
     private int currentRow;
     private int currentCol;
 
-    public boolean putChess(int x, int y, int type, boolean check) {
+    public boolean putChess(int x, int y, int type) {
         if (isGameOver) {
             return false;
         }
 
-        // 计算出对应的行列 向上取整
-        int row = Math.round((float)(x - BORDER) / BORDER);
-        int col = Math.round((float)(y - BORDER) / BORDER);
+        // 计算出对应的行列 四舍五入取整
+        int row = Math.round((float) (x - BORDER) / BORDER);
+        int col = Math.round((float) (y - BORDER) / BORDER);
 
         if (row < 0 || col < 0 || row > ROWS - 1 || col > COLS - 1) {
             return false;
@@ -167,15 +174,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
         // 重绘
         repaint();
 
-        if (check) {
-            put = true;
-            // 检查是否5连
-            checkWinner(row, col, type);
-            return true;
-        }
-
-        put = false;
-
+        // 检查是否5连
+        checkWinner(row, col, type);
         return true;
     }
 
@@ -222,10 +222,10 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
                 g2.fillOval(chessX, chessY, CHESS_SIZE, CHESS_SIZE);
 
-                if (i == currentRow && j == currentCol) {
+                if (isHighlight(i, j) || i == currentRow && j == currentCol) {
                     // 当前棋子高亮
                     g2.setColor(Color.RED);
-                    g2.drawOval(chessX,chessY, CHESS_SIZE, CHESS_SIZE);
+                    g2.drawOval(chessX, chessY, CHESS_SIZE, CHESS_SIZE);
                 }
             }
         }
@@ -249,6 +249,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
      */
     public void checkWinner(int x, int y, int type) {
         // 横轴
+        initChessHighLight();
         int k = 1;
         for (int i = 1; i < 5; i++) {
             int preX = x - i;
@@ -259,6 +260,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
             if (chessData[preX][y] != type) {
                 break;
             }
+
+            setChessHighlight(preX, y);
 
             if (++k == 5) {
                 winner();
@@ -275,6 +278,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 break;
             }
 
+            setChessHighlight(nextX, y);
+
             if (++k == 5) {
                 winner();
                 return;
@@ -282,6 +287,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
         }
 
         // 纵轴
+        initChessHighLight();
         k = 1;
         for (int i = 1; i < 5; i++) {
             int preY = y - i;
@@ -292,6 +298,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
             if (chessData[x][preY] != type) {
                 break;
             }
+
+            setChessHighlight(x, preY);
 
             if (++k == 5) {
                 winner();
@@ -308,6 +316,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 break;
             }
 
+            setChessHighlight(x, nextY);
+
             if (++k == 5) {
                 winner();
                 return;
@@ -315,6 +325,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
         }
 
         // 左对角线
+        initChessHighLight();
         k = 1;
         for (int i = 1; i < 5; i++) {
             int preX = x - i;
@@ -326,6 +337,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
             if (chessData[preX][preY] != type) {
                 break;
             }
+
+            setChessHighlight(preX, preY);
 
             if (++k == 5) {
                 winner();
@@ -343,6 +356,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 break;
             }
 
+            setChessHighlight(nextX, nextY);
+
             if (++k == 5) {
                 winner();
                 return;
@@ -350,6 +365,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
         }
 
         // 右对角线
+        initChessHighLight();
         k = 1;
         for (int i = 1; i < 5; i++) {
             int nextX = x + i;
@@ -361,6 +377,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
             if (chessData[nextX][preY] != type) {
                 break;
             }
+
+            setChessHighlight(nextX, preY);
 
             if (++k == 5) {
                 winner();
@@ -378,6 +396,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 break;
             }
 
+            setChessHighlight(preX, nextY);
+
             if (++k == 5) {
                 winner();
                 return;
@@ -386,6 +406,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
         // 检查是否和棋
         checkPeace();
+
+        initChessHighLight();
     }
 
     private void gameOver() {
@@ -393,6 +415,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
     }
 
     private void winner() {
+        repaint();
         status = 1;
         gameOver();
     }
@@ -421,5 +444,21 @@ public class Gobang extends AbstractGame<GobangDTO> {
         }
 
         tips.setText(msg);
+    }
+
+    private void initChessHighLight() {
+        chessHighlight = new HashMap<>();
+    }
+
+    private void setChessHighlight(int x, int y) {
+        this.chessHighlight.put(x + "," + y, true);
+    }
+
+    private boolean isHighlight(int x, int y) {
+        if (chessHighlight == null) {
+            return false;
+        }
+
+        return chessHighlight.containsKey(x + "," + y);
     }
 }
