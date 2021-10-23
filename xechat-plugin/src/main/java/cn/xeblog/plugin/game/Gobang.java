@@ -64,9 +64,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
         if (putChess(gobangDTO.getX(), gobangDTO.getY(), gobangDTO.getType())) {
             put = false;
             showTips(DataCache.username + "(你)：思考中...");
+            checkStatus(gobangDTO.getStatus(), user.getUsername());
         }
-
-        checkStatus(gobangDTO.getStatus(), user.getUsername());
     }
 
     private void checkStatus(int status, String username) {
@@ -115,6 +114,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 if (putChess(e.getX(), e.getY(), type)) {
                     put = true;
                     send(e.getX(), e.getY());
+                    checkStatus(status, DataCache.username);
                 }
             }
         });
@@ -410,19 +410,13 @@ public class Gobang extends AbstractGame<GobangDTO> {
         initChessHighLight();
     }
 
-    private void gameOver() {
-        checkStatus(status, DataCache.username);
-    }
-
     private void winner() {
         repaint();
         status = 1;
-        gameOver();
     }
 
     private void peacemaker() {
         status = 2;
-        gameOver();
     }
 
     private void send(int x, int y) {
