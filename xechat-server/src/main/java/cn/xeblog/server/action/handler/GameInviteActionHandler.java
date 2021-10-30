@@ -19,20 +19,22 @@ public class GameInviteActionHandler extends AbstractGameActionHandler<GameInvit
     @Override
     public void handle(ChannelHandlerContext ctx, GameInviteDTO body) {
         User user = getUser(ctx);
-        User inviteUser =  getUser(body.getId());
-
-        if (opponentOffline(inviteUser, ctx)) {
-            return;
-        }
-
-        if (inviteUser.getStatus() != UserStatus.FISHING) {
-            ctx.channel().writeAndFlush(ResponseBuilder.system("人家正在" + inviteUser.getStatus().alias() + "呢！就你天天摸鱼？"));
-            return;
-        }
-
         user.setStatus(UserStatus.PLAYING);
-        inviteUser.setStatus(UserStatus.PLAYING);
-        inviteUser.getChannel().writeAndFlush(ResponseBuilder.build(user, body, MessageType.GAME_INVITE));
-        ctx.channel().writeAndFlush(ResponseBuilder.system("已向" + inviteUser.getUsername() + "发送《" + body.getGame().getName() + "》游戏邀请！"));
+
+        if (body.getId() != null) {
+            User inviteUser = getUser(body.getId());
+            if (opponentOffline(inviteUser, ctx)) {
+                return;
+            }
+
+            if (inviteUser.getStatus() != UserStatus.FISHING) {
+                ctx.channel().writeAndFlush(ResponseBuilder.system("人家正在" + inviteUser.getStatus().alias() + "呢！就你天天摸鱼？"));
+                return;
+            }
+
+            inviteUser.setStatus(UserStatus.PLAYING);
+            inviteUser.getChannel().writeAndFlush(ResponseBuilder.build(user, body, MessageType.GAME_INVITE));
+            ctx.channel().writeAndFlush(ResponseBuilder.system("已向" + inviteUser.getUsername() + "发送《" + body.getGame().getName() + "》游戏邀请！"));
+        }
     }
 }

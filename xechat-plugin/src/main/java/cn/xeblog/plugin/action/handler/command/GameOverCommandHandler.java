@@ -22,8 +22,12 @@ public class GameOverCommandHandler extends AbstractCommandHandler {
             return;
         }
 
+        String opponentId = null;
         String opponent = GameAction.getOpponent();
-        MessageAction.send(DataCache.userMap.get(opponent), Action.GAME_OVER);
+        if (opponent != null) {
+            opponentId = DataCache.userMap.get(opponent);
+        }
+        MessageAction.send(opponentId, Action.GAME_OVER);
 
         GameAction.over();
     }

@@ -17,7 +17,6 @@ public class GobangDTO extends GameDTO {
     private int x;
     private int y;
     private int type;
-    private int status;
 
     @Override
     public Game getGame() {

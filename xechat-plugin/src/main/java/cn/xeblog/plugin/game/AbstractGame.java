@@ -9,7 +9,7 @@ import java.awt.*;
  * @author anlingyi
  * @date 2020/8/31
  */
-public abstract class AbstractGame<T> extends JPanel {
+public abstract class AbstractGame<T> {
 
     protected static JPanel mainPanel;
 
@@ -31,8 +31,6 @@ public abstract class AbstractGame<T> extends JPanel {
     public void start() {
         mainPanel.setEnabled(true);
         mainPanel.setVisible(true);
-        setEnabled(true);
-        setVisible(true);
     }
 
     public void over() {

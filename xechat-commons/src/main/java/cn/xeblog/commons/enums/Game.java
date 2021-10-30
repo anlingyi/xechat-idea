@@ -10,13 +10,26 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Game {
-    GOBANG("五子棋");
+    GOBANG("五子棋", 0, 1);
 
+    /**
+     * 游戏名称
+     */
     private String name;
+
+    /**
+     * 最小邀请玩家数
+     */
+    private int minPlayers;
+
+    /**
+     * 最大邀请玩家数
+     */
+    private int maxPlayers;
 
     public static Game getGame(int index) {
         Game[] games = values();
-        if (index < 0 || index > games.length - 1) {
+        if (index < 0 || index >= games.length) {
             return null;
         }
 
