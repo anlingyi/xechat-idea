@@ -6,6 +6,7 @@ import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.commons.entity.GobangDTO;
 import cn.xeblog.commons.entity.Response;
 import cn.xeblog.commons.enums.Action;
+import cn.xeblog.plugin.enums.Command;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -24,10 +25,11 @@ import java.util.Map;
  */
 public class Gobang extends AbstractGame<GobangDTO> {
 
+    // 棋盘
     private JPanel chessPanel;
-
+    // 提示
     private JLabel tips;
-
+    // 开始界面
     private JPanel startPanel;
 
     // 每个格子的边框大小
@@ -53,20 +55,22 @@ public class Gobang extends AbstractGame<GobangDTO> {
     private int type;
     // 游戏是否结束
     private boolean isGameOver;
-
+    // 游戏状态 0.进行中 1.赢 2.平
     private int status;
-
+    // 标记是否已下棋子
     private boolean put;
-
     // 高亮棋子
     Map<String, Boolean> chessHighlight;
-
-    private String selfName;
-
-    private String opponentName;
-
+    // 黑棋玩家名
+    private String blackName;
+    // 白棋玩家名
+    private String whiteName;
+    // 游戏模式
     private GameMode gameMode;
 
+    /**
+     * 初始化游戏数据
+     */
     private void initValue() {
         chessData = new int[ROWS][COLS];
         currentChessTotal = 0;
@@ -101,13 +105,13 @@ public class Gobang extends AbstractGame<GobangDTO> {
         GobangDTO gobangDTO = response.getBody();
         setChess(gobangDTO.getX(), gobangDTO.getY(), gobangDTO.getType());
 
-        checkStatus(opponentName);
+        checkStatus(whiteName);
         if (isGameOver) {
             return;
         }
 
         put = false;
-        showTips(selfName + "(你)：思考中...");
+        showTips(blackName + "(你)：思考中...");
     }
 
     private void checkStatus(String username) {
@@ -127,37 +131,28 @@ public class Gobang extends AbstractGame<GobangDTO> {
         }
 
         isGameOver = flag;
-
-        if (isGameOver) {
-            JButton restartButton = new JButton("重新开始");
-            restartButton.addActionListener(e -> {
-                mainPanel.removeAll();
-                initStartPanel();
-                mainPanel.updateUI();
-            });
-            mainPanel.add(restartButton, BorderLayout.SOUTH);
-        }
     }
 
     private void initChessPanel() {
         initValue();
-        selfName = DataCache.username;
+        blackName = DataCache.username;
         if (GameAction.getOpponent() == null) {
             switch (gameMode) {
                 case HUMAN_VS_PC:
-                    opponentName = "人工制杖";
+                    whiteName = "人工制杖";
                     break;
                 case HUMAN_VS_HUMAN:
-                    opponentName = "路人甲";
-                    if (type == 2) {
-                        type = 1;
-                        selfName = opponentName;
-                        opponentName = DataCache.username;
-                    }
+                    whiteName = "路人甲";
                     break;
             }
+
+            if (type == 2) {
+                type = 1;
+                blackName = whiteName;
+                whiteName = DataCache.username;
+            }
         } else {
-            opponentName = GameAction.getOpponent();
+            whiteName = GameAction.getOpponent();
             gameMode = GameMode.ONLINE;
             if (GameAction.isProactive()) {
                 type = 1;
@@ -169,27 +164,50 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
         chessPanel = new JPanel() {
             @Override
-            public void paint(Graphics g) {
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
                 paintChessBoard(g);
             }
         };
 
-        mainPanel.setPreferredSize(new Dimension(WIDTH + 100, HEIGHT + 100));
+        Dimension mainDimension = new Dimension(WIDTH + 50, HEIGHT + 50);
+
+        mainPanel.setLayout(new BorderLayout());
+        mainPanel.setPreferredSize(mainDimension);
 
         tips = new JLabel("", JLabel.CENTER);
         tips.setFont(new Font("", Font.BOLD, 13));
         tips.setForeground(new Color(237, 81, 38));
-        tips.setBounds(0, 30, WIDTH + 60, 30);
+        tips.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 
+        // 设置棋盘宽高
+        chessPanel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         // 设置棋盘背景颜色
         chessPanel.setBackground(Color.LIGHT_GRAY);
-        chessPanel.setBounds(mainPanel.getWidth() / 2 - WIDTH / 2, tips.getHeight() + 5, WIDTH, HEIGHT);
 
-        mainPanel.add(tips);
-        mainPanel.add(chessPanel);
+        JPanel topPanel = new JPanel();
+        topPanel.add(tips);
 
-        chessPanel.setEnabled(true);
-        chessPanel.setVisible(true);
+        JPanel centerPanel = new JPanel();
+        centerPanel.add(chessPanel);
+
+        JPanel bottomPanel = new JPanel();
+        if (gameMode != GameMode.ONLINE) {
+            JButton restartButton = new JButton("重新开始");
+            restartButton.addActionListener(e -> {
+                mainPanel.removeAll();
+                initStartPanel();
+                mainPanel.updateUI();
+            });
+            bottomPanel.add(restartButton);
+        }
+        JButton exitButton = new JButton("退出游戏");
+        exitButton.addActionListener(e -> Command.GAME_OVER.exec(null));
+        bottomPanel.add(exitButton);
+
+        mainPanel.add(topPanel, BorderLayout.NORTH);
+        mainPanel.add(centerPanel, BorderLayout.CENTER);
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         chessPanel.addMouseListener(new MouseAdapter() {
             // 监听鼠标点击事件
@@ -200,32 +218,32 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 }
 
                 if (putChess(e.getX(), e.getY(), type)) {
-                    checkStatus(selfName);
+                    checkStatus(blackName);
 
                     if (!isGameOver) {
-                        showTips(opponentName + "：思考中...");
+                        showTips(whiteName + "：思考中...");
                     }
 
                     switch (gameMode) {
                         case ONLINE:
                             put = true;
-                            send(currentRow, currentCol);
+                            send(currentX, currentY);
                             break;
                         case HUMAN_VS_PC:
                             break;
                         case HUMAN_VS_HUMAN:
                             type = 3 - type;
-                            String tempName = selfName;
-                            selfName = opponentName;
-                            opponentName = tempName;
+                            String tempName = blackName;
+                            blackName = whiteName;
+                            whiteName = tempName;
                             break;
                     }
                 }
             }
         });
 
-        String name = type == 1 ? selfName : opponentName;
-        showTips(name + "-先下手为强！");
+        String name = type == 1 ? blackName : whiteName;
+        showTips(name + "先下手为强！");
     }
 
     /**
@@ -248,13 +266,16 @@ public class Gobang extends AbstractGame<GobangDTO> {
             g2.drawLine(i * BORDER + BORDER, BORDER, i * BORDER + BORDER, HEIGHT - BORDER);
         }
 
-        int starSize = BORDER / 3;
-        int halfStarSize = starSize / 2;
-        g2.fillOval(4 * BORDER - halfStarSize, 4 * BORDER - halfStarSize, starSize, starSize);
-        g2.fillOval(12 * BORDER - halfStarSize, 4 * BORDER - halfStarSize, starSize, starSize);
-        g2.fillOval(4 * BORDER - halfStarSize, 12 * BORDER - halfStarSize, starSize, starSize);
-        g2.fillOval(12 * BORDER - halfStarSize, 12 * BORDER - halfStarSize, starSize, starSize);
-        g2.fillOval(8 * BORDER - halfStarSize, 8 * BORDER - halfStarSize, starSize, starSize);
+        if (ROWS == 15 && COLS == 15) {
+            // 标准棋盘
+            int starSize = BORDER / 3;
+            int halfStarSize = starSize / 2;
+            g2.fillOval(4 * BORDER - halfStarSize, 4 * BORDER - halfStarSize, starSize, starSize);
+            g2.fillOval(12 * BORDER - halfStarSize, 4 * BORDER - halfStarSize, starSize, starSize);
+            g2.fillOval(4 * BORDER - halfStarSize, 12 * BORDER - halfStarSize, starSize, starSize);
+            g2.fillOval(12 * BORDER - halfStarSize, 12 * BORDER - halfStarSize, starSize, starSize);
+            g2.fillOval(8 * BORDER - halfStarSize, 8 * BORDER - halfStarSize, starSize, starSize);
+        }
 
         if (currentChessTotal == 0) {
             return;
@@ -281,7 +302,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
                 g2.fillOval(chessX, chessY, CHESS_SIZE, CHESS_SIZE);
 
-                if (isHighlight(i, j) || i == currentRow && j == currentCol) {
+                if (isHighlight(i, j) || i == currentX && j == currentY) {
                     // 当前棋子高亮
                     g2.setColor(Color.RED);
                     g2.drawOval(chessX, chessY, CHESS_SIZE, CHESS_SIZE);
@@ -291,10 +312,17 @@ public class Gobang extends AbstractGame<GobangDTO> {
     }
 
     private void initStartPanel() {
+        if (GameAction.getOpponent() != null) {
+            initChessPanel();
+            return;
+        }
+
+        mainPanel.setLayout(null);
+        mainPanel.setPreferredSize(new Dimension(150, 220));
+
         startPanel = new JPanel();
         startPanel.setBounds(10, 10, 100, 200);
 
-        mainPanel.setPreferredSize(new Dimension(150, 220));
         mainPanel.add(startPanel);
 
         JLabel label1 = new JLabel("游戏模式：");
@@ -343,7 +371,6 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
     @Override
     protected void init() {
-        mainPanel.setLayout(null);
         initStartPanel();
     }
 
@@ -352,8 +379,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
         super.start();
     }
 
-    private int currentRow;
-    private int currentCol;
+    private int currentX;
+    private int currentY;
 
     public boolean putChess(int x, int y, int type) {
         if (isGameOver) {
@@ -373,32 +400,34 @@ public class Gobang extends AbstractGame<GobangDTO> {
         int circleY = col * BORDER + BORDER;
 
         // 判断鼠标点击的坐标是否在棋子圆外
-        boolean notInCircle = Math.pow(circleX - x, 2) + Math.pow(circleY - y, 2) > Math.pow(CHESS_SIZE / 2, 2);
+        boolean notInCircle = Math.pow(circleX - x, 2) + Math.pow(circleY - y, 2) > Math.pow((double) CHESS_SIZE / 2, 2);
 
         if (notInCircle) {
             // 不在棋子圆内
             return false;
         }
 
-        setChess(row, col, type);
-
-        return true;
+        return setChess(row, col, type);
     }
 
-    private void setChess(int x, int y, int type) {
+    private boolean setChess(int x, int y, int type) {
         if (chessData[x][y] != 0) {
             // 此处已有棋子
-            return;
+            return false;
         }
 
-        currentRow = x;
-        currentCol = y;
+        currentX = x;
+        currentY = y;
         currentChessTotal++;
         chessData[x][y] = type;
+
         // 重绘
         chessPanel.repaint();
+
         // 检查是否5连
         checkWinner(x, y, type);
+
+        return true;
     }
 
     /**

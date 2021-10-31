@@ -41,6 +41,12 @@ public class PlayCommandHandler extends AbstractCommandHandler {
             return;
         }
 
+        if (GameAction.getOpponent() != null) {
+            ConsoleAction.showSimpleMsg(GameAction.isProactive() ? "请等待【" + GameAction.getOpponent() + "】加入游戏！"
+                    : "【" + GameAction.getOpponent() + "】已邀请你加入游戏，请确认！");
+            return;
+        }
+
         if (len < 2) {
             if (game.getMinPlayers() > 0) {
                 ConsoleAction.showSimpleMsg("该游戏至少需要邀请" + game.getMinPlayers() + "人！");
@@ -50,7 +56,6 @@ public class PlayCommandHandler extends AbstractCommandHandler {
             MessageAction.send(new GameInviteDTO(null, game), Action.GAME_INVITE);
             GameAction.setGame(game);
             GameAction.create();
-            ConsoleAction.showSimpleMsg("《" + game.getName() + "》- 游戏开始！");
         } else {
             if (DataCache.username.equals(args[1])) {
                 ConsoleAction.showSimpleMsg("自娱自乐？？？");
@@ -75,7 +80,7 @@ public class PlayCommandHandler extends AbstractCommandHandler {
                 @Override
                 public void run() {
                     boolean timeout = --time < 0;
-                    if (GameAction.playing() || timeout) {
+                    if (GameAction.playing() || GameAction.isOver() || timeout) {
                         timer.cancel();
                     }
                     if (timeout) {
