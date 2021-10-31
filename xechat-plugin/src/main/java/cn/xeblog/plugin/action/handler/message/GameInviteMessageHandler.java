@@ -20,7 +20,6 @@ public class GameInviteMessageHandler extends AbstractGameMessageHandler<GameInv
     public void handle(Response<GameInviteDTO> response) {
         User user = response.getUser();
         GameAction.setOpponent(user.getUsername());
-        GameAction.setProactive(false);
         GameAction.setGame(response.getBody().getGame());
 
         ConsoleAction.renderText(String.format("[%s] 系统消息：%s\n", response.getTime(),

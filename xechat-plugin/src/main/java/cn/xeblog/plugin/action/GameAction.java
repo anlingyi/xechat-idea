@@ -11,12 +11,24 @@ import cn.xeblog.plugin.game.AbstractGame;
  */
 public class GameAction {
 
+    /**
+     * 当前游戏
+     */
     private static Game game;
 
+    /**
+     * 游戏动作
+     */
     private static AbstractGame action;
 
+    /**
+     * 对手昵称
+     */
     private static String opponent;
 
+    /**
+     * 是否是主动邀请
+     */
     private static boolean proactive;
 
     public static void setGame(Game game) {
@@ -82,5 +94,9 @@ public class GameAction {
 
     public static boolean playing() {
         return action != null;
+    }
+
+    public static boolean isOver() {
+        return game == null;
     }
 }

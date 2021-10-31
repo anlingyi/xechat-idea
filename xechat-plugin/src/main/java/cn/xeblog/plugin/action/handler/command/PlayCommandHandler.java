@@ -31,52 +31,67 @@ public class PlayCommandHandler extends AbstractCommandHandler {
 
         int len = args.length;
         if (len < 1) {
-            ConsoleAction.showSimpleMsg("用户名不能为空！");
+            ConsoleAction.showSimpleMsg("游戏编号不能为空！");
             return;
         }
 
-        if (DataCache.username.equals(args[0])) {
-            ConsoleAction.showSimpleMsg("自娱自乐？？？");
-            return;
-        }
-
-        String id = DataCache.userMap.get(args[0]);
-        if (id == null) {
-            ConsoleAction.showSimpleMsg("该用户不存在！");
-            return;
-        }
-
-        Game game = null;
-        if (len > 1) {
-            game = Game.getGame(Integer.parseInt(args[1]));
-        }
+        Game game = Game.getGame(Integer.parseInt(args[0]));
         if (game == null) {
-            game = Game.GOBANG;
+            ConsoleAction.showSimpleMsg("没有找到该游戏！");
+            return;
         }
 
-        MessageAction.send(new GameInviteDTO(id, game), Action.GAME_INVITE);
-        GameAction.setOpponent(args[0]);
-        GameAction.setProactive(true);
-        GameAction.setGame(game);
+        if (GameAction.getOpponent() != null) {
+            ConsoleAction.showSimpleMsg(GameAction.isProactive() ? "请等待【" + GameAction.getOpponent() + "】加入游戏！"
+                    : "【" + GameAction.getOpponent() + "】已邀请你加入游戏，请确认！");
+            return;
+        }
 
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            int time = 0;
-
-            @Override
-            public void run() {
-                boolean timeout = ++time > 29;
-                if (GameAction.playing() || timeout) {
-                    timer.cancel();
-                }
-                if (timeout) {
-                    GameInviteResultDTO result = new GameInviteResultDTO(InviteStatus.TIMEOUT);
-                    result.setGame(GameAction.getGame());
-                    result.setOpponentId(DataCache.userMap.get(GameAction.getOpponent()));
-                    MessageAction.send(result, Action.GAME_INVITE_RESULT);
-                }
+        if (len < 2) {
+            if (game.getMinPlayers() > 0) {
+                ConsoleAction.showSimpleMsg("该游戏至少需要邀请" + game.getMinPlayers() + "人！");
+                return;
             }
-        }, 0, 1000);
+
+            MessageAction.send(new GameInviteDTO(null, game), Action.GAME_INVITE);
+            GameAction.setGame(game);
+            GameAction.create();
+        } else {
+            if (DataCache.username.equals(args[1])) {
+                ConsoleAction.showSimpleMsg("自娱自乐？？？");
+                return;
+            }
+
+            String id = DataCache.userMap.get(args[1]);
+            if (id == null) {
+                ConsoleAction.showSimpleMsg("该用户不存在！");
+                return;
+            }
+
+            MessageAction.send(new GameInviteDTO(id, game), Action.GAME_INVITE);
+            GameAction.setOpponent(args[1]);
+            GameAction.setGame(game);
+            GameAction.setProactive(true);
+
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                int time = 30;
+
+                @Override
+                public void run() {
+                    boolean timeout = --time < 0;
+                    if (GameAction.playing() || GameAction.isOver() || timeout) {
+                        timer.cancel();
+                    }
+                    if (timeout) {
+                        GameInviteResultDTO result = new GameInviteResultDTO(InviteStatus.TIMEOUT);
+                        result.setGame(GameAction.getGame());
+                        result.setOpponentId(DataCache.userMap.get(GameAction.getOpponent()));
+                        MessageAction.send(result, Action.GAME_INVITE_RESULT);
+                    }
+                }
+            }, 0, 1000);
+        }
     }
 
 }

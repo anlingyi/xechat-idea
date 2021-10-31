@@ -1,6 +1,8 @@
 package cn.xeblog.server.action.handler;
 
+import cn.xeblog.commons.entity.GameInviteResultDTO;
 import cn.xeblog.commons.enums.Action;
+import cn.xeblog.commons.enums.InviteStatus;
 import cn.xeblog.server.annotation.DoAction;
 import cn.xeblog.server.builder.ResponseBuilder;
 import cn.xeblog.commons.entity.GameInviteDTO;
@@ -19,13 +21,20 @@ public class GameInviteActionHandler extends AbstractGameActionHandler<GameInvit
     @Override
     public void handle(ChannelHandlerContext ctx, GameInviteDTO body) {
         User user = getUser(ctx);
-        User inviteUser =  getUser(body.getId());
 
+        if (body.getId() == null) {
+            user.setStatus(UserStatus.PLAYING);
+            ctx.channel().writeAndFlush(ResponseBuilder.system("《" + body.getGame().getName() + "》游戏开始！"));
+            return;
+        }
+
+        User inviteUser = getUser(body.getId());
         if (opponentOffline(inviteUser, ctx)) {
             return;
         }
 
         if (inviteUser.getStatus() != UserStatus.FISHING) {
+            ctx.channel().writeAndFlush(ResponseBuilder.build(inviteUser, new GameInviteResultDTO(InviteStatus.REJECT), MessageType.GAME_INVITE_RESULT));
             ctx.channel().writeAndFlush(ResponseBuilder.system("人家正在" + inviteUser.getStatus().alias() + "呢！就你天天摸鱼？"));
             return;
         }
