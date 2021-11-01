@@ -63,9 +63,9 @@ public class Gobang extends AbstractGame<GobangDTO> {
     private boolean put;
     // 高亮棋子
     Map<String, Boolean> chessHighlight;
-    // 黑棋玩家名
+    // 当前玩家名
     private String player;
-    // 白棋玩家名
+    // 下一个玩家名
     private String nextPlayer;
     // 游戏模式
     private GameMode gameMode;
