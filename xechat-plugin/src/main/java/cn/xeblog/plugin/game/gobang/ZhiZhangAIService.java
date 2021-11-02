@@ -9,7 +9,8 @@ import cn.hutool.core.util.RandomUtil;
 public class ZhiZhangAIService implements AIService {
 
     @Override
-    public Gobang.Point getPoint(int[][] chessData, int type) {
+    public Gobang.Point getPoint(int[][] chessData, Gobang.Point point) {
+        int type = 3 - point.type;
         int size = chessData.length;
         int x;
         int y;

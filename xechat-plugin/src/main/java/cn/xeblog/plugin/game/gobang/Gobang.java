@@ -276,12 +276,12 @@ public class Gobang extends AbstractGame<GobangDTO> {
     private void aiPutChess() {
         new Thread(() -> {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
-            if (setChess(aiService.getPoint(chessData, 3 - type))) {
+            if (setChess(aiService.getPoint(chessData, new Point(currentX, currentY, type)))) {
                 checkStatus(player);
 
                 if (isGameOver) {

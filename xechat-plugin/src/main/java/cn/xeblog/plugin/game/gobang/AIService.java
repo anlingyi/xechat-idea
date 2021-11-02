@@ -6,6 +6,13 @@ package cn.xeblog.plugin.game.gobang;
  */
 public interface AIService {
 
-    Gobang.Point getPoint(int[][] chessData, int type);
+    /**
+     * 获取AI棋位
+     *
+     * @param chessData 当前棋子数据
+     * @param point     对手棋位
+     * @return
+     */
+    Gobang.Point getPoint(int[][] chessData, Gobang.Point point);
 
 }
