@@ -6,8 +6,8 @@ plugins {
 group 'cn.xeblog'
 version '1.4.3-beta'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 11
+targetCompatibility = 11
 
 buildSearchableOptions.enabled = false
 
@@ -30,7 +30,7 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version '2020.2'
+    version '2021.2'
 }
 patchPluginXml {
     sinceBuild(191)
