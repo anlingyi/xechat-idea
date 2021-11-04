@@ -11,8 +11,9 @@ public interface AIService {
      *
      * @param chessData 当前棋子数据
      * @param point     对手棋位
+     * @param started   是否刚开局
      * @return
      */
-    Gobang.Point getPoint(int[][] chessData, Gobang.Point point);
+    Gobang.Point getPoint(int[][] chessData, Gobang.Point point, boolean started);
 
 }

@@ -227,7 +227,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
         showTips(player + (DataCache.username.equals(player) ? "(你)" : "") + "先下手为强！");
 
         if (type == 2 && gameMode == GameMode.HUMAN_VS_PC) {
-            aiPutChess();
+            aiPutChess(true);
         }
 
         chessPanel.addMouseListener(new MouseAdapter() {
@@ -254,7 +254,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
                             break;
                         case HUMAN_VS_PC:
                             changePlayer();
-                            aiPutChess();
+                            aiPutChess(false);
                             break;
                         case HUMAN_VS_HUMAN:
                             type = 3 - type;
@@ -273,7 +273,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
         nextPlayer = tempName;
     }
 
-    private void aiPutChess() {
+    private void aiPutChess(boolean started) {
         new Thread(() -> {
             try {
                 Thread.sleep(500);
@@ -281,7 +281,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 e.printStackTrace();
             }
 
-            if (setChess(aiService.getPoint(chessData, new Point(currentX, currentY, type)))) {
+            if (setChess(aiService.getPoint(chessData, new Point(currentX, currentY, type), started))) {
                 checkStatus(player);
 
                 if (isGameOver) {
