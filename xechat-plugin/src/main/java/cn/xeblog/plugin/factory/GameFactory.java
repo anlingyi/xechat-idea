@@ -2,7 +2,7 @@ package cn.xeblog.plugin.factory;
 
 import cn.xeblog.commons.enums.Game;
 import cn.xeblog.plugin.game.AbstractGame;
-import cn.xeblog.plugin.game.Gobang;
+import cn.xeblog.plugin.game.gobang.Gobang;
 
 /**
  * @author anlingyi
