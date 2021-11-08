@@ -42,7 +42,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
     private JPanel startPanel;
 
     // 每个格子的边框大小
-    private int border = 14;
+    private int border;
     // 棋子大小
     private int chessSize;
     // 棋盘宽度
@@ -363,6 +363,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
     private void initStartPanel() {
         if (GameAction.getOpponent() != null) {
+            border = 14;
             initChessPanel();
             return;
         }
