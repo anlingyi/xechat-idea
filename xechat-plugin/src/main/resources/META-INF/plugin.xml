@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>cn.xeblog.xechat.plugin</id>
     <name>XEChat</name>
-    <version>1.4.4-beta</version>
+    <version>1.4.5-beta</version>
     <vendor email="1090172196@qq.com" url="https://xeblog.cn">AnLingYi</vendor>
 
     <description><![CDATA[
