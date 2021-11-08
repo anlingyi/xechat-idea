@@ -246,7 +246,7 @@ public class ZhiZhangAIService implements AIService {
 
                 if (isAI) {
                     // AI要选对自己最有利的节点（分最高的）
-                    if (score > beta) {
+                    if (score > alpha) {
                         // 最高值被刷新，更新alpha值
                         alpha = score;
                         if (isRoot) {
