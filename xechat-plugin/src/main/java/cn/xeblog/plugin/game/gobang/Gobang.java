@@ -112,6 +112,10 @@ public class Gobang extends AbstractGame<GobangDTO> {
         GobangDTO gobangDTO = response.getBody();
         setChess(new Point(gobangDTO.getX(), gobangDTO.getY(), gobangDTO.getType()));
 
+        if (type == 2) {
+            changePlayer();
+        }
+
         checkStatus(nextPlayer);
         if (isGameOver) {
             return;
@@ -169,6 +173,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
             if (GameAction.isProactive()) {
                 type = 1;
             } else {
+                changePlayer();
                 type = 2;
                 put = true;
             }
@@ -235,25 +240,29 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
                 if (putChess(e.getX(), e.getY(), type)) {
                     put = true;
+                    boolean isOnlineMode = gameMode == GameMode.ONLINE;
+
                     checkStatus(player);
 
-                    if (isGameOver) {
+                    if (!isGameOver) {
+                        showTips(nextPlayer + (DataCache.username.equals(nextPlayer) ? "(你)" : "") + "：思考中...");
+                    } else if (!isOnlineMode) {
                         return;
                     }
 
-                    showTips(nextPlayer + (DataCache.username.equals(nextPlayer) ? "(你)" : "") + "：思考中...");
+                    if (!isOnlineMode || (isOnlineMode && type == 2)) {
+                        changePlayer();
+                    }
 
                     switch (gameMode) {
                         case ONLINE:
                             send(new Point(currentX, currentY, type));
                             break;
                         case HUMAN_VS_PC:
-                            changePlayer();
                             aiPutChess(false);
                             break;
                         case HUMAN_VS_HUMAN:
                             type = 3 - type;
-                            changePlayer();
                             put = false;
                             break;
                     }
