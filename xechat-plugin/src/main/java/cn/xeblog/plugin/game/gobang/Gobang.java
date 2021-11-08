@@ -8,9 +8,9 @@ import cn.xeblog.commons.entity.Response;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.plugin.enums.Command;
 import cn.xeblog.plugin.game.AbstractGame;
+import com.intellij.openapi.ui.ComboBox;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,6 +27,13 @@ import java.util.Map;
  */
 public class Gobang extends AbstractGame<GobangDTO> {
 
+    // 行数，y
+    private static final int ROWS = 15;
+    // 列数，x
+    private static final int COLS = 15;
+    // 棋子总数
+    private static final int CHESS_TOTAL = ROWS * COLS;
+
     // 棋盘
     private JPanel chessPanel;
     // 提示
@@ -35,20 +42,13 @@ public class Gobang extends AbstractGame<GobangDTO> {
     private JPanel startPanel;
 
     // 每个格子的边框大小
-    public static final int BORDER = 10;
-    // 行数
-    public static final int ROWS = 15;
-    // 列数
-    public static final int COLS = 15;
-    // 棋子大小，约为格子的3/4
-    private static final int CHESS_SIZE = Math.round(BORDER * 0.75f);
+    private int border = 14;
+    // 棋子大小
+    private int chessSize;
     // 棋盘宽度
-    private static final int WIDTH = ROWS * BORDER + BORDER;
+    private int width;
     // 棋盘高度
-    private static final int HEIGHT = ROWS * BORDER + BORDER;
-    // 棋子总数
-    private static final int CHESS_TOTAL = ROWS * COLS;
-
+    private int height;
     // 已下棋子数据
     private int[][] chessData;
     // 当前已下棋子数
@@ -62,7 +62,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
     // 标记是否已下棋子
     private boolean put;
     // 高亮棋子
-    Map<String, Boolean> chessHighlight;
+    private Map<String, Boolean> chessHighlight;
     // 当前玩家名
     private String player;
     // 下一个玩家名
@@ -76,20 +76,15 @@ public class Gobang extends AbstractGame<GobangDTO> {
      * 初始化游戏数据
      */
     private void initValue() {
-        chessData = new int[ROWS][COLS];
+        chessData = new int[COLS][ROWS];
         currentChessTotal = 0;
         isGameOver = false;
         status = 0;
         put = false;
+        chessSize = Math.round(border * 0.75f);
+        width = ROWS * border + border;
+        height = ROWS * border + border;
         initChessHighLight();
-    }
-
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Point {
-        int x;
-        int y;
-        int type;
     }
 
     @Getter
@@ -152,7 +147,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
             switch (gameMode) {
                 case HUMAN_VS_PC:
                     nextPlayer = "人工制杖";
-                    aiService = new ZhiZhangAIService();
+                    aiService = createAI();
                     if (type == 2) {
                         put = true;
                         player = nextPlayer;
@@ -187,7 +182,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
             }
         };
 
-        Dimension mainDimension = new Dimension(WIDTH + 50, HEIGHT + 50);
+        Dimension mainDimension = new Dimension(width + 50, height + 50);
 
         mainPanel.setLayout(new BorderLayout());
         mainPanel.setPreferredSize(mainDimension);
@@ -198,7 +193,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
         tips.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 
         // 设置棋盘宽高
-        chessPanel.setPreferredSize(new Dimension(WIDTH, HEIGHT));
+        chessPanel.setPreferredSize(new Dimension(width, height));
         // 设置棋盘背景颜色
         chessPanel.setBackground(Color.LIGHT_GRAY);
 
@@ -276,7 +271,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
     private void aiPutChess(boolean started) {
         new Thread(() -> {
             try {
-                Thread.sleep(500);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -313,23 +308,23 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
         // 画横线
         for (int i = 0; i < ROWS; i++) {
-            g2.drawLine(BORDER, i * BORDER + BORDER, WIDTH - BORDER, i * BORDER + BORDER);
+            g2.drawLine(border, i * border + border, width - border, i * border + border);
         }
 
         // 画纵线
         for (int i = 0; i < COLS; i++) {
-            g2.drawLine(i * BORDER + BORDER, BORDER, i * BORDER + BORDER, HEIGHT - BORDER);
+            g2.drawLine(i * border + border, border, i * border + border, height - border);
         }
 
         if (ROWS == 15 && COLS == 15) {
             // 标准棋盘
-            int starSize = BORDER / 3;
+            int starSize = border / 3;
             int halfStarSize = starSize / 2;
-            g2.fillOval(4 * BORDER - halfStarSize, 4 * BORDER - halfStarSize, starSize, starSize);
-            g2.fillOval(12 * BORDER - halfStarSize, 4 * BORDER - halfStarSize, starSize, starSize);
-            g2.fillOval(4 * BORDER - halfStarSize, 12 * BORDER - halfStarSize, starSize, starSize);
-            g2.fillOval(12 * BORDER - halfStarSize, 12 * BORDER - halfStarSize, starSize, starSize);
-            g2.fillOval(8 * BORDER - halfStarSize, 8 * BORDER - halfStarSize, starSize, starSize);
+            g2.fillOval(4 * border - halfStarSize, 4 * border - halfStarSize, starSize, starSize);
+            g2.fillOval(12 * border - halfStarSize, 4 * border - halfStarSize, starSize, starSize);
+            g2.fillOval(4 * border - halfStarSize, 12 * border - halfStarSize, starSize, starSize);
+            g2.fillOval(12 * border - halfStarSize, 12 * border - halfStarSize, starSize, starSize);
+            g2.fillOval(8 * border - halfStarSize, 8 * border - halfStarSize, starSize, starSize);
         }
 
         if (currentChessTotal == 0) {
@@ -337,8 +332,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
         }
 
         // 画棋子
-        for (int i = 0; i < ROWS; i++) {
-            for (int j = 0; j < COLS; j++) {
+        for (int i = 0; i < COLS; i++) {
+            for (int j = 0; j < ROWS; j++) {
                 int k = chessData[i][j];
                 if (k == 0) {
                     continue;
@@ -351,16 +346,16 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 }
 
                 // 计算棋子外矩形左上顶点坐标
-                int halfBorder = CHESS_SIZE / 2;
-                int chessX = i * BORDER + BORDER - halfBorder;
-                int chessY = j * BORDER + BORDER - halfBorder;
+                int halfBorder = chessSize / 2;
+                int chessX = i * border + border - halfBorder;
+                int chessY = j * border + border - halfBorder;
 
-                g2.fillOval(chessX, chessY, CHESS_SIZE, CHESS_SIZE);
+                g2.fillOval(chessX, chessY, chessSize, chessSize);
 
                 if (isHighlight(i, j) || i == currentX && j == currentY) {
                     // 当前棋子高亮
                     g2.setColor(Color.RED);
-                    g2.drawOval(chessX, chessY, CHESS_SIZE, CHESS_SIZE);
+                    g2.drawOval(chessX, chessY, chessSize, chessSize);
                 }
             }
         }
@@ -412,11 +407,34 @@ public class Gobang extends AbstractGame<GobangDTO> {
         startPanel.add(blackChessRadio);
         startPanel.add(whiteChessRadio);
 
+        JLabel label3 = new JLabel("棋盘尺寸：");
+        label3.setFont(new Font("", 1, 13));
+        startPanel.add(label3);
+
+        ComboBox chessSizeBox = new ComboBox();
+        chessSizeBox.addItem("小");
+        chessSizeBox.addItem("中");
+        chessSizeBox.addItem("大");
+        chessSizeBox.setSelectedItem("中");
+        startPanel.add(chessSizeBox);
+
         JButton startGameButton = new JButton("开始游戏");
         startGameButton.addActionListener(e -> {
             mainPanel.remove(startPanel);
             gameMode = GameMode.getMode(modeRadioGroup.getSelection().getActionCommand());
             type = Integer.parseInt(chessRadioGroup.getSelection().getActionCommand());
+            String chessSize = chessSizeBox.getSelectedItem().toString();
+            switch (chessSize) {
+                case "小":
+                    border = 12;
+                    break;
+                case "中":
+                    border = 14;
+                    break;
+                case "大":
+                    border = 16;
+                    break;
+            }
             initChessPanel();
         });
 
@@ -443,19 +461,19 @@ public class Gobang extends AbstractGame<GobangDTO> {
         }
 
         // 计算出对应的行列 四舍五入取整
-        int row = Math.round((float) (x - BORDER) / BORDER);
-        int col = Math.round((float) (y - BORDER) / BORDER);
+        int row = Math.round((float) (x - border) / border);
+        int col = Math.round((float) (y - border) / border);
 
         if (row < 0 || col < 0 || row > ROWS - 1 || col > COLS - 1) {
             return false;
         }
 
         // 棋子圆心坐标
-        int circleX = row * BORDER + BORDER;
-        int circleY = col * BORDER + BORDER;
+        int circleX = row * border + border;
+        int circleY = col * border + border;
 
         // 判断鼠标点击的坐标是否在棋子圆外
-        boolean notInCircle = Math.pow(circleX - x, 2) + Math.pow(circleY - y, 2) > Math.pow((double) CHESS_SIZE / 2, 2);
+        boolean notInCircle = Math.pow(circleX - x, 2) + Math.pow(circleY - y, 2) > Math.pow((double) chessSize / 2, 2);
 
         if (notInCircle) {
             // 不在棋子圆内
@@ -707,5 +725,9 @@ public class Gobang extends AbstractGame<GobangDTO> {
         }
 
         return chessHighlight.containsKey(x + "," + y);
+    }
+
+    private AIService createAI() {
+        return new ZhiZhangAIService();
     }
 }
