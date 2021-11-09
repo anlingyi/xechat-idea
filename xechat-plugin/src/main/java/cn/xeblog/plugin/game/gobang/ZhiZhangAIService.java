@@ -84,7 +84,7 @@ public class ZhiZhangAIService implements AIService {
         /**
          * 眠二
          */
-        MIANER(50, new String[]{"011200", "002110", "021100"}),
+        MIANER(50, new String[]{"011200", "001120", "002110", "021100", "001010", "010100"}),
         /**
          * 眠一
          */
@@ -285,17 +285,12 @@ public class ZhiZhangAIService implements AIService {
         int huosanTotal = 0;
         // 冲四数
         int chongsiTotal = 0;
-        // 活四数
-        int huosiTotal = 0;
         // 活二数
         int huoerTotal = 0;
 
         for (int i = 1; i < 5; i++) {
             String situation = getSituation(point, i);
-            if (checkSituation(situation, ChessModel.HUOSI)) {
-                // 活四+1
-                huosiTotal++;
-            } else if (checkSituation(situation, ChessModel.HUOSAN)) {
+            if (checkSituation(situation, ChessModel.HUOSAN)) {
                 // 活三+1
                 huosanTotal++;
             } else if (checkSituation(situation, ChessModel.CHONGSI)) {
@@ -314,13 +309,17 @@ public class ZhiZhangAIService implements AIService {
             // 活三又活二
             score *= 2;
         }
+        if (chongsiTotal > 0 && huoerTotal > 0) {
+            // 冲四又活二
+            score *= 4;
+        }
         if (huosanTotal > 1) {
             // 活三数大于1
-            score *= 3;
+            score *= 6;
         }
         if (chongsiTotal > 0 && huosanTotal > 0) {
             // 冲四又活三
-            score *= 4;
+            score *= 8;
         }
 
         return score;
