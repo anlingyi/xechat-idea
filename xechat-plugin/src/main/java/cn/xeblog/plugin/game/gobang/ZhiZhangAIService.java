@@ -120,6 +120,11 @@ public class ZhiZhangAIService implements AIService {
         return this.bestPoint;
     }
 
+    /**
+     * 初始化棋盘数据
+     *
+     * @param chessData 当前棋盘数据
+     */
     private void initChessData(int[][] chessData) {
         this.rows = chessData.length;
         this.cols = chessData[0].length;
@@ -182,6 +187,82 @@ public class ZhiZhangAIService implements AIService {
         }
 
         return best;
+    }
+
+    /**
+     * 极大极小值搜索
+     *
+     * @param type  当前走棋方 0.根节点表示AI走棋 1.AI 2.玩家
+     * @param depth 搜索深度
+     * @return
+     */
+    private int minimax(int type, int depth) {
+        // 是否是根节点
+        boolean isRoot = type == 0;
+        if (isRoot) {
+            // 根节点是AI走棋
+            type = this.ai;
+        }
+
+        // 当前是否是AI走棋
+        boolean isAI = type == this.ai;
+        // 当前分值，
+        int score;
+        if (isAI) {
+            // AI因为要选择最高分，所以初始化一个难以到达的低分
+            score = -INFINITY;
+        } else {
+            // 对手要选择最低分，所以初始化一个难以到达的高分
+            score = INFINITY;
+        }
+
+        // 到达叶子结点
+        if (depth == 0) {
+            /**
+             * 评估每棵博弈树的叶子结点的局势
+             * 比如：depth=2时，表示从AI开始走两步棋之后的局势评估，AI(走第一步) -> 玩家(走第二步)，然后对局势进行评估
+             * 注意：局势评估是以AI角度进行的，分值越大对AI越有利，对玩家越不利
+             */
+            return evaluateAll();
+        }
+
+        for (int i = 0; i < this.cols; i++) {
+            for (int j = 0; j < this.rows; j++) {
+                if (this.chessData[i][j] != 0) {
+                    // 该处已有棋子，跳过
+                    continue;
+                }
+
+                /* 模拟 AI -> 玩家 交替落子 */
+                Point p = new Point(i, j, type);
+                // 落子
+                putChess(p);
+                // 递归生成博弈树，并评估叶子结点的局势获取分值
+                int curScore = minimax(3 - type, depth - 1);
+                // 撤销落子
+                revokeChess(p);
+
+                if (isAI) {
+                    // AI要选对自己最有利的节点（分最高的）
+                    if (curScore > score) {
+                        // 最高值被刷新
+                        score = curScore;
+                        if (isRoot) {
+                            // 根节点处更新AI最好的棋位
+                            this.bestPoint = p;
+                        }
+                    }
+                } else {
+                    // 对手要选对AI最不利的节点（分最低的）
+                    if (curScore < score) {
+                        // 最低值被刷新
+                        score = curScore;
+                    }
+                }
+            }
+        }
+
+        return score;
     }
 
     /**
