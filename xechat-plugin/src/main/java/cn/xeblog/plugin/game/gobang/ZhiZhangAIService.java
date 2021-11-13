@@ -109,8 +109,8 @@ public class ZhiZhangAIService implements AIService {
 
         if (started) {
             // AI先下，首子天元
-            int centerX = Math.round(this.cols / 2);
-            int centerY = Math.round(this.rows / 2);
+            int centerX = this.cols / 2;
+            int centerY = this.rows / 2;
             return new Point(centerX, centerY, this.ai);
         }
 
