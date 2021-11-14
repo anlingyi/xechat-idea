@@ -115,7 +115,7 @@ public class ZhiZhangAIService implements AIService {
         }
 
         // 基于极大极小值搜索获取最佳棋位
-        minimax(0, 2, -INFINITY, INFINITY);
+        minimax(0, 6, -INFINITY, INFINITY);
 
         return this.bestPoint;
     }
@@ -295,7 +295,41 @@ public class ZhiZhangAIService implements AIService {
             return evaluateAll();
         }
 
-        for (int i = 0; i < this.cols; i++) {
+        // 启发式搜索
+        List<Point> pointList = getHeuristicPoints(type);
+        for (Point point : pointList) {
+            int score;
+            if (checkSituation(point, ChessModel.LIANWU)) {
+                // 落子到这里就赢了，如果是AI落的子就返回最高分，否则返回最低分
+                score = isAI ? INFINITY - 1 : -INFINITY + 1;
+            } else {
+                /* 模拟 AI -> 玩家 交替落子 */
+                // 落子
+                putChess(point);
+                // 递归生成博弈树，并评估叶子结点的局势
+                score = minimax(3 - type, depth - 1, alpha, beta);
+                // 撤销落子
+                revokeChess(point);
+            }
+
+            if (isAI) {
+                // AI要选对自己最有利的节点（分最高的）
+                if (score > alpha) {
+                    // 最高值被刷新，更新alpha值
+                    alpha = score;
+                    if (isRoot) {
+                        // 根节点处更新AI最好的棋位
+                        this.bestPoint = point;
+                    }
+                }
+            } else {
+                // 对手要选对AI最不利的节点（分最低的）
+                if (score < beta) {
+                    // 最低值被刷新，更新beta值
+                    beta = score;
+                }
+            }
+
             if (alpha >= beta) {
                 /*
                  AlphaBeta剪枝
@@ -309,48 +343,72 @@ public class ZhiZhangAIService implements AIService {
                  */
                 break;
             }
+        }
 
+        return isAI ? alpha : beta;
+    }
+
+    /**
+     * 启发式获取落子点位
+     *
+     * @param type 当前走棋方 1.AI 2.玩家
+     * @return
+     */
+    private List<Point> getHeuristicPoints(int type) {
+        // 高优先级落子点
+        List<Point> highPriorityPointList = new ArrayList<>();
+        // 低优先级落子点
+        List<Point> lowPriorityPointList = new ArrayList<>();
+        // 候补落子点
+        List<Point> alternatePointList = new ArrayList<>();
+
+        for (int i = 0; i < this.cols; i++) {
             for (int j = 0; j < this.rows; j++) {
                 if (this.chessData[i][j] != 0) {
                     // 该处已有棋子，跳过
                     continue;
                 }
 
-                /* 模拟 AI -> 玩家 交替落子 */
-                Point p = new Point(i, j, type);
-                // 落子
-                putChess(p);
-                // 递归生成博弈树，并评估叶子结点的局势
-                int score = minimax(3 - type, depth - 1, alpha, beta);
-                // 撤销落子
-                revokeChess(p);
-
-                if (isAI) {
-                    // AI要选对自己最有利的节点（分最高的）
-                    if (score > alpha) {
-                        // 最高值被刷新，更新alpha值
-                        alpha = score;
-                        if (isRoot) {
-                            // 根节点处更新AI最好的棋位
-                            this.bestPoint = p;
-                        }
+                // 考虑自己的落子情况
+                Point point = new Point(i, j, type);
+                if (checkSituation(point, ChessModel.LIANWU, ChessModel.HUOSI)) {
+                    // 高优先级落子点：连五、活四
+                    highPriorityPointList.add(point);
+                } else if (checkSituation(point, ChessModel.HUOSAN, ChessModel.CHONGSI)) {
+                    if (lowPriorityPointList.size() < 8) {
+                        // 低优先级落子点：活三、冲四，超过8个则忽略
+                        lowPriorityPointList.add(point);
                     }
-                } else {
-                    // 对手要选对AI最不利的节点（分最低的）
-                    if (score < beta) {
-                        // 最低值被刷新，更新beta值
-                        beta = score;
+                } else if (checkSituation(point, ChessModel.HUOER, ChessModel.MIANSAN, ChessModel.MIANER, ChessModel.MIANYI)) {
+                    if (alternatePointList.size() < 8) {
+                        // 候补落子点：活二、眠三、眠二、眠一，超过8个则忽略
+                        alternatePointList.add(point);
                     }
                 }
 
-                if (alpha >= beta) {
-                    // 剪枝
-                    break;
+                // 考虑对手的落子情况
+                Point foePoint = new Point(i, j, 3 - type);
+                // 只需考虑对手的连五、活四、冲四等情况
+                if (checkSituation(foePoint, ChessModel.LIANWU, ChessModel.HUOSI, ChessModel.CHONGSI)) {
+                    // 高优先级落子点
+                    highPriorityPointList.add(point);
                 }
             }
         }
 
-        return isAI ? alpha : beta;
+        if (highPriorityPointList.isEmpty()) {
+            // 无高优先级落子点，则判断是否有低优先级落子点
+            if (lowPriorityPointList.isEmpty()) {
+                // 低优先级落子点也没有，就返回候补落子点
+                return alternatePointList;
+            }
+
+            // 返回低优先级落子点
+            return lowPriorityPointList;
+        }
+
+        // 返回高优先级落子点
+        return highPriorityPointList;
     }
 
     /**
@@ -455,15 +513,18 @@ public class ZhiZhangAIService implements AIService {
     /**
      * 检查当前落子是否处于某一局势
      *
-     * @param point      当前棋位
-     * @param chessScore 检查的局势
+     * @param point       当前棋位
+     * @param chessModels 检查的局势
      * @return
      */
-    private boolean checkSituation(Point point, ChessModel chessScore) {
+    private boolean checkSituation(Point point, ChessModel... chessModels) {
         // 要检查4个大方向
         for (int i = 1; i < 5; i++) {
-            if (checkSituation(getSituation(point, i), chessScore)) {
-                return true;
+            ChessModel chessModel = getChessModel(getSituation(point, i));
+            for (ChessModel model : chessModels) {
+                if (model == chessModel) {
+                    return true;
+                }
             }
         }
         return false;
