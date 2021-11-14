@@ -63,7 +63,7 @@ public class ZhiZhangAIService implements AIService {
         /**
          * 活四
          */
-        HUOSI(100000, new String[]{"011110"}),
+        HUOSI(1000000, new String[]{"011110"}),
         /**
          * 活三
          */
