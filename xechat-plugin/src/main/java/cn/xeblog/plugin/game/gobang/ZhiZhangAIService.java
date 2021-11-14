@@ -398,8 +398,8 @@ public class ZhiZhangAIService implements AIService {
             // 活三数大于1
             score *= 6;
         }
-        if (chongsiTotal > 0 && huosanTotal > 0) {
-            // 冲四又活三
+        if (chongsiTotal > 1 || (chongsiTotal > 0 && huosanTotal > 0)) {
+            // 冲四数大于1、冲四又活三
             score *= 8;
         }
 
