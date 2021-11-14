@@ -370,20 +370,31 @@ public class ZhiZhangAIService implements AIService {
         int huoerTotal = 0;
 
         for (int i = 1; i < 5; i++) {
+            // 获取当前局势
             String situation = getSituation(point, i);
-            if (checkSituation(situation, ChessModel.HUOSAN)) {
-                // 活三+1
-                huosanTotal++;
-            } else if (checkSituation(situation, ChessModel.CHONGSI)) {
-                // 冲四+1
-                chongsiTotal++;
-            } else if (checkSituation(situation, ChessModel.HUOER)) {
-                // 活二+1
-                huoerTotal++;
-            }
+            // 获取当前局势的棋型
+            ChessModel chessModel = getChessModel(situation);
 
-            // 下此步的得分
-            score += getScore(situation);
+            // 棋型统计
+            if (chessModel != null) {
+                switch (chessModel) {
+                    case HUOSAN:
+                        // 活三+1
+                        huosanTotal++;
+                        break;
+                    case CHONGSI:
+                        // 冲四+1
+                        chongsiTotal++;
+                        break;
+                    case HUOER:
+                        // 活二+1
+                        huoerTotal++;
+                        break;
+                }
+
+                // 下此步的得分
+                score += chessModel.score;
+            }
         }
 
         if (huosanTotal > 0 && huoerTotal > 0) {
@@ -472,6 +483,24 @@ public class ZhiZhangAIService implements AIService {
             }
         }
         return false;
+    }
+
+    /**
+     * 获取当前局势的棋型
+     *
+     * @param situation 当前局势
+     * @return
+     */
+    private ChessModel getChessModel(String situation) {
+        for (ChessModel chessModel : ChessModel.values()) {
+            for (String value : chessModel.values) {
+                if (situation.contains(value)) {
+                    return chessModel;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
