@@ -88,7 +88,7 @@ public class ZhiZhangAIService implements AIService {
         /**
          * 眠一
          */
-        MIANYI(10, new String[]{"001200", "002100", "020100", "000210", "000120"});
+        MIANYI(10, new String[]{"001200", "002100", "020100", "000210", "000120", "210000", "000012"});
 
         /**
          * 分数
@@ -355,6 +355,8 @@ public class ZhiZhangAIService implements AIService {
      * @return
      */
     private List<Point> getHeuristicPoints(int type) {
+        // 落子点上限
+        int max = 8;
         // 高优先级落子点
         List<Point> highPriorityPointList = new ArrayList<>();
         // 低优先级落子点
@@ -375,12 +377,12 @@ public class ZhiZhangAIService implements AIService {
                     // 高优先级落子点：连五、活四
                     highPriorityPointList.add(point);
                 } else if (checkSituation(point, ChessModel.HUOSAN, ChessModel.CHONGSI)) {
-                    if (lowPriorityPointList.size() < 8) {
+                    if (lowPriorityPointList.size() < max) {
                         // 低优先级落子点：活三、冲四，超过8个则忽略
                         lowPriorityPointList.add(point);
                     }
                 } else if (checkSituation(point, ChessModel.HUOER, ChessModel.MIANSAN, ChessModel.MIANER, ChessModel.MIANYI)) {
-                    if (alternatePointList.size() < 8) {
+                    if (alternatePointList.size() < max) {
                         // 候补落子点：活二、眠三、眠二、眠一，超过8个则忽略
                         alternatePointList.add(point);
                     }
