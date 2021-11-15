@@ -356,7 +356,7 @@ public class ZhiZhangAIService implements AIService {
      */
     private List<Point> getHeuristicPoints(int type) {
         // 落子点上限
-        int max = 8;
+        int max = 10;
         // 高优先级落子点
         List<Point> highPriorityPointList = new ArrayList<>();
         // 低优先级落子点
