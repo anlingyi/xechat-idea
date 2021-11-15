@@ -378,12 +378,12 @@ public class ZhiZhangAIService implements AIService {
                     highPriorityPointList.add(point);
                 } else if (checkSituation(point, ChessModel.HUOSAN, ChessModel.CHONGSI)) {
                     if (lowPriorityPointList.size() < max) {
-                        // 低优先级落子点：活三、冲四，超过8个则忽略
+                        // 低优先级落子点：活三、冲四，超过上限则忽略
                         lowPriorityPointList.add(point);
                     }
                 } else if (checkSituation(point, ChessModel.HUOER, ChessModel.MIANSAN, ChessModel.MIANER, ChessModel.MIANYI)) {
                     if (alternatePointList.size() < max) {
-                        // 候补落子点：活二、眠三、眠二、眠一，超过8个则忽略
+                        // 候补落子点：活二、眠三、眠二、眠一，超过上限则忽略
                         alternatePointList.add(point);
                     }
                 }
