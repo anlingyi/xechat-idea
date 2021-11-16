@@ -34,6 +34,10 @@ public class ZhiZhangAIService implements AIService {
      * AI最佳下棋点位
      */
     private Point bestPoint;
+    /**
+     * AI级别
+     */
+    private int level;
 
     /**
      * 声明一个最大值
@@ -100,6 +104,14 @@ public class ZhiZhangAIService implements AIService {
         String[] values;
     }
 
+    public ZhiZhangAIService() {
+        this(6);
+    }
+
+    public ZhiZhangAIService(int level) {
+        this.level = level;
+    }
+
     @Override
     public Point getPoint(int[][] chessData, Point point, boolean started) {
         initChessData(chessData);
@@ -114,8 +126,12 @@ public class ZhiZhangAIService implements AIService {
             return new Point(centerX, centerY, this.ai);
         }
 
+        if (level < 2) {
+            return getBestPoint(point);
+        }
+
         // 基于极大极小值搜索获取最佳棋位
-        minimax(0, 6, -INFINITY, INFINITY);
+        minimax(0, level, -INFINITY, INFINITY);
 
         return this.bestPoint;
     }
@@ -174,8 +190,8 @@ public class ZhiZhangAIService implements AIService {
                 }
 
                 Point p = new Point(i, j, this.ai);
-                // 该点得分 = AI落子得分 + 对手落子得分
-                int val = evaluate(p) + evaluate(new Point(i, j, 3 - this.ai));
+                // 该点得分 = AI落子得分 * 进攻系数 + 对手落子得分
+                int val = evaluate(p) * this.attack + evaluate(new Point(i, j, 3 - this.ai));
                 // 选择得分最高的点位
                 if (val > score) {
                     // 最高分被刷新
