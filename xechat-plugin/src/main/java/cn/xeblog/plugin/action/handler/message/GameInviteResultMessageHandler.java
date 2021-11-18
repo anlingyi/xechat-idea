@@ -16,7 +16,7 @@ import cn.xeblog.plugin.enums.Style;
 public class GameInviteResultMessageHandler extends AbstractGameMessageHandler<GameInviteResultDTO> {
 
     @Override
-    public void handle(Response<GameInviteResultDTO> response) {
+    protected void process(Response<GameInviteResultDTO> response) {
         GameInviteResultDTO result = response.getBody();
         String opponent = GameAction.getOpponent();
         switch (result.getStatus()) {
@@ -37,4 +37,5 @@ public class GameInviteResultMessageHandler extends AbstractGameMessageHandler<G
                 break;
         }
     }
+
 }

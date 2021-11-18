@@ -15,10 +15,11 @@ import cn.xeblog.plugin.enums.Style;
 public class UserMessageHandler extends AbstractMessageHandler<String> {
 
     @Override
-    public void handle(Response<String> response) {
+    protected void process(Response<String> response) {
         User user = response.getUser();
         ConsoleAction.renderText(String.format("[%s] %s(%s)：", response.getTime(), user.getUsername(),
                 user.getStatus().alias()), Style.USER_NAME);
         ConsoleAction.showSimpleMsg(response.getBody());
     }
+
 }

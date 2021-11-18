@@ -1,9 +1,9 @@
 package cn.xeblog.plugin.action.handler.message;
 
+import cn.xeblog.commons.entity.GameDTO;
 import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
-import cn.xeblog.commons.entity.GameInviteDTO;
 import cn.xeblog.commons.entity.Response;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.plugin.annotation.DoMessage;
@@ -14,15 +14,16 @@ import cn.xeblog.plugin.enums.Style;
  * @date 2020/8/19
  */
 @DoMessage(MessageType.GAME_INVITE)
-public class GameInviteMessageHandler extends AbstractGameMessageHandler<GameInviteDTO> {
+public class GameInviteMessageHandler extends AbstractGameMessageHandler<GameDTO> {
 
     @Override
-    public void handle(Response<GameInviteDTO> response) {
+    protected void process(Response<GameDTO> response) {
         User user = response.getUser();
         GameAction.setOpponent(user.getUsername());
         GameAction.setGame(response.getBody().getGame());
 
         ConsoleAction.renderText(String.format("[%s] 系统消息：%s\n", response.getTime(),
-                user.getUsername() + "邀请你加入游戏-《" + GameAction.getName() +"》！"), Style.SYSTEM_MSG);
+                user.getUsername() + "邀请你加入游戏-《" + GameAction.getName() + "》！"), Style.SYSTEM_MSG);
     }
+
 }

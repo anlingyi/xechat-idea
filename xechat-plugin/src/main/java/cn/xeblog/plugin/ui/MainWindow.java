@@ -58,6 +58,11 @@ public class MainWindow {
             @Override
             public void keyReleased(KeyEvent e) {
                 if ((e.isControlDown() || e.isMetaDown()) && e.getKeyCode() == KeyEvent.VK_V) {
+                    if (!DataCache.isOnline) {
+                        ConsoleAction.showLoginMsg();
+                        return;
+                    }
+
                     // 粘贴图片
                     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                     Transferable transferable = clipboard.getContents(null);
@@ -65,8 +70,7 @@ public class MainWindow {
                         if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
                             List<File> fileList = (List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
                             UploadUtils.uploadImageFile(fileList.get(0));
-                        }
-                        if (transferable.isDataFlavorSupported(DataFlavor.imageFlavor)) {
+                        } else if (transferable.isDataFlavorSupported(DataFlavor.imageFlavor)) {
                             Image image = (Image) transferable.getTransferData(DataFlavor.imageFlavor);
                             UploadUtils.uploadImage(image);
                         }

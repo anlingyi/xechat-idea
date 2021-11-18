@@ -15,7 +15,7 @@ import cn.xeblog.plugin.factory.MessageHandlerFactory;
 public class HistoryMessageHandler extends AbstractMessageHandler<HistoryMsgDTO> {
 
     @Override
-    public void handle(Response<HistoryMsgDTO> response) {
+    protected void process(Response<HistoryMsgDTO> response) {
         response.getBody().getMsgList().forEach(msg -> MessageHandlerFactory.INSTANCE.produce(msg.getType()).handle(msg));
         ConsoleAction.showSimpleMsg("------以上是历史消息------");
     }

@@ -4,7 +4,7 @@ import cn.xeblog.commons.entity.HistoryMsgDTO;
 import cn.xeblog.commons.entity.Response;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.MessageType;
-import cn.xeblog.server.action.AbstractAction;
+import cn.xeblog.server.action.ChannelAction;
 import cn.xeblog.server.annotation.DoAction;
 import cn.xeblog.server.builder.ResponseBuilder;
 import cn.xeblog.server.cache.UserCache;
@@ -21,17 +21,19 @@ import java.util.List;
  * @date 2020/8/14
  */
 @DoAction(Action.LOGIN)
-public class LoginActionHandler extends AbstractAction<String> {
+public class LoginActionHandler implements ActionHandler<String> {
 
     @Override
     public void handle(ChannelHandlerContext ctx, String body) {
         String username = body;
-        String id = getId(ctx);
         if (UserCache.existUsername(body)) {
-            username += id;
+            ctx.writeAndFlush(ResponseBuilder.system("昵称重复！"));
+            ctx.close();
+            return;
         }
 
         User user = new User(username, UserStatus.FISHING, ctx.channel());
+        String id = ChannelAction.getId(ctx);
         UserCache.add(id, user);
 
         List<Response> historyMsgList = ObjectFactory.getObject(AbstractResponseHistoryService.class).getHistory();
@@ -39,8 +41,8 @@ public class LoginActionHandler extends AbstractAction<String> {
             ctx.writeAndFlush(ResponseBuilder.build(null, new HistoryMsgDTO(historyMsgList), MessageType.HISTORY_MSG));
         }
 
-        sendOnlineUsers();
-        writeAndFlush(ResponseBuilder.system(user.getUsername() + "进入了鱼塘！"));
+        ChannelAction.sendOnlineUsers();
+        ChannelAction.send(ResponseBuilder.system(user.getUsername() + "进入了鱼塘！"));
     }
 
 }

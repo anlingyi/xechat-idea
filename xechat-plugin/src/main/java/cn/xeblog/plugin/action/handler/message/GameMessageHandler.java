@@ -14,7 +14,8 @@ import cn.xeblog.plugin.annotation.DoMessage;
 public class GameMessageHandler extends AbstractGameMessageHandler<GameDTO> {
 
     @Override
-    public void handle(Response<GameDTO> response) {
+    protected void process(Response<GameDTO> response) {
         GameAction.handle(response);
     }
+
 }

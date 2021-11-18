@@ -14,8 +14,9 @@ import cn.xeblog.plugin.enums.Style;
 public class SystemMessageHandler extends AbstractMessageHandler<String> {
 
     @Override
-    public void handle(Response<String> response) {
+    protected void process(Response<String> response) {
         ConsoleAction.renderText(String.format("[%s] 系统消息：%s\n", response.getTime(), response.getBody()),
                 Style.SYSTEM_MSG);
     }
+
 }
