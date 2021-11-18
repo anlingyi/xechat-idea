@@ -51,9 +51,9 @@
 > 提醒：公共模块需优先打包
 
 ```shell
-// 进入公共模块根目录
+# 进入公共模块根目录
 cd xechat-commons
-// 打包到本地仓库
+# 打包到本地仓库
 mvn install
 ```
 
@@ -72,11 +72,11 @@ mvn install
 #### 部署
 
 ```shell
-// 进入服务端根目录
+# 进入服务端根目录
 cd xechat-server
-// 打包
+# 打包
 mvn package
-// 启动服务端
+# 启动服务端
 java -jar target/xechat-server-xxx.jar
 ```
 
