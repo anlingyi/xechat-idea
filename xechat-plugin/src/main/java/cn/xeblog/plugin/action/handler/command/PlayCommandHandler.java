@@ -1,11 +1,11 @@
 package cn.xeblog.plugin.action.handler.command;
 
+import cn.xeblog.commons.entity.GameDTO;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.annotation.DoCommand;
 import cn.xeblog.plugin.cache.DataCache;
-import cn.xeblog.commons.entity.GameInviteDTO;
 import cn.xeblog.commons.entity.GameInviteResultDTO;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.Game;
@@ -53,7 +53,7 @@ public class PlayCommandHandler extends AbstractCommandHandler {
                 return;
             }
 
-            MessageAction.send(new GameInviteDTO(null, game), Action.GAME_INVITE);
+            MessageAction.send(new GameDTO(null, game), Action.GAME_INVITE);
             GameAction.setGame(game);
             GameAction.create();
         } else {
@@ -68,7 +68,7 @@ public class PlayCommandHandler extends AbstractCommandHandler {
                 return;
             }
 
-            MessageAction.send(new GameInviteDTO(id, game), Action.GAME_INVITE);
+            MessageAction.send(new GameDTO(id, game), Action.GAME_INVITE);
             GameAction.setOpponent(args[1]);
             GameAction.setGame(game);
             GameAction.setProactive(true);

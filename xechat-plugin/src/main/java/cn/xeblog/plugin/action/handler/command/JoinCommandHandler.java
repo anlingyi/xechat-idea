@@ -4,7 +4,6 @@ import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.annotation.DoCommand;
-import cn.xeblog.plugin.builder.RequestBuilder;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.commons.entity.GameInviteResultDTO;
 import cn.xeblog.commons.enums.Action;

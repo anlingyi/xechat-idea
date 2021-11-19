@@ -7,6 +7,6 @@ package cn.xeblog.commons.enums;
 public enum InviteStatus {
     ACCEPT,
     REJECT,
-    TIMEOUT
-    ;
+    TIMEOUT,
+    OFFLINE;
 }

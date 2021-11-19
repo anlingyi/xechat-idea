@@ -16,4 +16,9 @@ public class GameInviteResultDTO extends GameDTO {
 
     private InviteStatus status;
 
+    public GameInviteResultDTO(GameDTO gameDTO, InviteStatus status) {
+        super(gameDTO.getOpponentId(), gameDTO.getGame());
+        this.status = status;
+    }
+
 }

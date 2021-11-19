@@ -19,7 +19,7 @@ public abstract class AbstractCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handle(String[] args) {
+    public final void handle(String[] args) {
         if (!check(args)) {
             return;
         }

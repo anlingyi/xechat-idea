@@ -23,12 +23,20 @@ public class ChannelAction {
 
     private static final ChannelGroup GROUP = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
-    public static void writeAndFlush(Response resp) {
+    public static void send(Response resp) {
         if (resp.getType() == MessageType.SYSTEM || resp.getType() == MessageType.USER) {
             ObjectFactory.getObject(AbstractResponseHistoryService.class).addHistory(resp);
         }
 
         GROUP.writeAndFlush(resp);
+    }
+
+    public static void send(ChannelHandlerContext ctx, Object body, MessageType messageType) {
+        send(getUser(ctx), body, messageType);
+    }
+
+    public static void send(User user, Object body, MessageType messageType) {
+        send(ResponseBuilder.build(user, body, messageType));
     }
 
     public static void add(Channel channel) {
@@ -48,7 +56,7 @@ public class ChannelAction {
     }
 
     public static void sendOnlineUsers() {
-        writeAndFlush(ResponseBuilder.build(null, UserCache.getUsernameMap(), MessageType.ONLINE_USERS));
+        send(ResponseBuilder.build(null, UserCache.getUsernameMap(), MessageType.ONLINE_USERS));
     }
 
     public static void cleanUser(ChannelHandlerContext ctx) {
@@ -67,7 +75,7 @@ public class ChannelAction {
 
         UserCache.remove(id);
         sendOnlineUsers();
-        writeAndFlush(ResponseBuilder.system(user.getUsername() + "离开了鱼塘！"));
+        send(ResponseBuilder.system(user.getUsername() + "离开了鱼塘！"));
 
         return user;
     }

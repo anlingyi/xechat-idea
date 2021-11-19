@@ -3,10 +3,9 @@ package cn.xeblog.plugin.util;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.MessageAction;
-import cn.xeblog.plugin.builder.RequestBuilder;
-import cn.xeblog.plugin.cache.DataCache;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.intellij.util.ui.ImageUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -96,7 +95,8 @@ public class UploadUtils {
 
     public static void uploadImage(Image image) {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            ImageIO.write((BufferedImage) image, "jpg", out);
+            BufferedImage bufferedImage = ImageUtil.toBufferedImage(image);
+            ImageIO.write(bufferedImage, "jpg", out);
             sendImgAsync(out.toByteArray(), System.currentTimeMillis() + ".jpg");
         } catch (IOException e) {
             e.printStackTrace();
@@ -105,10 +105,6 @@ public class UploadUtils {
     }
 
     private static void sendImgAsync(byte[] bytes, String fileName) {
-        if (!DataCache.isOnline) {
-            ConsoleAction.showLoginMsg();
-            return;
-        }
         if (UPLOADING) {
             ConsoleAction.showSimpleMsg("请等待之前的图片上传完成！");
             return;

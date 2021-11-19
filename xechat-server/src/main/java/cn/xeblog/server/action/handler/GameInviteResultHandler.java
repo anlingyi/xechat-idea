@@ -9,24 +9,16 @@ import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.enums.InviteStatus;
 import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.commons.enums.UserStatus;
-import io.netty.channel.ChannelHandlerContext;
 
 /**
  * @author anlingyi
  * @date 2020/8/14
  */
 @DoAction(Action.GAME_INVITE_RESULT)
-public class GameInviteResultHandler extends AbstractGameActionHandler<GameInviteResultDTO> {
+public class GameInviteResultHandler extends AbstractGameActionHandlerHandler<GameInviteResultDTO> {
 
     @Override
-    public void handle(ChannelHandlerContext ctx, GameInviteResultDTO body) {
-        User user = getUser(ctx);
-        User opponent = getUser(body.getOpponentId());
-
-        if (opponentOffline(opponent, ctx)) {
-            return;
-        }
-
+    protected void process(User user, User opponent, GameInviteResultDTO body) {
         if (body.getStatus() != InviteStatus.ACCEPT) {
             user.setStatus(UserStatus.FISHING);
             opponent.setStatus(UserStatus.FISHING);
@@ -34,10 +26,10 @@ public class GameInviteResultHandler extends AbstractGameActionHandler<GameInvit
 
         Response response = ResponseBuilder.build(user, body, MessageType.GAME_INVITE_RESULT);
         if (body.getStatus() != InviteStatus.REJECT) {
-            ctx.channel().writeAndFlush(response);
+            user.send(response);
         }
 
-        opponent.getChannel().writeAndFlush(response);
+        opponent.send(response);
     }
 
 }

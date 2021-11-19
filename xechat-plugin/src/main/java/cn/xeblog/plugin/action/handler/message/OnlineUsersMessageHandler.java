@@ -16,8 +16,9 @@ import java.util.Map;
 public class OnlineUsersMessageHandler extends AbstractMessageHandler<Map<String, String>> {
 
     @Override
-    public void handle(Response<Map<String, String>> response) {
+    protected void process(Response<Map<String, String>> response) {
         DataCache.userMap = response.getBody();
         ConsoleAction.setConsoleTitle("Debug(" + DataCache.userMap.size() + ")");
     }
+
 }

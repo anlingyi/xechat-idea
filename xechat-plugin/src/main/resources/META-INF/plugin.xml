@@ -1,13 +1,18 @@
 <idea-plugin>
     <id>cn.xeblog.xechat.plugin</id>
     <name>XEChat</name>
-    <version>1.4.6-beta</version>
+    <version>1.4.7-beta</version>
     <vendor email="1090172196@qq.com" url="https://xeblog.cn">AnLingYi</vendor>
 
     <description><![CDATA[
-        <p>在IDEA里享受即时聊天的乐趣！</p>
-        <p>努力工作，请勿摸鱼！</p>
-        <p>凑字数，还不够？？？吗？</p>
+    <p>在IDEA里享受即时聊天的乐趣！</p>
+    <p>主要功能：</p>
+    <ul>
+        <li>即时聊天</li>
+        <li>游戏对战</li>
+        <li>待探索...</li>
+    </ul>
+    <p><a href="https://github.com/anlingyi/xechat-idea">项目地址</a> <a href="https://xeblog.cn/?tag=xechat-idea">了解更多</a></p>
     ]]></description>
 
     <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html

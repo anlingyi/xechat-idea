@@ -20,7 +20,7 @@ public class HelpCommandHandler extends AbstractCommandHandler {
             sb.append("· ").append(command.getCommand()).append("：")
                     .append(command.getDesc()).append("\n");
         }
-        sb.append("[当前版本：v").append(IdeaUtils.getPluginVersion()).append("]");
+        sb.append("当前版本：v").append(IdeaUtils.getPluginVersion());
         ConsoleAction.showSimpleMsg(sb.toString());
     }
 
