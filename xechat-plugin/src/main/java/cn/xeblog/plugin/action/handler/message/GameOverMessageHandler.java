@@ -6,7 +6,6 @@ import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.commons.entity.Response;
 import cn.xeblog.plugin.annotation.DoMessage;
-import cn.xeblog.plugin.enums.Style;
 
 /**
  * @author anlingyi
@@ -18,8 +17,7 @@ public class GameOverMessageHandler extends AbstractGameMessageHandler<GameDTO> 
     @Override
     protected void process(Response<GameDTO> response) {
         GameAction.over();
-        ConsoleAction.renderText(String.format("[%s] 系统消息：%s\n", response.getTime(),
-                response.getBody()), Style.SYSTEM_MSG);
+        ConsoleAction.showSystemMsg(response.getTime(), response.getUser().getUsername() + "结束了游戏！");
     }
 
 }

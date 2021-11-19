@@ -26,7 +26,7 @@ public class GameInviteActionHandlerHandler extends AbstractGameActionHandlerHan
         }
 
         if (opponent.getStatus() != UserStatus.FISHING) {
-            user.send(ResponseBuilder.build(opponent, new GameInviteResultDTO(InviteStatus.REJECT), MessageType.GAME_INVITE_RESULT));
+            user.send(ResponseBuilder.build(opponent, new GameInviteResultDTO(body, InviteStatus.REJECT), MessageType.GAME_INVITE_RESULT));
             user.send(ResponseBuilder.system("人家正在" + opponent.getStatus().alias() + "呢！就你天天摸鱼？"));
             return;
         }

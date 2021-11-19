@@ -89,4 +89,7 @@ public class ConsoleAction {
         ConsoleAction.consoleScroll = consoleScroll;
     }
 
+    public static void showSystemMsg(String time, String msg) {
+        ConsoleAction.renderText(String.format("[%s] 系统消息：%s\n", time, msg), Style.SYSTEM_MSG);
+    }
 }

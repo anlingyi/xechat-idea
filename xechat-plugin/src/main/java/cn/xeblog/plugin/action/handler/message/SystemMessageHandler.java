@@ -4,7 +4,6 @@ import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.commons.entity.Response;
 import cn.xeblog.plugin.annotation.DoMessage;
-import cn.xeblog.plugin.enums.Style;
 
 /**
  * @author anlingyi
@@ -15,8 +14,7 @@ public class SystemMessageHandler extends AbstractMessageHandler<String> {
 
     @Override
     protected void process(Response<String> response) {
-        ConsoleAction.renderText(String.format("[%s] 系统消息：%s\n", response.getTime(), response.getBody()),
-                Style.SYSTEM_MSG);
+        ConsoleAction.showSystemMsg(response.getTime(), response.getBody());
     }
 
 }

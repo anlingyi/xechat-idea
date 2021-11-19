@@ -19,7 +19,7 @@ public class GameOverActionHandlerHandler extends AbstractGameActionHandlerHandl
     @Override
     protected void process(User user, User opponent, GameDTO body) {
         user.setStatus(UserStatus.FISHING);
-        Response resp = ResponseBuilder.build(user, user.getUsername() + "结束了游戏！", MessageType.GAME_OVER);
+        Response resp = ResponseBuilder.build(user, body, MessageType.GAME_OVER);
         user.send(resp);
 
         if (opponent != null) {

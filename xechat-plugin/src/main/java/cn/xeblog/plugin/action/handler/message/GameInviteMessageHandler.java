@@ -7,7 +7,6 @@ import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.commons.entity.Response;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.plugin.annotation.DoMessage;
-import cn.xeblog.plugin.enums.Style;
 
 /**
  * @author anlingyi
@@ -22,8 +21,8 @@ public class GameInviteMessageHandler extends AbstractGameMessageHandler<GameDTO
         GameAction.setOpponent(user.getUsername());
         GameAction.setGame(response.getBody().getGame());
 
-        ConsoleAction.renderText(String.format("[%s] 系统消息：%s\n", response.getTime(),
-                user.getUsername() + "邀请你加入游戏-《" + GameAction.getName() + "》！"), Style.SYSTEM_MSG);
+        ConsoleAction.showSystemMsg(response.getTime(),
+                user.getUsername() + "邀请你加入游戏-《" + GameAction.getName() + "》！");
     }
 
 }
