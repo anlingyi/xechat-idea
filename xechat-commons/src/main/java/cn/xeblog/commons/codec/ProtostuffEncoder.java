@@ -16,7 +16,9 @@ public class ProtostuffEncoder extends MessageToByteEncoder {
     @Override
     protected void encode(ChannelHandlerContext channelHandlerContext, Object msg, ByteBuf byteBuf) throws Exception {
         byte[] data = ProtostuffUtils.serialize(msg);
+        // 消息头：消息体总字节数
         byteBuf.writeInt(data.length);
+        // 消息体：完整的数据内容
         byteBuf.writeBytes(data);
     }
 

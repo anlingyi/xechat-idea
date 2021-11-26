@@ -23,18 +23,18 @@ public class ProtostuffDecoder extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
+        // 标记当前的读索引位置
         byteBuf.markReaderIndex();
-        int preIndex = byteBuf.readerIndex();
-        int length = byteBuf.readInt();
 
-        if (preIndex == byteBuf.readerIndex()) {
-            return;
-        }
-
-        if (length > 0) {
+        // 可读字节数必须大于一个int类型长度
+        if (byteBuf.readableBytes() > 4) {
+            // 获取消息体长度
+            int length = byteBuf.readInt();
             if (byteBuf.readableBytes() < length) {
+                // 数据是不完整的，重置当前的读索引到标记位置
                 byteBuf.resetReaderIndex();
             } else {
+                // 读取完整的数据
                 byte[] data = new byte[length];
                 byteBuf.readRetainedSlice(length).readBytes(data);
                 list.add(ProtostuffUtils.deserialize(data, clazz));
