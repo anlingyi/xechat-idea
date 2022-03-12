@@ -1,6 +1,7 @@
 package cn.xeblog.plugin.game;
 
 import cn.xeblog.commons.entity.Response;
+import com.intellij.openapi.application.ApplicationManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,6 +36,6 @@ public abstract class AbstractGame<T> {
 
     public void over() {
         mainPanel.setVisible(false);
-        mainPanel.removeAll();
+        ApplicationManager.getApplication().invokeLater(() -> mainPanel.removeAll());
     }
 }
