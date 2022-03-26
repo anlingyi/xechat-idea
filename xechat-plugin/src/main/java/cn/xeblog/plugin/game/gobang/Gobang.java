@@ -346,6 +346,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 Point point = chessStack.pop();
                 chessData[point.x][point.y] = 0;
             }
+            this.currentChessTotal -= count;
             chessPanel.repaint();
         });
         return regretButton;
