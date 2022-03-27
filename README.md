@@ -11,6 +11,8 @@
 
 了解更多：[https://xeblog.cn/?tag=xechat-idea](https://xeblog.cn/?tag=xechat-idea)
 
+![](https://oss.xeblog.cn/prod/3ba0020c0aff46a984896ad3f231b7ea.png)
+
 ### 项目结构
 
 ```
