@@ -6,15 +6,15 @@
 
     <groupId>cn.xeblog</groupId>
     <artifactId>xechat-commons</artifactId>
-    <version>1.4.7-beta</version>
+    <version>1.4.8-beta</version>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
         </plugins>
