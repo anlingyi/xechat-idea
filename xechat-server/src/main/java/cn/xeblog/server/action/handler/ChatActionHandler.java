@@ -11,7 +11,7 @@ import cn.xeblog.commons.enums.MessageType;
  * @date 2020/8/14
  */
 @DoAction(Action.CHAT)
-public class ChatActionHandlerHandler extends AbstractActionHandler<String> {
+public class ChatActionHandler extends AbstractActionHandler<String> {
 
     @Override
     protected void process(User user, String body) {

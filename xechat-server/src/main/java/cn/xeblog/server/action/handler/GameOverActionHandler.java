@@ -14,7 +14,7 @@ import cn.xeblog.commons.enums.UserStatus;
  * @date 2020/8/14
  */
 @DoAction(Action.GAME_OVER)
-public class GameOverActionHandlerHandler extends AbstractGameActionHandlerHandler<GameDTO> {
+public class GameOverActionHandler extends AbstractGameActionHandler<GameDTO> {
 
     @Override
     protected void process(User user, User opponent, GameDTO body) {

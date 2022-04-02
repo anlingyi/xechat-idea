@@ -11,7 +11,7 @@ import cn.xeblog.commons.enums.UserStatus;
  * @date 2020/8/14
  */
 @DoAction(Action.SET_STATUS)
-public class SetStatusActionHandlerHandler extends AbstractActionHandler<UserStatus> {
+public class SetStatusActionHandler extends AbstractActionHandler<UserStatus> {
 
     @Override
     protected void process(User user, UserStatus body) {

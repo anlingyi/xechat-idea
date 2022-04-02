@@ -12,7 +12,7 @@ import cn.xeblog.commons.enums.MessageType;
  * @date 2020/8/14
  */
 @DoAction(Action.GAME)
-public class GameActionHandlerHandler extends AbstractGameActionHandlerHandler<GameDTO> {
+public class GameActionHandler extends AbstractGameActionHandler<GameDTO> {
 
     @Override
     protected void process(User user, User opponent, GameDTO body) {
