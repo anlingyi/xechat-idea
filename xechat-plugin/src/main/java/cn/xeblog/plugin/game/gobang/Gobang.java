@@ -166,7 +166,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
     private void initChessPanel() {
         initValue();
-        player = DataCache.username;
+        player = GameAction.getNickname();
         if (GameAction.getOpponent() == null) {
             switch (gameMode) {
                 case HUMAN_VS_PC:
@@ -174,7 +174,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
                     if (type == 2) {
                         put = true;
                         player = nextPlayer;
-                        nextPlayer = DataCache.username;
+                        nextPlayer = GameAction.getNickname();
                     }
                     break;
                 case HUMAN_VS_HUMAN:
@@ -182,7 +182,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
                     if (type == 2) {
                         type = 1;
                         player = nextPlayer;
-                        nextPlayer = DataCache.username;
+                        nextPlayer = GameAction.getNickname();
                     }
                     break;
             }
@@ -251,7 +251,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
         mainPanel.add(centerPanel, BorderLayout.CENTER);
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
-        showTips(player + (DataCache.username.equals(player) ? "(你)" : "") + "先下手为强！");
+        showTips(player + (GameAction.getNickname().equals(player) ? "(你)" : "") + "先下手为强！");
 
         if (type == 2 && gameMode == GameMode.HUMAN_VS_PC) {
             aiPutChess(true);
@@ -272,7 +272,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
                     checkStatus(player);
 
                     if (!isGameOver) {
-                        showTips(nextPlayer + (DataCache.username.equals(nextPlayer) ? "(你)" : "") + "：思考中...");
+                        showTips(nextPlayer + (GameAction.getNickname().equals(nextPlayer) ? "(你)" : "") + "：思考中...");
                     } else if (!isOnlineMode) {
                         return;
                     }
@@ -320,7 +320,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 }
 
                 put = false;
-                showTips(nextPlayer + (DataCache.username.equals(nextPlayer) ? "(你)" : "") + "：思考中...");
+                showTips(nextPlayer + (GameAction.getNickname().equals(nextPlayer) ? "(你)" : "") + "：思考中...");
                 changePlayer();
             }
         }).start();

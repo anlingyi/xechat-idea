@@ -34,6 +34,10 @@ public class GameInviteResultMessageHandler extends AbstractGameMessageHandler<G
                 break;
         }
 
+        if (GameAction.isOfflineGame()) {
+            return;
+        }
+
         GameAction.clean();
     }
 

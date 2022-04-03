@@ -30,6 +30,11 @@ public class JoinCommandHandler extends AbstractCommandHandler {
             return;
         }
 
+        if (GameAction.playing()) {
+            ConsoleAction.showSimpleMsg("请先结束当前游戏！");
+            return;
+        }
+
         GameInviteResultDTO gameInviteResultDTO = new GameInviteResultDTO(InviteStatus.ACCEPT);
         gameInviteResultDTO.setGame(GameAction.getGame());
         gameInviteResultDTO.setOpponentId(DataCache.userMap.get(opponent));

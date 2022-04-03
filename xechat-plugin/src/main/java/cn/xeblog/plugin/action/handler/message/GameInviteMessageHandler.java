@@ -7,6 +7,7 @@ import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.commons.entity.Response;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.plugin.annotation.DoMessage;
+import cn.xeblog.plugin.cache.DataCache;
 
 /**
  * @author anlingyi
@@ -18,6 +19,7 @@ public class GameInviteMessageHandler extends AbstractGameMessageHandler<GameDTO
     @Override
     protected void process(Response<GameDTO> response) {
         User user = response.getUser();
+        GameAction.setNickname(DataCache.username);
         GameAction.setOpponent(user.getUsername());
         GameAction.setGame(response.getBody().getGame());
 

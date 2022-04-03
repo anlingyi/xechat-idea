@@ -22,6 +22,11 @@ public class GameAction {
     private static AbstractGame action;
 
     /**
+     * 我的昵称
+     */
+    private static String nickname;
+
+    /**
      * 对手昵称
      */
     private static String opponent;
@@ -30,6 +35,27 @@ public class GameAction {
      * 是否是主动邀请
      */
     private static boolean proactive;
+
+    /**
+     * 是否是离线游戏
+     */
+    private static boolean offlineGame;
+
+    public static void setOfflineGame(boolean bol) {
+        GameAction.offlineGame = bol;
+    }
+
+    public static boolean isOfflineGame() {
+        return offlineGame;
+    }
+
+    public static String getNickname() {
+        return nickname;
+    }
+
+    public static void setNickname(String nickname) {
+        GameAction.nickname = nickname;
+    }
 
     public static void setGame(Game game) {
         GameAction.game = game;
@@ -89,7 +115,9 @@ public class GameAction {
         game = null;
         action = null;
         opponent = null;
+        nickname = null;
         proactive = false;
+        offlineGame = false;
     }
 
     public static boolean playing() {

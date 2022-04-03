@@ -10,7 +10,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Game {
-    GOBANG("五子棋", 0, 1);
+    GOBANG("五子棋", 0, 1, false);
 
     /**
      * 游戏名称
@@ -26,6 +26,11 @@ public enum Game {
      * 最大邀请玩家数
      */
     private int maxPlayers;
+
+    /**
+     * 是否必须要登录
+     */
+    private boolean requiredLogin;
 
     public static Game getGame(int index) {
         Game[] games = values();
