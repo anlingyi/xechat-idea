@@ -428,13 +428,14 @@ public class ZhiZhangAIService implements AIService {
                 Point point = new Point(i, j, type);
                 // 考虑对手的落子情况
                 Point foePoint = new Point(i, j, 3 - type);
-                if (checkSituation(point, ChessModel.LIANWU) || checkSituation(foePoint, ChessModel.LIANWU)) {
-                    // 优先检查连五的情况，如果该落子点可以形成连五，则结束循环，直接返回
+                if (checkSituation(point, ChessModel.LIANWU)) {
+                    // 优先检查自己连五的情况，如果该落子点可以形成连五，则结束循环，直接返回
                     highPriorityPointList.clear();
                     highPriorityPointList.add(point);
                     isEnd = true;
                     break;
                 }
+
                 if (checkHighPriorityPoint(point) || checkHighPriorityPoint(foePoint)) {
                     // 自己的高优先级落子点 ｜ 对手的高优先级落子点
                     highPriorityPointList.add(point);
@@ -504,6 +505,7 @@ public class ZhiZhangAIService implements AIService {
             // 棋型统计
             if (chessModel != null) {
                 switch (chessModel) {
+                    case LIANWU:
                     case HUOSI:
                         return true;
                     case HUOSAN:

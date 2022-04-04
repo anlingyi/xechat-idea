@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.game.gobang;
 
+import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.cache.DataCache;
@@ -244,6 +245,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 mainPanel.updateUI();
             });
             gameButtonPanel.add(restartButton);
+            gameButtonPanel.add(getOutputChessRecordButton());
         }
         gameButtonPanel.add(getExitButton());
 
@@ -350,6 +352,29 @@ public class Gobang extends AbstractGame<GobangDTO> {
             chessPanel.repaint();
         });
         return regretButton;
+    }
+
+    /**
+     * 输出棋谱按钮
+     *
+     * @return
+     */
+    private JButton getOutputChessRecordButton() {
+        JButton exitButton = new JButton("输出棋谱");
+        exitButton.addActionListener(e -> {
+            if (chessStack.isEmpty()) {
+                return;
+            }
+
+            ConsoleAction.showSimpleMsg("===== 棋谱输出 =====");
+            StringBuffer sb = new StringBuffer();
+            chessStack.forEach(p -> {
+                sb.append(p.x).append(",").append(p.y).append(",").append(p.type).append(";");
+            });
+            ConsoleAction.showSimpleMsg(sb.toString());
+            ConsoleAction.showSimpleMsg("===== END =====");
+        });
+        return exitButton;
     }
 
     /**
