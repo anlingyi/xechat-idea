@@ -413,6 +413,8 @@ public class ZhiZhangAIService implements AIService {
         List<Point> alternatePointList = new ArrayList<>();
 
         boolean isEnd = false;
+        // 局势危险等级 0.不危险 1.有危险 2.很危险
+        int dangerLevel = 0;
         for (int i = 0; i < this.cols; i++) {
             if (isEnd) {
                 break;
@@ -434,6 +436,42 @@ public class ZhiZhangAIService implements AIService {
                     highPriorityPointList.add(point);
                     isEnd = true;
                     break;
+                }
+
+                // 当前局势危险等级
+                int level = 0;
+                if (checkSituation(foePoint, ChessModel.LIANWU)) {
+                    // 对手连五了，局势很危险！！
+                    level = 2;
+                } else if (checkSituation(foePoint, ChessModel.HUOSI)) {
+                    // 对手活四了，局势有危险！
+                    level = 1;
+                }
+
+                if (level > 0) {
+                    // 当前局势存在危险
+                    if (dangerLevel < level) {
+                        // 危险升级
+                        dangerLevel = level;
+                        // 局势危险等级如果上升，则清空之前选择的高优先级节点，防止AI误入歧途
+                        highPriorityPointList.clear();
+                    }
+
+                    // 将此节点加入到高优先级队列
+                    highPriorityPointList.add(point);
+                } else {
+                    if (dangerLevel == 1) {
+                        // 局势如果有危险但又不是很危险，则检查自己冲四、活四的棋位
+                        if (checkSituation(point, ChessModel.CHONGSI, ChessModel.HUOSI)) {
+                            // 将此节点加入到高优先级队列
+                            highPriorityPointList.add(point);
+                        }
+                    }
+                }
+
+                if (dangerLevel > 0) {
+                    // 局势有危险，下面的检查逻辑不用走了
+                    continue;
                 }
 
                 if (checkHighPriorityPoint(point) || checkHighPriorityPoint(foePoint)) {
@@ -505,7 +543,6 @@ public class ZhiZhangAIService implements AIService {
             // 棋型统计
             if (chessModel != null) {
                 switch (chessModel) {
-                    case LIANWU:
                     case HUOSI:
                         return true;
                     case HUOSAN:

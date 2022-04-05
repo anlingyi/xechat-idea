@@ -87,9 +87,9 @@ public class Gobang extends AbstractGame<GobangDTO> {
     static {
         // AI级别初始化
         AI_LEVEL.put("AI·制杖", 1);
-        AI_LEVEL.put("AI·棋跪王", 2);
-        AI_LEVEL.put("AI·沟流儿", 4);
-        AI_LEVEL.put("AI·林必诚", 6);
+        AI_LEVEL.put("AI·棋跪王", 4);
+        AI_LEVEL.put("AI·沟流儿", 6);
+        AI_LEVEL.put("AI·林必诚", 8);
     }
 
     /**
