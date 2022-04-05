@@ -23,14 +23,22 @@ public class GameOverCommandHandler extends AbstractCommandHandler {
             return;
         }
 
-        String opponentId = null;
-        String opponent = GameAction.getOpponent();
-        if (opponent != null) {
-            opponentId = DataCache.userMap.get(opponent);
+        if (!GameAction.isOfflineGame()) {
+            String opponentId = null;
+            String opponent = GameAction.getOpponent();
+            if (opponent != null) {
+                opponentId = DataCache.userMap.get(opponent);
+            }
+
+            MessageAction.send(new GameDTO(opponentId, GameAction.getGame()), Action.GAME_OVER);
         }
-        MessageAction.send(new GameDTO(opponentId, GameAction.getGame()), Action.GAME_OVER);
 
         GameAction.over();
+    }
+
+    @Override
+    protected boolean check(String[] args) {
+        return true;
     }
 
 }

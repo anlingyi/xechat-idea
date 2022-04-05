@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.game.gobang;
 
+import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.cache.DataCache;
@@ -86,9 +87,9 @@ public class Gobang extends AbstractGame<GobangDTO> {
     static {
         // AI级别初始化
         AI_LEVEL.put("AI·制杖", 1);
-        AI_LEVEL.put("AI·棋跪王", 2);
-        AI_LEVEL.put("AI·沟流儿", 4);
-        AI_LEVEL.put("AI·林必诚", 6);
+        AI_LEVEL.put("AI·棋跪王", 4);
+        AI_LEVEL.put("AI·沟流儿", 6);
+        AI_LEVEL.put("AI·林必诚", 8);
     }
 
     /**
@@ -166,7 +167,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
     private void initChessPanel() {
         initValue();
-        player = DataCache.username;
+        player = GameAction.getNickname();
         if (GameAction.getOpponent() == null) {
             switch (gameMode) {
                 case HUMAN_VS_PC:
@@ -174,7 +175,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
                     if (type == 2) {
                         put = true;
                         player = nextPlayer;
-                        nextPlayer = DataCache.username;
+                        nextPlayer = GameAction.getNickname();
                     }
                     break;
                 case HUMAN_VS_HUMAN:
@@ -182,7 +183,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
                     if (type == 2) {
                         type = 1;
                         player = nextPlayer;
-                        nextPlayer = DataCache.username;
+                        nextPlayer = GameAction.getNickname();
                     }
                     break;
             }
@@ -244,6 +245,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 mainPanel.updateUI();
             });
             gameButtonPanel.add(restartButton);
+            gameButtonPanel.add(getOutputChessRecordButton());
         }
         gameButtonPanel.add(getExitButton());
 
@@ -251,7 +253,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
         mainPanel.add(centerPanel, BorderLayout.CENTER);
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
-        showTips(player + (DataCache.username.equals(player) ? "(你)" : "") + "先下手为强！");
+        showTips(player + (GameAction.getNickname().equals(player) ? "(你)" : "") + "先下手为强！");
 
         if (type == 2 && gameMode == GameMode.HUMAN_VS_PC) {
             aiPutChess(true);
@@ -272,7 +274,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
                     checkStatus(player);
 
                     if (!isGameOver) {
-                        showTips(nextPlayer + (DataCache.username.equals(nextPlayer) ? "(你)" : "") + "：思考中...");
+                        showTips(nextPlayer + (GameAction.getNickname().equals(nextPlayer) ? "(你)" : "") + "：思考中...");
                     } else if (!isOnlineMode) {
                         return;
                     }
@@ -320,7 +322,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 }
 
                 put = false;
-                showTips(nextPlayer + (DataCache.username.equals(nextPlayer) ? "(你)" : "") + "：思考中...");
+                showTips(nextPlayer + (GameAction.getNickname().equals(nextPlayer) ? "(你)" : "") + "：思考中...");
                 changePlayer();
             }
         }).start();
@@ -350,6 +352,29 @@ public class Gobang extends AbstractGame<GobangDTO> {
             chessPanel.repaint();
         });
         return regretButton;
+    }
+
+    /**
+     * 输出棋谱按钮
+     *
+     * @return
+     */
+    private JButton getOutputChessRecordButton() {
+        JButton exitButton = new JButton("输出棋谱");
+        exitButton.addActionListener(e -> {
+            if (chessStack.isEmpty()) {
+                return;
+            }
+
+            ConsoleAction.showSimpleMsg("===== 棋谱输出 =====");
+            StringBuffer sb = new StringBuffer();
+            chessStack.forEach(p -> {
+                sb.append(p.x).append(",").append(p.y).append(",").append(p.type).append(";");
+            });
+            ConsoleAction.showSimpleMsg(sb.toString());
+            ConsoleAction.showSimpleMsg("===== END =====");
+        });
+        return exitButton;
     }
 
     /**

@@ -1,6 +1,7 @@
 package cn.xeblog.server.action.handler;
 
 import cn.xeblog.commons.entity.HistoryMsgDTO;
+import cn.xeblog.commons.entity.LoginDTO;
 import cn.xeblog.commons.entity.Response;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.MessageType;
@@ -21,18 +22,18 @@ import java.util.List;
  * @date 2020/8/14
  */
 @DoAction(Action.LOGIN)
-public class LoginActionHandler implements ActionHandler<String> {
+public class LoginActionHandler implements ActionHandler<LoginDTO> {
 
     @Override
-    public void handle(ChannelHandlerContext ctx, String body) {
-        String username = body;
-        if (UserCache.existUsername(body)) {
+    public void handle(ChannelHandlerContext ctx, LoginDTO body) {
+        String username = body.getUsername();
+        if (UserCache.existUsername(username)) {
             ctx.writeAndFlush(ResponseBuilder.system("昵称重复！"));
             ctx.close();
             return;
         }
 
-        User user = new User(username, UserStatus.FISHING, ctx.channel());
+        User user = new User(username, body.getStatus(), ctx.channel());
         String id = ChannelAction.getId(ctx);
         UserCache.add(id, user);
 

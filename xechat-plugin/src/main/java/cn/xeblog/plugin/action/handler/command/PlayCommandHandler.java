@@ -41,6 +41,12 @@ public class PlayCommandHandler extends AbstractCommandHandler {
             return;
         }
 
+        boolean isOffline = !DataCache.isOnline;
+        if (game.isRequiredLogin() && isOffline) {
+            ConsoleAction.showLoginMsg();
+            return;
+        }
+
         if (GameAction.getOpponent() != null) {
             ConsoleAction.showSimpleMsg(GameAction.isProactive() ? "请等待【" + GameAction.getOpponent() + "】加入游戏！"
                     : "【" + GameAction.getOpponent() + "】已邀请你加入游戏，请确认！");
@@ -53,10 +59,22 @@ public class PlayCommandHandler extends AbstractCommandHandler {
                 return;
             }
 
-            MessageAction.send(new GameDTO(null, game), Action.GAME_INVITE);
+            String nickname = "玩家";
+            if (!isOffline) {
+                nickname = DataCache.username;
+                MessageAction.send(new GameDTO(null, game), Action.GAME_INVITE);
+            }
+
+            GameAction.setOfflineGame(isOffline);
+            GameAction.setNickname(nickname);
             GameAction.setGame(game);
             GameAction.create();
         } else {
+            if (isOffline) {
+                ConsoleAction.showLoginMsg();
+                return;
+            }
+
             if (DataCache.username.equals(args[1])) {
                 ConsoleAction.showSimpleMsg("自娱自乐？？？");
                 return;
@@ -69,6 +87,7 @@ public class PlayCommandHandler extends AbstractCommandHandler {
             }
 
             MessageAction.send(new GameDTO(id, game), Action.GAME_INVITE);
+            GameAction.setNickname(DataCache.username);
             GameAction.setOpponent(args[1]);
             GameAction.setGame(game);
             GameAction.setProactive(true);
@@ -92,6 +111,11 @@ public class PlayCommandHandler extends AbstractCommandHandler {
                 }
             }, 0, 1000);
         }
+    }
+
+    @Override
+    protected boolean check(String[] args) {
+        return true;
     }
 
 }

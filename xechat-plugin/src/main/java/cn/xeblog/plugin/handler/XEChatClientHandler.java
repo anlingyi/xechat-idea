@@ -1,6 +1,8 @@
 package cn.xeblog.plugin.handler;
 
+import cn.xeblog.commons.entity.LoginDTO;
 import cn.xeblog.commons.enums.Action;
+import cn.xeblog.commons.enums.UserStatus;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.plugin.action.MessageAction;
@@ -20,7 +22,12 @@ public class XEChatClientHandler extends SimpleChannelInboundHandler<Response> {
         DataCache.ctx = ctx;
         DataCache.isOnline = true;
         ConsoleAction.clean();
-        MessageAction.send(DataCache.username, Action.LOGIN);
+
+        UserStatus status = UserStatus.FISHING;
+        if (GameAction.playing()) {
+            status = UserStatus.PLAYING;
+        }
+        MessageAction.send(new LoginDTO(DataCache.username, status), Action.LOGIN);
     }
 
     @Override

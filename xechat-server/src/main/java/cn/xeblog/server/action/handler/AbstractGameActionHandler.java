@@ -13,7 +13,7 @@ import cn.xeblog.commons.entity.User;
  * @author anlingyi
  * @date 2020/8/14
  */
-public abstract class AbstractGameActionHandlerHandler<T extends GameDTO> extends AbstractActionHandler<T> {
+public abstract class AbstractGameActionHandler<T extends GameDTO> extends AbstractActionHandler<T> {
 
     @Override
     protected void process(User user, GameDTO body) {
