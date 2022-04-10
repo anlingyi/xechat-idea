@@ -44,6 +44,11 @@ public class ZhiZhangAIService implements AIService {
     private int rounds;
 
     /**
+     * 落子点上限
+     */
+    private int limit;
+
+    /**
      * 声明一个最大值
      */
     private static final int INFINITY = 999999999;
@@ -142,6 +147,7 @@ public class ZhiZhangAIService implements AIService {
             depth = 4;
         }
 
+        this.limit = 10;
         // 基于极大极小值搜索获取最佳棋位
         minimax(0, depth, -INFINITY, INFINITY);
 
@@ -399,18 +405,20 @@ public class ZhiZhangAIService implements AIService {
     /**
      * 启发式获取落子点位
      *
-     * @param type 当前走棋方 1.AI 2.玩家
+     * @param type 当前走棋方 1.黑棋 2.白棋
      * @return
      */
     private List<Point> getHeuristicPoints(int type) {
         // 落子点上限
-        int max = 10;
+        int max = this.limit;
         // 高优先级落子点
         List<Point> highPriorityPointList = new ArrayList<>();
         // 低优先级落子点
         List<Point> lowPriorityPointList = new ArrayList<>();
         // 候补落子点
         List<Point> alternatePointList = new ArrayList<>();
+        // 杀棋点
+        List<Point> killPointList = new ArrayList<>();
 
         boolean isEnd = false;
         // 局势危险等级 0.不危险 1.有危险 2.很危险
@@ -428,8 +436,6 @@ public class ZhiZhangAIService implements AIService {
 
                 // 考虑自己的落子情况
                 Point point = new Point(i, j, type);
-                // 考虑对手的落子情况
-                Point foePoint = new Point(i, j, 3 - type);
                 if (checkSituation(point, ChessModel.LIANWU)) {
                     // 优先检查自己连五的情况，如果该落子点可以形成连五，则结束循环，直接返回
                     highPriorityPointList.clear();
@@ -438,6 +444,18 @@ public class ZhiZhangAIService implements AIService {
                     break;
                 }
 
+                if (dangerLevel == 2) {
+                    // 局势很危险，只检查自己可以连五的落子点
+                    continue;
+                }
+
+                if (checkSituation(point, ChessModel.CHONGSI, ChessModel.HUOSI)) {
+                    // 将自己的冲四、活四落子点加入到杀棋点队列
+                    killPointList.add(point);
+                }
+
+                // 考虑对手的落子情况
+                Point foePoint = new Point(i, j, 3 - type);
                 // 当前局势危险等级
                 int level = 0;
                 if (checkSituation(foePoint, ChessModel.LIANWU)) {
@@ -459,14 +477,6 @@ public class ZhiZhangAIService implements AIService {
 
                     // 将此节点加入到高优先级队列
                     highPriorityPointList.add(point);
-                } else {
-                    if (dangerLevel == 1) {
-                        // 局势如果有危险但又不是很危险，则检查自己冲四、活四的棋位
-                        if (checkSituation(point, ChessModel.CHONGSI, ChessModel.HUOSI)) {
-                            // 将此节点加入到高优先级队列
-                            highPriorityPointList.add(point);
-                        }
-                    }
                 }
 
                 if (dangerLevel > 0) {
@@ -485,6 +495,11 @@ public class ZhiZhangAIService implements AIService {
                     alternatePointList.add(point);
                 }
             }
+        }
+
+        if (dangerLevel == 1 && !killPointList.isEmpty()) {
+            // 局势有危险且杀棋队列不为空，则将所有的杀棋点加入到高优先级队列
+            highPriorityPointList.addAll(killPointList);
         }
 
         if (highPriorityPointList.isEmpty()) {

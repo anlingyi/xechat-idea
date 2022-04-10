@@ -308,12 +308,6 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
     private void aiPutChess(boolean started) {
         new Thread(() -> {
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
             if (setChess(aiService.getPoint(chessData, new Point(currentX, currentY, type), started))) {
                 checkStatus(player);
 
@@ -349,6 +343,13 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 chessData[point.x][point.y] = 0;
             }
             this.currentChessTotal -= count;
+
+            if (!chessStack.isEmpty()) {
+                // 最后一个棋子高亮
+                Point lastPoint = chessStack.lastElement();
+                this.currentX = lastPoint.x;
+                this.currentY = lastPoint.y;
+            }
             chessPanel.repaint();
         });
         return regretButton;
@@ -449,6 +450,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
             return;
         }
 
+        this.aiService = null;
         mainPanel.setLayout(null);
         mainPanel.setPreferredSize(new Dimension(150, 400));
 
