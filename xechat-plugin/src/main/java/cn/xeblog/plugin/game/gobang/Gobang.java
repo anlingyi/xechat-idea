@@ -308,12 +308,6 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
     private void aiPutChess(boolean started) {
         new Thread(() -> {
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
             if (setChess(aiService.getPoint(chessData, new Point(currentX, currentY, type), started))) {
                 checkStatus(player);
 
