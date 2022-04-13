@@ -127,4 +127,8 @@ public class GameAction {
     public static boolean isOver() {
         return game == null;
     }
+
+    public static AbstractGame getAction() {
+        return action;
+    }
 }
