@@ -34,19 +34,16 @@ public class ZhiZhangAIService implements AIService {
      * AI最佳下棋点位
      */
     private Point bestPoint;
-    /**
-     * AI级别
-     */
-    private int level;
+
     /**
      * 当前回合数
      */
     private int rounds;
 
     /**
-     * 落子点上限
+     * AI配置
      */
-    private int limit;
+    private AIConfig aiConfig;
 
     /**
      * 声明一个最大值
@@ -114,23 +111,23 @@ public class ZhiZhangAIService implements AIService {
     }
 
     public ZhiZhangAIService() {
-        this(6);
+        this(new AIConfig(6, 10));
     }
 
-    public ZhiZhangAIService(int level) {
-        this.level = level;
+    public ZhiZhangAIService(AIConfig aiConfig) {
+        this.aiConfig = aiConfig;
     }
 
     @Override
-    public Point getPoint(int[][] chessData, Point point, boolean started) {
+    public Point getPoint(int[][] chessData, Point point) {
         initChessData(chessData);
         this.ai = 3 - point.type;
         this.bestPoint = null;
         // AI是黑棋则偏进攻，是白棋则偏防守
         this.attack = this.ai == 1 ? 1.5f : 1.0f;
-        int depth = this.level;
+        int depth = this.aiConfig.getDepth();
 
-        if (started) {
+        if (this.rounds == 1 && this.ai == 1) {
             // AI先下，首子天元
             int centerX = this.cols / 2;
             int centerY = this.rows / 2;
@@ -138,16 +135,15 @@ public class ZhiZhangAIService implements AIService {
         }
 
         // 基于普通方式获取最佳棋位
-        if (this.level < 2) {
+        if (this.aiConfig.getDepth() < 2) {
             return getBestPoint(point);
         }
 
-        if (this.level > 4 && this.rounds < 4) {
+        if (this.aiConfig.getDepth() > 4 && this.rounds < 4) {
             // 当AI级别大于4时，将前三个回合的搜索深度设置为4
             depth = 4;
         }
 
-        this.limit = 10;
         // 基于极大极小值搜索获取最佳棋位
         minimax(0, depth, -INFINITY, INFINITY);
 
@@ -410,7 +406,7 @@ public class ZhiZhangAIService implements AIService {
      */
     private List<Point> getHeuristicPoints(int type) {
         // 落子点上限
-        int max = this.limit;
+        int max = this.aiConfig.getMaxNodes();
         // 高优先级落子点
         List<Point> highPriorityPointList = new ArrayList<>();
         // 低优先级落子点

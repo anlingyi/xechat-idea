@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.game.gobang;
 
+import cn.hutool.core.util.StrUtil;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.plugin.action.MessageAction;
@@ -10,11 +11,16 @@ import cn.xeblog.commons.enums.Action;
 import cn.xeblog.plugin.enums.Command;
 import cn.xeblog.plugin.game.AbstractGame;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.ui.components.JBScrollPane;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
@@ -80,6 +86,10 @@ public class Gobang extends AbstractGame<GobangDTO> {
     private int aiLevel;
     // 记录落子数据
     private Stack<Point> chessStack;
+    // 最后一个落子点
+    private Point lastPoint;
+    // AI配置
+    private AIService.AIConfig aiConfig;
 
     // AI级别
     private static final Map<String, Integer> AI_LEVEL = new LinkedHashMap<>();
@@ -96,6 +106,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
      * 初始化游戏数据
      */
     private void initValue() {
+        lastPoint = null;
         chessData = new int[COLS][ROWS];
         currentChessTotal = 0;
         isGameOver = false;
@@ -113,7 +124,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
     private enum GameMode {
         HUMAN_VS_PC("人类VS电脑"),
         HUMAN_VS_HUMAN("人类VS人类"),
-        ONLINE("在线PK");
+        ONLINE("在线PK"),
+        DEBUG("调试模式");
 
         private String name;
 
@@ -147,13 +159,18 @@ public class Gobang extends AbstractGame<GobangDTO> {
     }
 
     private void checkStatus(String username) {
+        boolean isDebug = gameMode == GameMode.DEBUG;
         boolean flag = true;
         switch (status) {
             case 1:
-                showTips("游戏结束：" + username + "这个菜鸡赢了！");
+                if (!isDebug) {
+                    showTips("游戏结束：" + username + "这个菜鸡赢了！");
+                }
                 break;
             case 2:
-                showTips("游戏结束：平局~ 卧槽？？？");
+                if (!isDebug) {
+                    showTips("游戏结束：平局~ 卧槽？？？");
+                }
                 break;
             case 0:
                 flag = false;
@@ -186,6 +203,11 @@ public class Gobang extends AbstractGame<GobangDTO> {
                         nextPlayer = GameAction.getNickname();
                     }
                     break;
+                case DEBUG:
+                    type = 1;
+                    aiLevel = 6;
+                    aiService = createAI();
+                    break;
             }
         } else {
             nextPlayer = GameAction.getOpponent();
@@ -207,7 +229,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
             }
         };
 
-        Dimension mainDimension = new Dimension(width + 50, height + 50);
+        Dimension mainDimension = new Dimension(width + 120, height + 50);
 
         mainPanel.setLayout(new BorderLayout());
         mainPanel.setPreferredSize(mainDimension);
@@ -227,6 +249,12 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
         JPanel centerPanel = new JPanel();
         centerPanel.add(chessPanel);
+
+        if (gameMode == GameMode.DEBUG) {
+            JPanel rightPanel = new JPanel();
+            rightPanel.add(getConfigPanel());
+            mainPanel.add(rightPanel, BorderLayout.EAST);
+        }
 
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new BorderLayout());
@@ -253,10 +281,15 @@ public class Gobang extends AbstractGame<GobangDTO> {
         mainPanel.add(centerPanel, BorderLayout.CENTER);
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
-        showTips(player + (GameAction.getNickname().equals(player) ? "(你)" : "") + "先下手为强！");
+        boolean isDebug = gameMode == GameMode.DEBUG;
+        if (isDebug) {
+            showTips("调试模式");
+        } else {
+            showTips(player + (GameAction.getNickname().equals(player) ? "(你)" : "") + "先下手为强！");
+        }
 
         if (type == 2 && gameMode == GameMode.HUMAN_VS_PC) {
-            aiPutChess(true);
+            aiPutChess();
         }
 
         chessPanel.addMouseListener(new MouseAdapter() {
@@ -268,28 +301,30 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 }
 
                 if (putChess(e.getX(), e.getY(), type)) {
-                    put = true;
-                    boolean isOnlineMode = gameMode == GameMode.ONLINE;
+                    if (!isDebug) {
+                        put = true;
+                        boolean isOnlineMode = gameMode == GameMode.ONLINE;
+                        if (!isGameOver) {
+                            showTips(nextPlayer + (GameAction.getNickname().equals(nextPlayer) ? "(你)" : "") + "：思考中...");
+                        } else if (!isOnlineMode) {
+                            return;
+                        }
+
+                        if (!isOnlineMode || (isOnlineMode && type == 2)) {
+                            changePlayer();
+                        }
+                    }
 
                     checkStatus(player);
 
-                    if (!isGameOver) {
-                        showTips(nextPlayer + (GameAction.getNickname().equals(nextPlayer) ? "(你)" : "") + "：思考中...");
-                    } else if (!isOnlineMode) {
-                        return;
-                    }
-
-                    if (!isOnlineMode || (isOnlineMode && type == 2)) {
-                        changePlayer();
-                    }
-
                     switch (gameMode) {
                         case ONLINE:
-                            send(new Point(currentX, currentY, type));
+                            send(lastPoint);
                             break;
                         case HUMAN_VS_PC:
-                            aiPutChess(false);
+                            aiPutChess();
                             break;
+                        case DEBUG:
                         case HUMAN_VS_HUMAN:
                             type = 3 - type;
                             put = false;
@@ -306,18 +341,25 @@ public class Gobang extends AbstractGame<GobangDTO> {
         nextPlayer = tempName;
     }
 
-    private void aiPutChess(boolean started) {
+    private void aiPutChess() {
+        boolean isDebug = gameMode == GameMode.DEBUG;
         new Thread(() -> {
-            if (setChess(aiService.getPoint(chessData, new Point(currentX, currentY, type), started))) {
-                checkStatus(player);
+            if (setChess(aiService.getPoint(chessData, lastPoint == null ? new Point(-1, -1, type) : lastPoint))) {
+                if (isDebug) {
+                    showTips("调试模式");
+                    type = 3 - lastPoint.type;
+                }
 
+                checkStatus(player);
                 if (isGameOver) {
                     return;
                 }
 
                 put = false;
-                showTips(nextPlayer + (GameAction.getNickname().equals(nextPlayer) ? "(你)" : "") + "：思考中...");
-                changePlayer();
+                if (!isDebug) {
+                    showTips(nextPlayer + (GameAction.getNickname().equals(nextPlayer) ? "(你)" : "") + "：思考中...");
+                    changePlayer();
+                }
             }
         }).start();
     }
@@ -329,12 +371,14 @@ public class Gobang extends AbstractGame<GobangDTO> {
     }
 
     private JButton getRegretButton() {
+        boolean isDebug = gameMode == GameMode.DEBUG;
+
         JButton regretButton = new JButton("悔棋");
         regretButton.setEnabled(false);
         regretButton.addActionListener(e -> {
             // 默认一次后退2步棋
             int count = 2;
-            if (isGameOver || chessStack.size() < count) {
+            if (!isDebug && isGameOver || chessStack.size() < count) {
                 return;
             }
 
@@ -344,14 +388,23 @@ public class Gobang extends AbstractGame<GobangDTO> {
             }
             this.currentChessTotal -= count;
 
-            if (!chessStack.isEmpty()) {
+            if (chessStack.isEmpty()) {
+                type = 1;
+            } else {
                 // 最后一个棋子高亮
-                Point lastPoint = chessStack.lastElement();
-                this.currentX = lastPoint.x;
-                this.currentY = lastPoint.y;
+                lastPoint = chessStack.lastElement();
+                type = 3 - lastPoint.type;
             }
+            if (isGameOver && isDebug) {
+                isGameOver = false;
+                put = false;
+                status = 0;
+                chessHighlight = null;
+            }
+
             chessPanel.repaint();
         });
+
         return regretButton;
     }
 
@@ -376,6 +429,169 @@ public class Gobang extends AbstractGame<GobangDTO> {
             ConsoleAction.showSimpleMsg("===== END =====");
         });
         return exitButton;
+    }
+
+    /**
+     * 获取配置面板
+     *
+     * @return
+     */
+    private JPanel getConfigPanel() {
+        JPanel configPanel = new JPanel();
+        configPanel.setPreferredSize(new Dimension(80, 400));
+
+        JLabel label1 = new JLabel("搜索深度：");
+        label1.setFont(new Font("", 1, 13));
+        configPanel.add(label1);
+
+        JTextField searchDepthInput = new JTextField();
+        searchDepthInput.setText(String.valueOf(aiConfig.getDepth()));
+        searchDepthInput.setColumns(5);
+        searchDepthInput.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                int keyChar = e.getKeyChar();
+                if (keyChar < KeyEvent.VK_0 || keyChar > KeyEvent.VK_9) {
+                    e.consume();
+                }
+            }
+        });
+        configPanel.add(searchDepthInput);
+
+        JLabel label2 = new JLabel("启发节点数：");
+        label2.setFont(new Font("", 1, 13));
+        configPanel.add(label2);
+
+        JTextField maxNodesInput = new JTextField();
+        maxNodesInput.setText(String.valueOf(aiConfig.getMaxNodes()));
+        maxNodesInput.setColumns(5);
+        maxNodesInput.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                int keyChar = e.getKeyChar();
+                if (keyChar < KeyEvent.VK_0 || keyChar > KeyEvent.VK_9) {
+                    e.consume();
+                }
+            }
+        });
+        configPanel.add(maxNodesInput);
+
+        JButton inputChessRecordButton = new JButton("输入棋谱");
+        inputChessRecordButton.addActionListener(e -> {
+            new InputChessRecordDialog().show();
+        });
+        configPanel.add(inputChessRecordButton);
+
+        JButton aiTestButton = new JButton("AI落子");
+        aiTestButton.addActionListener(e -> {
+            if (put || isGameOver) {
+                return;
+            }
+
+            put = true;
+            if (lastPoint == null) {
+                type = 2;
+            }
+            showTips("AI思考中...");
+            aiConfig.setDepth(Math.min(10, Integer.parseInt(searchDepthInput.getText())));
+            aiConfig.setMaxNodes(Math.min(30, Integer.parseInt(maxNodesInput.getText())));
+            searchDepthInput.setText(String.valueOf(aiConfig.getDepth()));
+            maxNodesInput.setText(String.valueOf(aiConfig.getMaxNodes()));
+            aiPutChess();
+        });
+        configPanel.add(aiTestButton);
+
+        return configPanel;
+    }
+
+    private static class InputChessRecordDialog extends DialogWrapper {
+
+        private JPanel main;
+        private JTextArea chessRecordText;
+
+        InputChessRecordDialog() {
+            super(true);
+
+            setTitle("输入棋谱");
+            setOKActionEnabled(true);
+            setResizable(false);
+
+            init();
+        }
+
+        @Override
+        protected @Nullable JComponent createCenterPanel() {
+            main = new JPanel();
+            main.setPreferredSize(new Dimension(200, 200));
+            chessRecordText = new JTextArea();
+            chessRecordText.setColumns(20);
+            chessRecordText.setRows(10);
+            chessRecordText.setLineWrap(true);
+            JBScrollPane scrollPane = new JBScrollPane(chessRecordText);
+            scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+            main.add(scrollPane);
+            return main;
+        }
+
+        @Override
+        protected void doOKAction() {
+            String text = chessRecordText.getText();
+            if (StrUtil.isNotBlank(text)) {
+                Gobang gobang = (Gobang) GameAction.getAction();
+                gobang.inputChessRecode(text);
+            }
+
+            super.doOKAction();
+        }
+    }
+
+    /**
+     * 输入棋谱
+     *
+     * @param chessRecord
+     */
+    public void inputChessRecode(String chessRecord) {
+        if (StrUtil.isBlank(chessRecord)) {
+            return;
+        }
+
+        Point newLastPoint = null;
+        int[][] newChessData = new int[15][15];
+        Stack newChessStack = new Stack();
+        int newChessTotal = 0;
+        try {
+            String[] chessRecords = chessRecord.split(";");
+            int len = chessRecords.length;
+            for (int i = 0; i < len; i++) {
+                String[] point = chessRecords[i].split(",");
+                int x = Integer.parseInt(point[0]);
+                int y = Integer.parseInt(point[1]);
+                int type = Integer.parseInt(point[2]);
+                newChessData[x][y] = type;
+                Point p = new Point(x, y, type);
+                newChessStack.push(p);
+                newChessTotal++;
+
+                if (i == len - 1) {
+                    newLastPoint = p;
+                }
+            }
+
+            chessData = newChessData;
+            currentChessTotal = newChessTotal;
+            chessStack = newChessStack;
+            lastPoint = newLastPoint;
+            type = 3 - lastPoint.type;
+            chessHighlight = null;
+            status = 0;
+            isGameOver = false;
+
+            chessPanel.repaint();
+            checkWinner(lastPoint);
+            checkStatus(null);
+        } catch (Exception e) {
+            ConsoleAction.showSimpleMsg("输入的棋谱数据无法识别！");
+        }
     }
 
     /**
@@ -434,7 +650,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
                 g2.fillOval(chessX, chessY, chessSize, chessSize);
 
-                if (isHighlight(i, j) || i == currentX && j == currentY) {
+                if (isHighlight(i, j) || i == lastPoint.x && j == lastPoint.y) {
                     // 当前棋子高亮
                     g2.setColor(Color.RED);
                     g2.drawOval(chessX, chessY, chessSize, chessSize);
@@ -467,13 +683,17 @@ public class Gobang extends AbstractGame<GobangDTO> {
         humanVsPCRadio.setActionCommand(humanVsPCRadio.getText());
         JRadioButton humanVsHumanRadio = new JRadioButton(GameMode.HUMAN_VS_HUMAN.getName(), false);
         humanVsHumanRadio.setActionCommand(humanVsHumanRadio.getText());
+        JRadioButton debugRadio = new JRadioButton(GameMode.DEBUG.getName(), false);
+        debugRadio.setActionCommand(debugRadio.getText());
 
         ButtonGroup modeRadioGroup = new ButtonGroup();
         modeRadioGroup.add(humanVsPCRadio);
         modeRadioGroup.add(humanVsHumanRadio);
+        modeRadioGroup.add(debugRadio);
 
         startPanel.add(humanVsPCRadio);
         startPanel.add(humanVsHumanRadio);
+        startPanel.add(debugRadio);
 
         JLabel label4 = new JLabel("选择AI：");
         label4.setFont(new Font("", 1, 13));
@@ -553,9 +773,6 @@ public class Gobang extends AbstractGame<GobangDTO> {
         super.start();
     }
 
-    private int currentX;
-    private int currentY;
-
     public boolean putChess(int x, int y, int type) {
         if (isGameOver) {
             return false;
@@ -590,14 +807,14 @@ public class Gobang extends AbstractGame<GobangDTO> {
             return false;
         }
 
-        currentX = point.x;
-        currentY = point.y;
+        lastPoint = point;
         currentChessTotal++;
         chessData[point.x][point.y] = point.type;
         chessStack.push(point);
 
         if (regretButton != null) {
-            regretButton.setEnabled(currentChessTotal > 1 && (gameMode == GameMode.HUMAN_VS_HUMAN || point.type != this.type));
+            regretButton.setEnabled(currentChessTotal > 1
+                    && (gameMode == GameMode.DEBUG || gameMode == GameMode.HUMAN_VS_HUMAN || point.type != this.type));
             regretButton.requestFocus();
         }
 
@@ -835,6 +1052,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
     }
 
     private AIService createAI() {
-        return new ZhiZhangAIService(this.aiLevel);
+        aiConfig = new AIService.AIConfig(aiLevel, 10);
+        return new ZhiZhangAIService(aiConfig);
     }
+
 }
