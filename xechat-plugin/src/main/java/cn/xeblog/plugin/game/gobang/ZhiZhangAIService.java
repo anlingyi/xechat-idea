@@ -1,6 +1,8 @@
 package cn.xeblog.plugin.game.gobang;
 
+import cn.xeblog.plugin.action.ConsoleAction;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.util.*;
 
@@ -44,6 +46,11 @@ public class ZhiZhangAIService implements AIService {
      * AI配置
      */
     private AIConfig aiConfig;
+
+    /**
+     * 统计
+     */
+    private Statistics statistics;
 
     /**
      * 声明一个最大值
@@ -110,8 +117,47 @@ public class ZhiZhangAIService implements AIService {
         String[] values;
     }
 
+    /**
+     * 统计
+     */
+    @Data
+    private class Statistics {
+        /**
+         * 搜索深度
+         */
+        private int depth;
+        /**
+         * 最佳点位
+         */
+        private Point point;
+        /**
+         * 分数
+         */
+        private int score;
+        /**
+         * 耗时（秒）
+         */
+        private double time;
+        /**
+         * 搜索节点数
+         */
+        private int nodes;
+        /**
+         * 剪枝数
+         */
+        private int cuts;
+
+        public void incrNodes() {
+            this.nodes++;
+        }
+
+        public void incrCuts() {
+            this.cuts++;
+        }
+    }
+
     public ZhiZhangAIService() {
-        this(new AIConfig(6, 10));
+        this(new AIConfig(6, 10, false));
     }
 
     public ZhiZhangAIService(AIConfig aiConfig) {
@@ -121,6 +167,7 @@ public class ZhiZhangAIService implements AIService {
     @Override
     public Point getPoint(int[][] chessData, Point point) {
         initChessData(chessData);
+        this.statistics = new Statistics();
         this.ai = 3 - point.type;
         this.bestPoint = null;
         // AI是黑棋则偏进攻，是白棋则偏防守
@@ -144,8 +191,23 @@ public class ZhiZhangAIService implements AIService {
             depth = 4;
         }
 
+        long startTime = System.currentTimeMillis();
         // 基于极大极小值搜索获取最佳棋位
         minimax(0, depth, -INFINITY, INFINITY);
+        long endTime = System.currentTimeMillis();
+        statistics.setTime((endTime - startTime) / 1000.00d);
+        statistics.setDepth(depth);
+
+        if (aiConfig.isDebug()) {
+            ConsoleAction.showSimpleMsg("=================AI统计===============");
+            ConsoleAction.showSimpleMsg("搜索深度：" + statistics.getDepth());
+            ConsoleAction.showSimpleMsg("搜索节点数：" + statistics.getNodes());
+            ConsoleAction.showSimpleMsg("发生剪枝数：" + statistics.getCuts());
+            ConsoleAction.showSimpleMsg("最佳落子点：" + statistics.getPoint());
+            ConsoleAction.showSimpleMsg("得分：" + statistics.getScore());
+            ConsoleAction.showSimpleMsg("耗时：" + statistics.getTime() + "s");
+            ConsoleAction.showSimpleMsg("=====================================");
+        }
 
         return this.bestPoint;
     }
@@ -338,6 +400,8 @@ public class ZhiZhangAIService implements AIService {
         // 记录选择的最好落子点
         List<Point> bestPointList = new ArrayList<>();
         for (Point point : pointList) {
+            statistics.incrNodes();
+
             int score;
             if (checkSituation(point, ChessModel.LIANWU)) {
                 // 落子到这里就赢了，后面的节点不用再评估了
@@ -386,6 +450,7 @@ public class ZhiZhangAIService implements AIService {
                  因为对手要选择分数小于beta的分支，AI要从对手给的分支里面选最大的分支，这个最大的分支要和当前的分支(alpha)做比较，
                  现在alpha都比beta大了，下面搜索给出的分支也都是小于alpha的，所以搜索下去没有意义，剪掉提高搜索效率。
                  */
+                statistics.incrCuts();
                 break;
             }
         }
@@ -393,6 +458,8 @@ public class ZhiZhangAIService implements AIService {
         if (isRoot) {
             // 如果有多个落子点，则通过getBestPoint方法选择一个最好的
             this.bestPoint = bestPointList.size() > 1 ? getBestPoint(bestPointList) : bestPointList.get(0);
+            statistics.setPoint(this.bestPoint);
+            statistics.setScore(alpha);
         }
 
         return isAI ? alpha : beta;
