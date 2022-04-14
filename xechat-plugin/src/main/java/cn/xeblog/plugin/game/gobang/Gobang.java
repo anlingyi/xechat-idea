@@ -301,6 +301,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 }
 
                 if (putChess(e.getX(), e.getY(), type)) {
+                    checkStatus(player);
+
                     if (!isDebug) {
                         put = true;
                         boolean isOnlineMode = gameMode == GameMode.ONLINE;
@@ -314,8 +316,6 @@ public class Gobang extends AbstractGame<GobangDTO> {
                             changePlayer();
                         }
                     }
-
-                    checkStatus(player);
 
                     switch (gameMode) {
                         case ONLINE:
