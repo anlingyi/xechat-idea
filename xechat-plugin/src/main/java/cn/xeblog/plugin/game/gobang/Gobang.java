@@ -703,7 +703,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
         for (String ai : AI_LEVEL.keySet()) {
             chessAIBox.addItem(ai);
         }
-        chessAIBox.setSelectedIndex(0);
+        chessAIBox.setSelectedIndex(2);
         startPanel.add(chessAIBox);
 
         JLabel label2 = new JLabel("选择棋子：");
