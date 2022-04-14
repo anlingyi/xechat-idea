@@ -351,11 +351,11 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 }
 
                 checkStatus(player);
+                put = false;
                 if (isGameOver) {
                     return;
                 }
 
-                put = false;
                 if (!isDebug) {
                     showTips(nextPlayer + (GameAction.getNickname().equals(nextPlayer) ? "(你)" : "") + "：思考中...");
                     changePlayer();
@@ -378,7 +378,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
         regretButton.addActionListener(e -> {
             // 默认一次后退2步棋
             int count = 2;
-            if (!isDebug && isGameOver || chessStack.size() < count) {
+            if (put || (!isDebug && isGameOver || chessStack.size() < count)) {
                 return;
             }
 
@@ -1052,7 +1052,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
     }
 
     private AIService createAI() {
-        aiConfig = new AIService.AIConfig(aiLevel, 10);
+        aiConfig = new AIService.AIConfig(aiLevel, 10, gameMode == GameMode.DEBUG);
         return new ZhiZhangAIService(aiConfig);
     }
 

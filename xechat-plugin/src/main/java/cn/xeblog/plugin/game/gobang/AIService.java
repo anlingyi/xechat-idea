@@ -34,6 +34,10 @@ public interface AIService {
          * 最大启发式节点数
          */
         private int maxNodes;
+        /**
+         * debug
+         */
+        private boolean debug;
     }
 
 }
