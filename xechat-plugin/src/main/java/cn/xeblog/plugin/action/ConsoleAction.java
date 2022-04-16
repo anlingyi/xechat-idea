@@ -64,9 +64,7 @@ public class ConsoleAction {
     }
 
     public synchronized static void gotoConsoleLow() {
-        JScrollBar scrollBar = consoleScroll.getVerticalScrollBar();
-        scrollBar.setValue(scrollBar.getMaximum());
-        consoleScroll.updateUI();
+        console.setCaretPosition(console.getDocument().getLength());
     }
 
     public static void showErrorMsg() {
