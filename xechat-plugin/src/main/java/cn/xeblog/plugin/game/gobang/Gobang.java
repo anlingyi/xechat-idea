@@ -585,6 +585,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
             chessHighlight = null;
             status = 0;
             isGameOver = false;
+            regretButton.setEnabled(true);
 
             chessPanel.repaint();
             checkWinner(lastPoint);

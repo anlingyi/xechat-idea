@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.game.gobang;
 
+import cn.hutool.core.collection.ListUtil;
 import cn.xeblog.plugin.action.ConsoleAction;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -88,8 +89,7 @@ public class ZhiZhangAIService implements AIService {
         /**
          * 冲四
          */
-        CHONGSI(8000, new String[]{"0111010", "0101110", "0110110", "110111", "101111", "111011", "110111",
-                "011112", "211110", "10111", "11011", "11101", "111012", "211101", "110112", "101112", "211011"}),
+        CHONGSI(8000, new String[]{"11110", "01111", "10111", "11011", "11101"}),
         /**
          * 眠三
          */
@@ -146,6 +146,10 @@ public class ZhiZhangAIService implements AIService {
          * 剪枝数
          */
         private int cuts;
+        /**
+         * 算杀命中 0.未命中 1.vcf 2.vct
+         */
+        private int vcx;
 
         public void incrNodes() {
             this.nodes++;
@@ -192,21 +196,50 @@ public class ZhiZhangAIService implements AIService {
         }
 
         long startTime = System.currentTimeMillis();
-        // 基于极大极小值搜索获取最佳棋位
-        minimax(0, depth, -INFINITY, INFINITY);
-        long endTime = System.currentTimeMillis();
-        statistics.setTime((endTime - startTime) / 1000.00d);
-        statistics.setDepth(depth);
+        int maxDepth = 12;
+        if (this.bestPoint == null && this.rounds > 3) {
+            this.bestPoint = deepening(this.ai, 2, maxDepth, false);
+        }
+        if (this.rounds > 4) {
+            this.bestPoint = deepening(this.ai, 2, maxDepth, true);
+        }
+//        if (this.bestPoint == null && this.rounds > 3) {
+//            this.ai = 3 - this.ai;
+//            this.bestPoint = deepening(this.ai, 2, maxDepth, false);
+//            this.ai = 3 - this.ai;
+//            if (this.bestPoint != null) {
+//                this.bestPoint.type = this.ai;
+//            }
+//        }
+//        if (this.bestPoint == null) {
+//            this.ai = 3 - this.ai;
+//            this.bestPoint = deepening(this.ai, 2, maxDepth, true);
+//            this.ai = 3 - this.ai;
+//            if (this.bestPoint != null) {
+//                this.bestPoint.type = this.ai;
+//            }
+//        }
 
-        if (aiConfig.isDebug()) {
-            ConsoleAction.showSimpleMsg("=================AI统计===============");
-            ConsoleAction.showSimpleMsg("搜索深度：" + statistics.getDepth());
-            ConsoleAction.showSimpleMsg("搜索节点数：" + statistics.getNodes());
-            ConsoleAction.showSimpleMsg("发生剪枝数：" + statistics.getCuts());
-            ConsoleAction.showSimpleMsg("最佳落子点：" + statistics.getPoint());
-            ConsoleAction.showSimpleMsg("得分：" + statistics.getScore());
-            ConsoleAction.showSimpleMsg("耗时：" + statistics.getTime() + "s");
-            ConsoleAction.showSimpleMsg("=====================================");
+        if (this.bestPoint == null) {
+            this.statistics = new Statistics();
+            this.statistics.setDepth(depth);
+            // 基于极大极小值搜索获取最佳棋位
+            minimax(0, depth, -INFINITY, INFINITY);
+        }
+
+        long endTime = System.currentTimeMillis();
+        this.statistics.setTime((endTime - startTime) / 1000.00d);
+
+        if (this.aiConfig.isDebug()) {
+            ConsoleAction.showSimpleMsg("============AI统计[第" + this.rounds + "回合]==========");
+            ConsoleAction.showSimpleMsg("搜索深度：" + this.statistics.getDepth());
+            ConsoleAction.showSimpleMsg("搜索节点数：" + this.statistics.getNodes());
+            ConsoleAction.showSimpleMsg("发生剪枝数：" + this.statistics.getCuts());
+            ConsoleAction.showSimpleMsg("算杀命中：" + (this.statistics.getVcx() == 1 ? "VCF" : this.statistics.getVcx() == 2 ? "VCT" : "未命中"));
+            ConsoleAction.showSimpleMsg("最佳落子点：" + this.statistics.getPoint());
+            ConsoleAction.showSimpleMsg("得分：" + this.statistics.getScore());
+            ConsoleAction.showSimpleMsg("耗时：" + this.statistics.getTime() + "s");
+            ConsoleAction.showSimpleMsg("==================================");
         }
 
         return this.bestPoint;
@@ -234,6 +267,198 @@ public class ZhiZhangAIService implements AIService {
         }
 
         this.rounds = chessTotal / 2 + 1;
+    }
+
+    /**
+     * 迭代加深VCX
+     *
+     * @param maxDepth 最大深度
+     * @param isVcf    true:VCF false:VCT
+     * @return
+     */
+    private Point deepeningVcx(int maxDepth, boolean isVcf) {
+        Point point = deepening(this.ai, 2, maxDepth, isVcf);
+        if (point == null) {
+            this.ai = 3 - this.ai;
+            point = deepening(this.ai, 2, maxDepth, isVcf);
+            this.ai = 3 - this.ai;
+            if (point != null) {
+                point.type = this.ai;
+            }
+        }
+        return point;
+    }
+
+    private Stack<Point> path;
+
+    /**
+     * 迭代加深算杀搜索
+     *
+     * @param type     当前走棋方 1.AI 2.玩家
+     * @param depth    当前搜索深度
+     * @param maxDepth 最大搜索深度
+     * @param isVcf    true:VCF false:VCT
+     * @return
+     */
+    private Point deepening(int type, int depth, int maxDepth, boolean isVcf) {
+        Point point = null;
+        for (; depth <= maxDepth; depth += 2) {
+            path = new Stack<>();
+            point = vcx(type, depth, isVcf);
+            if (point != null) {
+                // 算杀成功
+                this.statistics.setDepth(depth);
+                this.statistics.setPoint(point);
+                this.statistics.setVcx(isVcf ? 1 : 2);
+                this.statistics.setScore(point.score);
+                break;
+            }
+        }
+        return point;
+    }
+
+    /**
+     * 算杀（VCF、VCT）
+     *
+     * @param type  当前走棋方 1.AI 2.玩家
+     * @param depth 搜索深度
+     * @param isVcf true:VCF false:VCT
+     * @return
+     */
+    private Point vcx(int type, int depth, boolean isVcf) {
+        if (depth == 0) {
+            // 算杀失败
+            return null;
+        }
+
+        boolean isAI = type == this.ai;
+        List<Point> pointList = getVcxPoints(type, isVcf);
+        for (Point point : pointList) {
+            this.statistics.incrNodes();
+
+            if (checkSituation(point, ChessModel.LIANWU, ChessModel.HUOSI)) {
+                // AI连五、活四，算杀成功
+                if (isAI) {
+                    path.push(point);
+                    System.out.println("=====VCX路径输出=====");
+                    path.forEach(p -> {
+                        System.out.print(p.x + "," + p.y + "," + p.type + ";");
+                    });
+                    System.out.println("\n====================");
+                    path.pop();
+                }
+                return isAI ? point : null;
+            }
+
+            path.push(point);
+            putChess(point);
+            Point result = vcx(3 - type, depth - 1, isVcf);
+            revokeChess(point);
+            path.pop();
+
+            if (result != null) {
+                // 有结果就表示算杀成功，返回当前节点
+                return point;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * 获取算杀落子点
+     *
+     * @param type  当前走棋方 1.黑棋 2.白棋
+     * @param isVcf 是否是连续冲四
+     * @return
+     */
+    private List<Point> getVcxPoints(int type, boolean isVcf) {
+        boolean isAI = type == this.ai;
+        // 进攻点列表
+        List<Point> attackPointList = new ArrayList<>();
+        // 防守点列表
+        List<Point> defensePointList = new ArrayList<>();
+        // VCT列表
+        List<Point> vctPointList = new ArrayList<>();
+        // VCF列表
+        List<Point> vcfPointList = new ArrayList<>();
+        // 局势是否危险
+        boolean isDanger = false;
+        for (int i = 0; i < this.cols; i++) {
+            for (int j = 0; j < this.rows; j++) {
+                if (this.chessData[i][j] != 0) {
+                    // 该处已有棋子，跳过
+                    continue;
+                }
+
+                // 考虑自己的落子情况
+                Point point = new Point(i, j, type);
+                if (checkSituation(point, ChessModel.LIANWU)) {
+                    // 自己可以连五，直接返回
+                    return ListUtil.of(point);
+                }
+
+                if (isDanger) {
+                    // 存在危险，继续找自己可以连五的棋子
+                    continue;
+                }
+
+                // 考虑对手的落子情况
+                Point foePoint = new Point(i, j, 3 - type);
+                if (checkSituation(foePoint, ChessModel.LIANWU)) {
+                    // 对手连五了，局势很危险！！赶紧找自己可以连五的点位，不行就防守
+                    isDanger = true;
+                    defensePointList.clear();
+                    defensePointList.add(point);
+                    continue;
+                }
+
+//                if (checkSituation(foePoint, ChessModel.HUOSI)) {
+//                    // 对手活四了
+//                    defensePointList.add(point);
+//                }
+
+                // 看看自己有没有活四的点
+                if (checkSituation(point, ChessModel.HUOSI)) {
+                    attackPointList.add(point);
+                    continue;
+                }
+
+                // 寻找自己可以冲四的棋子
+                if (checkSituation(point, ChessModel.CHONGSI)) {
+                    vcfPointList.add(point);
+                }
+
+                if (isAI) {
+                    // 寻找自己可以活三的棋子
+                    if (!isVcf && checkSituation(point, ChessModel.HUOSAN)) {
+                        vctPointList.add(point);
+                    }
+                }
+            }
+        }
+
+        List<Point> pointList = new ArrayList<>();
+        if (!isDanger) {
+            // 优先活四进攻
+            if (!attackPointList.isEmpty()) {
+                return attackPointList;
+            }
+            // VCF、VCT进攻
+            if (isVcf) {
+                if (!vcfPointList.isEmpty()) {
+                    pointList.addAll(vcfPointList);
+                }
+            } else if (!vctPointList.isEmpty()) {
+                pointList.addAll(vctPointList);
+            }
+        }
+        if (!defensePointList.isEmpty()) {
+            // 防守
+            pointList.addAll(defensePointList);
+        }
+
+        return pointList;
     }
 
     /**
@@ -483,14 +708,9 @@ public class ZhiZhangAIService implements AIService {
         // 杀棋点
         List<Point> killPointList = new ArrayList<>();
 
-        boolean isEnd = false;
         // 局势危险等级 0.不危险 1.有危险 2.很危险
         int dangerLevel = 0;
         for (int i = 0; i < this.cols; i++) {
-            if (isEnd) {
-                break;
-            }
-
             for (int j = 0; j < this.rows; j++) {
                 if (this.chessData[i][j] != 0) {
                     // 该处已有棋子，跳过
@@ -501,10 +721,7 @@ public class ZhiZhangAIService implements AIService {
                 Point point = new Point(i, j, type);
                 if (checkSituation(point, ChessModel.LIANWU)) {
                     // 优先检查自己连五的情况，如果该落子点可以形成连五，则结束循环，直接返回
-                    highPriorityPointList.clear();
-                    highPriorityPointList.add(point);
-                    isEnd = true;
-                    break;
+                    return ListUtil.of(point);
                 }
 
                 if (dangerLevel == 2) {
@@ -550,12 +767,18 @@ public class ZhiZhangAIService implements AIService {
                 if (checkHighPriorityPoint(point) || checkHighPriorityPoint(foePoint)) {
                     // 自己的高优先级落子点 ｜ 对手的高优先级落子点
                     highPriorityPointList.add(point);
-                } else if (checkSituation(point, ChessModel.HUOSAN, ChessModel.CHONGSI)) {
-                    // 低优先级落子点：活三、冲四
-                    lowPriorityPointList.add(point);
-                } else if (checkSituation(point, ChessModel.HUOER, ChessModel.MIANSAN, ChessModel.MIANER, ChessModel.MIANYI)) {
-                    // 候补落子点：活二、眠三、眠二、眠一
-                    alternatePointList.add(point);
+                    continue;
+                }
+                if (highPriorityPointList.isEmpty()) {
+                    if (checkSituation(point, ChessModel.HUOSAN, ChessModel.CHONGSI) || checkSituation(foePoint, ChessModel.CHONGSI)) {
+                        // 低优先级落子点：活三、冲四，只考虑对手的冲四
+                        lowPriorityPointList.add(point);
+                        continue;
+                    }
+                    if (lowPriorityPointList.isEmpty() && checkSituation(point, ChessModel.HUOER, ChessModel.MIANSAN, ChessModel.MIANER, ChessModel.MIANYI)) {
+                        // 候补落子点：活二、眠三、眠二、眠一，不用考虑对手
+                        alternatePointList.add(point);
+                    }
                 }
             }
         }
@@ -649,7 +872,7 @@ public class ZhiZhangAIService implements AIService {
         }
         if (huosanTotal > 0 && huoerTotal > 0) {
             // 活三又活二
-            return true;
+//            return true;
         }
 
         return false;
@@ -742,21 +965,15 @@ public class ZhiZhangAIService implements AIService {
             }
         }
 
-        if (chongsiTotal > 0 && huoerTotal > 0) {
-            // 冲四又活二
-            score *= 2;
-        }
-        if (huosanTotal > 0 && huoerTotal > 0) {
-            // 活三又活二
-            score *= 3;
-        }
-        if (huosanTotal > 1) {
-            // 活三数大于1
-            score *= 5;
-        }
         if (chongsiTotal > 1 || (chongsiTotal > 0 && huosanTotal > 0)) {
             // 冲四数大于1、冲四又活三
             score *= 6;
+        } else if (huosanTotal > 1) {
+            // 活三数大于1
+            score *= 4;
+        } else if (huosanTotal > 0 && huoerTotal > 0) {
+            // 活三又活二
+            score *= 2;
         }
 
         return score;
@@ -807,9 +1024,9 @@ public class ZhiZhangAIService implements AIService {
     private boolean checkSituation(Point point, ChessModel... chessModels) {
         // 要检查4个大方向
         for (int i = 1; i < 5; i++) {
-            ChessModel chessModel = getChessModel(getSituation(point, i));
-            for (ChessModel model : chessModels) {
-                if (model == chessModel) {
+            String situation = getSituation(point, i);
+            for (ChessModel chessModel : chessModels) {
+                if (checkSituation(situation, chessModel)) {
                     return true;
                 }
             }
@@ -834,7 +1051,11 @@ public class ZhiZhangAIService implements AIService {
     }
 
     /**
-     * 获取当前局势的棋型
+     * 获取当前局势的棋型（按顺序匹配）
+     *
+     * 如当前局势棋型为："210111002"（同时包含活三和冲四的棋型）
+     * 该方法会优先匹配到活三 "011100"，然后返回该棋型
+     * 满足冲四 "10111" 棋型，但由于顺序问题，将不会返回
      *
      * @param situation 当前局势
      * @return
