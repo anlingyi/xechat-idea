@@ -54,6 +54,11 @@ public class ZhiZhangAIService implements AIService {
     private Statistics statistics;
 
     /**
+     * 最佳落子路径
+     */
+    private Stack<Point> pathStack;
+
+    /**
      * 声明一个最大值
      */
     private static final int INFINITY = 999999999;
@@ -135,9 +140,9 @@ public class ZhiZhangAIService implements AIService {
          */
         private int score;
         /**
-         * 耗时（秒）
+         * 极大极小搜索耗时（秒）
          */
-        private double time;
+        private double minimaxTime;
         /**
          * 搜索节点数
          */
@@ -150,6 +155,11 @@ public class ZhiZhangAIService implements AIService {
          * 算杀命中 0.未命中 1.vcf 2.vct
          */
         private int vcx;
+        /**
+         * 算杀耗时（秒）
+         */
+        private double vcxTime;
+
 
         public void incrNodes() {
             this.nodes++;
@@ -195,40 +205,35 @@ public class ZhiZhangAIService implements AIService {
             depth = 4;
         }
 
-        long startTime = System.currentTimeMillis();
+        // 算杀最大深度
         int maxDepth = 12;
+        long vcxStartTime = System.currentTimeMillis();
+        // 进攻，己方算杀：先VCT、后VCF
+        if (this.rounds > 3) {
+            this.bestPoint = deepeningVcx(true, maxDepth, false);
+        }
+        if (this.bestPoint == null && this.rounds > 4) {
+            this.bestPoint = deepeningVcx(true, maxDepth, true);
+        }
+        // 防守，敌方算杀：先VCT、后VCF
         if (this.bestPoint == null && this.rounds > 3) {
-            this.bestPoint = deepening(this.ai, 2, maxDepth, false);
+            this.bestPoint = deepeningVcx(false, maxDepth, false);
         }
-        if (this.rounds > 4) {
-            this.bestPoint = deepening(this.ai, 2, maxDepth, true);
+        if (this.bestPoint == null && this.rounds > 4) {
+            this.bestPoint = deepeningVcx(false, maxDepth, true);
         }
-//        if (this.bestPoint == null && this.rounds > 3) {
-//            this.ai = 3 - this.ai;
-//            this.bestPoint = deepening(this.ai, 2, maxDepth, false);
-//            this.ai = 3 - this.ai;
-//            if (this.bestPoint != null) {
-//                this.bestPoint.type = this.ai;
-//            }
-//        }
-//        if (this.bestPoint == null) {
-//            this.ai = 3 - this.ai;
-//            this.bestPoint = deepening(this.ai, 2, maxDepth, true);
-//            this.ai = 3 - this.ai;
-//            if (this.bestPoint != null) {
-//                this.bestPoint.type = this.ai;
-//            }
-//        }
+        long vcxEndTime = System.currentTimeMillis();
+        this.statistics.setVcxTime((vcxEndTime - vcxStartTime) / 1000.00d);
 
         if (this.bestPoint == null) {
             this.statistics = new Statistics();
             this.statistics.setDepth(depth);
+            long minimaxStartTime = System.currentTimeMillis();
             // 基于极大极小值搜索获取最佳棋位
             minimax(0, depth, -INFINITY, INFINITY);
+            long minimaxEndTime = System.currentTimeMillis();
+            this.statistics.setMinimaxTime((minimaxEndTime - minimaxStartTime) / 1000.00d);
         }
-
-        long endTime = System.currentTimeMillis();
-        this.statistics.setTime((endTime - startTime) / 1000.00d);
 
         if (this.aiConfig.isDebug()) {
             ConsoleAction.showSimpleMsg("============AI统计[第" + this.rounds + "回合]==========");
@@ -238,7 +243,8 @@ public class ZhiZhangAIService implements AIService {
             ConsoleAction.showSimpleMsg("算杀命中：" + (this.statistics.getVcx() == 1 ? "VCF" : this.statistics.getVcx() == 2 ? "VCT" : "未命中"));
             ConsoleAction.showSimpleMsg("最佳落子点：" + this.statistics.getPoint());
             ConsoleAction.showSimpleMsg("得分：" + this.statistics.getScore());
-            ConsoleAction.showSimpleMsg("耗时：" + this.statistics.getTime() + "s");
+            double time = this.statistics.getMinimaxTime() + this.statistics.getVcxTime();
+            ConsoleAction.showSimpleMsg("耗时：" + time + "s" + ", VCX(" + this.statistics.getVcxTime() + "s), MINIMAX(" + this.statistics.getMinimaxTime() + "s)");
             ConsoleAction.showSimpleMsg("==================================");
         }
 
@@ -272,24 +278,23 @@ public class ZhiZhangAIService implements AIService {
     /**
      * 迭代加深VCX
      *
+     * @param isAi     是否是AI
      * @param maxDepth 最大深度
      * @param isVcf    true:VCF false:VCT
      * @return
      */
-    private Point deepeningVcx(int maxDepth, boolean isVcf) {
+    private Point deepeningVcx(boolean isAi, int maxDepth, boolean isVcf) {
+        this.ai = isAi ? this.ai : 3 - this.ai;
         Point point = deepening(this.ai, 2, maxDepth, isVcf);
-        if (point == null) {
-            this.ai = 3 - this.ai;
-            point = deepening(this.ai, 2, maxDepth, isVcf);
+        if (!isAi) {
             this.ai = 3 - this.ai;
             if (point != null) {
                 point.type = this.ai;
             }
         }
+
         return point;
     }
-
-    private Stack<Point> path;
 
     /**
      * 迭代加深算杀搜索
@@ -303,7 +308,9 @@ public class ZhiZhangAIService implements AIService {
     private Point deepening(int type, int depth, int maxDepth, boolean isVcf) {
         Point point = null;
         for (; depth <= maxDepth; depth += 2) {
-            path = new Stack<>();
+            if (aiConfig.isDebug()) {
+                pathStack = new Stack<>();
+            }
             point = vcx(type, depth, isVcf);
             if (point != null) {
                 // 算杀成功
@@ -337,24 +344,37 @@ public class ZhiZhangAIService implements AIService {
             this.statistics.incrNodes();
 
             if (checkSituation(point, ChessModel.LIANWU, ChessModel.HUOSI)) {
-                // AI连五、活四，算杀成功
                 if (isAI) {
-                    path.push(point);
-                    System.out.println("=====VCX路径输出=====");
-                    path.forEach(p -> {
-                        System.out.print(p.x + "," + p.y + "," + p.type + ";");
-                    });
-                    System.out.println("\n====================");
-                    path.pop();
+                    if (aiConfig.isDebug()) {
+                        pathStack.push(point);
+
+                        StringBuilder pathOut = new StringBuilder();
+                        pathOut.append(isVcf ? "VCF" : "VCT").append("路径：");
+                        pathStack.forEach(p -> pathOut.append(p).append(" "));
+                        ConsoleAction.showSimpleMsg(pathOut.toString());
+
+                        pathStack.pop();
+                    }
+
+                    // AI连五、活四，算杀成功
+                    return point;
                 }
-                return isAI ? point : null;
+
+                // 对手连五、活四，算杀失败
+                return null;
             }
 
-            path.push(point);
+            if (aiConfig.isDebug()) {
+                pathStack.push(point);
+            }
+
             putChess(point);
             Point result = vcx(3 - type, depth - 1, isVcf);
             revokeChess(point);
-            path.pop();
+
+            if (aiConfig.isDebug()) {
+                pathStack.pop();
+            }
 
             if (result != null) {
                 // 有结果就表示算杀成功，返回当前节点
@@ -362,6 +382,7 @@ public class ZhiZhangAIService implements AIService {
             }
         }
 
+        // 算杀失败
         return null;
     }
 
@@ -413,11 +434,6 @@ public class ZhiZhangAIService implements AIService {
                     continue;
                 }
 
-//                if (checkSituation(foePoint, ChessModel.HUOSI)) {
-//                    // 对手活四了
-//                    defensePointList.add(point);
-//                }
-
                 // 看看自己有没有活四的点
                 if (checkSituation(point, ChessModel.HUOSI)) {
                     attackPointList.add(point);
@@ -429,10 +445,17 @@ public class ZhiZhangAIService implements AIService {
                     vcfPointList.add(point);
                 }
 
-                if (isAI) {
-                    // 寻找自己可以活三的棋子
-                    if (!isVcf && checkSituation(point, ChessModel.HUOSAN)) {
-                        vctPointList.add(point);
+                if (!isVcf) {
+                    if (isAI) {
+                        if (checkSituation(point, ChessModel.HUOSAN)) {
+                            // AI进行VCT
+                            vctPointList.add(point);
+                        }
+                    } else {
+                        if (checkSituation(foePoint, ChessModel.HUOSI)) {
+                            // 防守对方的活四
+                            defensePointList.add(point);
+                        }
                     }
                 }
             }
@@ -872,7 +895,7 @@ public class ZhiZhangAIService implements AIService {
         }
         if (huosanTotal > 0 && huoerTotal > 0) {
             // 活三又活二
-//            return true;
+            return true;
         }
 
         return false;
@@ -1027,6 +1050,7 @@ public class ZhiZhangAIService implements AIService {
             String situation = getSituation(point, i);
             for (ChessModel chessModel : chessModels) {
                 if (checkSituation(situation, chessModel)) {
+                    point.score = chessModel.score;
                     return true;
                 }
             }

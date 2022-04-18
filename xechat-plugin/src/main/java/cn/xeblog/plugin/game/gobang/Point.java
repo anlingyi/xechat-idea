@@ -1,7 +1,6 @@
 package cn.xeblog.plugin.game.gobang;
 
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 /**
  * 棋子点位
@@ -10,7 +9,6 @@ import lombok.ToString;
  * @date 2021/11/7 5:59 下午
  */
 @NoArgsConstructor
-@ToString
 public class Point {
     /**
      * 横坐标
@@ -33,5 +31,10 @@ public class Point {
         this.x = x;
         this.y = y;
         this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        return (type == 1 ? "黑" : "白") + "[" + x + "," + y + ']';
     }
 }
