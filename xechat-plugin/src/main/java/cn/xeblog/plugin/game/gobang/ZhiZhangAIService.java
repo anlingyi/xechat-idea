@@ -128,6 +128,27 @@ public class ZhiZhangAIService implements AIService {
     }
 
     /**
+     * 风险评分
+     */
+    @AllArgsConstructor
+    private enum RiskScore {
+        /**
+         * 高风险
+         */
+        HIGH_RISK(800000),
+        /**
+         * 中风险
+         */
+        MEDIUM_RISK(500000),
+        /**
+         * 低风险
+         */
+        LOW_RISK(100000);
+
+        int score;
+    }
+
+    /**
      * 统计
      */
     @Data
@@ -190,7 +211,7 @@ public class ZhiZhangAIService implements AIService {
         this.ai = 3 - point.type;
         this.bestPoint = null;
         // AI是黑棋则偏进攻，是白棋则偏防守
-        this.attack = this.ai == 1 ? 1.5f : 1.0f;
+        this.attack = this.ai == 1 ? 1.8f : 1.0f;
         int depth = this.aiConfig.getDepth();
 
         if (this.rounds == 1 && this.ai == 1) {
@@ -360,17 +381,13 @@ public class ZhiZhangAIService implements AIService {
         Point best = null;
         List<Point> pointList = getVcxPoints(type, isVcf);
         for (Point point : pointList) {
-            if (isRoot && best != null) {
-                return best;
-            }
-
             this.statistics.incrNodes();
 
             if (aiConfig.isDebug()) {
                 pathStack.push(point);
             }
 
-            if (point.score >= 2 * ChessModel.HUOSI.score) {
+            if (point.score >= RiskScore.MEDIUM_RISK.score) {
                 if (aiConfig.isDebug()) {
                     if (isAI) {
                         bestPathStack = (Stack<Point>) pathStack.clone();
@@ -378,29 +395,35 @@ public class ZhiZhangAIService implements AIService {
                     pathStack.pop();
                 }
 
-                // 已经形成连五、活四了，如果是AI落子，就返回当前节点，否则返回空
+                // 已经可以形成大于等于冲四活三的棋型了，如果是AI落子，就返回当前节点，否则返回空
                 return isAI ? point : null;
             }
 
             putChess(point);
-            Point result = vcx(3 - type, depth - 1, isVcf);
+            best = vcx(3 - type, depth - 1, isVcf);
             revokeChess(point);
 
             if (aiConfig.isDebug()) {
                 pathStack.pop();
             }
 
-            if (result == null) {
-                // 对手可以防守成功，将best置为空，防止AI误入歧途
-                best = null;
-                // AI暂未找到可以胜利的节点，继续找
-                continue;
+            if (best == null) {
+                if (isAI) {
+                    // AI还没找到可以算杀成功的棋子，继续找...
+                    continue;
+                }
+
+                // 对手拦截成功了，直接返回空出去，表示算杀失败了
+                return null;
             }
 
-            // 将分数向上传递
-            point.score = result.score;
-            // 向上传递当前节点
+            // 记录当前节点
             best = point;
+
+            if (isAI && best != null) {
+                // AI已经找到可以算杀的棋子了，不用再找了
+                break;
+            }
         }
 
         return best;
@@ -419,10 +442,8 @@ public class ZhiZhangAIService implements AIService {
         List<Point> attackPointList = new ArrayList<>();
         // 防守点列表
         List<Point> defensePointList = new ArrayList<>();
-        // VCT列表
-        List<Point> vctPointList = new ArrayList<>();
-        // VCF列表
-        List<Point> vcfPointList = new ArrayList<>();
+        // VCX列表
+        List<Point> vcxPointList = new ArrayList<>();
 
         // 局势是否危险
         boolean isDanger = false;
@@ -457,26 +478,26 @@ public class ZhiZhangAIService implements AIService {
                     continue;
                 }
 
-                // 看看自己有没有大于等于活四的点
-                if (score >= 2 * ChessModel.HUOSI.score) {
+                // 看看自己有没有大于等于中风险分值的点位
+                if (score >= RiskScore.MEDIUM_RISK.score) {
                     attackPointList.add(point);
                     continue;
                 }
 
-                // 寻找自己可以冲四的棋子
-                if (checkSituation(point, ChessModel.CHONGSI)) {
-                    vcfPointList.add(point);
-                }
-
-                if (!isVcf) {
-                    if (isAI) {
-                        if (checkSituation(point, ChessModel.HUOSAN)) {
-                            // AI进行VCT
-                            vctPointList.add(point);
-                        }
-                    } else {
-                        if (checkSituation(foePoint, ChessModel.HUOSI)) {
-                            // 防守对方的活四
+                if (isAI) {
+                    // AI才进行VCX
+                    if (checkSituation(point, ChessModel.CHONGSI)) {
+                        // 不论是VCF还是VCT，AI都可先选择冲四
+                        vcxPointList.add(point);
+                    } else if (!isVcf && checkSituation(point, ChessModel.HUOSAN)) {
+                        // 记录VCT点位
+                        vcxPointList.add(point);
+                    }
+                } else {
+                    // 对手需防守VCT
+                    if (!isVcf) {
+                        if (checkSituation(point, ChessModel.CHONGSI) || foeScore >= ChessModel.HUOSI.score) {
+                            // 选择冲四或防守对方的活四
                             defensePointList.add(point);
                         }
                     }
@@ -485,8 +506,9 @@ public class ZhiZhangAIService implements AIService {
         }
 
         List<Point> pointList = new ArrayList<>();
+        // 没风险就进攻
         if (!isDanger) {
-            // 优先进攻
+            // 优先强进攻
             if (!attackPointList.isEmpty()) {
                 // 按分数从大到小排序
                 attackPointList.sort((p1, p2) -> {
@@ -497,21 +519,16 @@ public class ZhiZhangAIService implements AIService {
                     }
                     return 1;
                 });
+
                 return attackPointList;
             }
 
-            if (isVcf) {
-                // VCF进攻
-                if (!vcfPointList.isEmpty()) {
-                    pointList.addAll(vcfPointList);
-                }
-            } else {
-                // VCT进攻
-                if (!vctPointList.isEmpty()) {
-                    pointList.addAll(vctPointList);
-                }
+            // VCX进攻
+            if (!vcxPointList.isEmpty()) {
+                pointList.addAll(vcxPointList);
             }
         }
+
         if (!defensePointList.isEmpty()) {
             // 防守
             pointList.addAll(defensePointList);
@@ -803,7 +820,7 @@ public class ZhiZhangAIService implements AIService {
                 if (foeScore >= ChessModel.LIANWU.score) {
                     // 对手连五了，局势很危险！！
                     level = 2;
-                } else if (foeScore >= 2 * ChessModel.HUOSI.score) {
+                } else if (foeScore >= ChessModel.HUOSI.score) {
                     // 对手活四了，局势有危险！
                     level = 1;
                 }
@@ -826,7 +843,7 @@ public class ZhiZhangAIService implements AIService {
                     continue;
                 }
 
-                if (score >= ChessModel.HUOSI.score || foeScore >= ChessModel.HUOSI.score) {
+                if (score >= RiskScore.LOW_RISK.score || foeScore >= RiskScore.MEDIUM_RISK.score) {
                     // 高优先级落子点：活四、双冲四、双活三、冲四活三，需考虑对手
                     highPriorityPointList.add(point);
                     continue;
@@ -1018,10 +1035,6 @@ public class ZhiZhangAIService implements AIService {
                         // 冲四+1
                         chongsiTotal++;
                         break;
-                    case HUOSI:
-                        // 活四，分数补偿
-                        score += 4 * chessModel.score;
-                        break;
                 }
 
                 // 下此步的得分
@@ -1030,14 +1043,14 @@ public class ZhiZhangAIService implements AIService {
         }
 
         if (chongsiTotal > 1) {
-            // 冲四数大于1，加两倍的活四分
-            score += 2 * ChessModel.HUOSI.score;
+            // 冲四数大于1，+高风险评分
+            score += RiskScore.HIGH_RISK.score;
         } else if (chongsiTotal > 0 && huosanTotal > 0) {
-            // 冲四又活三，加一倍的活四分
-            score += ChessModel.HUOSI.score;
+            // 冲四又活三，+中风险评分
+            score += RiskScore.MEDIUM_RISK.score;
         } else if (huosanTotal > 1) {
-            // 活三数大于1，加0.5倍的活四分
-            score += ChessModel.HUOSI.score / 2;
+            // 活三数大于1，+低风险评分
+            score += RiskScore.LOW_RISK.score;
         }
 
         point.score = score;
