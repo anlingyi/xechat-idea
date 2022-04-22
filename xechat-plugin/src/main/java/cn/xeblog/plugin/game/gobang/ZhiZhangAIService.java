@@ -99,23 +99,27 @@ public class ZhiZhangAIService implements AIService {
         /**
          * 冲四
          */
-        CHONGSI(8000, new String[]{"11110", "01111", "10111", "11011", "11101"}),
-        /**
-         * 眠三
-         */
-        MIANSAN(1000, new String[]{"001112", "010112", "011012", "211100", "211010"}),
+        CHONGSI(9000, new String[]{"11110", "01111", "10111", "11011", "11101"}),
         /**
          * 活二
          */
-        HUOER(800, new String[]{"001100", "011000", "000110"}),
+        HUOER(100, new String[]{"001100", "011000", "000110", "001010", "010100"}),
+        /**
+         * 活一
+         */
+        HUOYI(80, new String[]{"010200", "002010", "020100", "001020", "201000", "000102", "000201"}),
+        /**
+         * 眠三
+         */
+        MIANSAN(30, new String[]{"001112", "010112", "011012", "211100", "211010"}),
         /**
          * 眠二
          */
-        MIANER(50, new String[]{"011200", "001120", "002110", "021100", "001010", "010100"}),
+        MIANER(10, new String[]{"011200", "001120", "002110", "021100", "110000", "000011", "000112", "211000"}),
         /**
          * 眠一
          */
-        MIANYI(10, new String[]{"001200", "002100", "020100", "000210", "000120", "210000", "000012"});
+        MIANYI(1, new String[]{"001200", "002100", "000210", "000120", "210000", "000012"});
 
         /**
          * 分数
@@ -387,7 +391,7 @@ public class ZhiZhangAIService implements AIService {
                 pathStack.push(point);
             }
 
-            if (point.score >= RiskScore.MEDIUM_RISK.score) {
+            if (point.score >= RiskScore.HIGH_RISK.score) {
                 if (aiConfig.isDebug()) {
                     if (isAI) {
                         bestPathStack = (Stack<Point>) pathStack.clone();
@@ -395,7 +399,7 @@ public class ZhiZhangAIService implements AIService {
                     pathStack.pop();
                 }
 
-                // 已经可以形成大于等于冲四活三的棋型了，如果是AI落子，就返回当前节点，否则返回空
+                // 已经可以形成必胜棋型了，如果是AI落子，就返回当前节点，否则返回空
                 return isAI ? point : null;
             }
 
@@ -420,8 +424,8 @@ public class ZhiZhangAIService implements AIService {
             // 记录当前节点
             best = point;
 
-            if (isAI && best != null) {
-                // AI已经找到可以算杀的棋子了，不用再找了
+            if (isAI) {
+                // AI已经找到可以算杀的棋子了，同层后续的节点都不用看了
                 break;
             }
         }
@@ -705,17 +709,17 @@ public class ZhiZhangAIService implements AIService {
 
             int score;
             if (point.score >= ChessModel.LIANWU.score) {
-                // 落子到这里就赢了，后面的节点不用再评估了
-                depth = 1;
+                // 落子到这里就赢了，如果是AI落的子就返回最高分，否则返回最低分
+                score = isAI ? INFINITY - 1 : -INFINITY + 1;
+            } else {
+                /* 模拟 AI -> 玩家 交替落子 */
+                // 落子
+                putChess(point);
+                // 递归生成博弈树，并评估叶子结点的局势
+                score = minimax(3 - type, depth - 1, alpha, beta);
+                // 撤销落子
+                revokeChess(point);
             }
-
-            /* 模拟 AI -> 玩家 交替落子 */
-            // 落子
-            putChess(point);
-            // 递归生成博弈树，并评估叶子结点的局势
-            score = minimax(3 - type, depth - 1, alpha, beta);
-            // 撤销落子
-            revokeChess(point);
 
             if (isAI) {
                 // AI要选对自己最有利的节点（分最高的）
@@ -844,7 +848,7 @@ public class ZhiZhangAIService implements AIService {
                 }
 
                 if (score >= RiskScore.LOW_RISK.score || foeScore >= RiskScore.MEDIUM_RISK.score) {
-                    // 高优先级落子点：活四、双冲四、双活三、冲四活三，需考虑对手
+                    // 高优先级落子点：活四、双冲四、双活三、冲四活三，需考虑对手的中风险情况（活四、双冲四、冲四活三）
                     highPriorityPointList.add(point);
                     continue;
                 }
@@ -857,7 +861,7 @@ public class ZhiZhangAIService implements AIService {
                     }
 
                     if (lowPriorityPointList.isEmpty() && score >= ChessModel.MIANYI.score) {
-                        // 候补落子点：活二、眠三、眠二、眠一，不用考虑对手
+                        // 候补落子点：活二、活一、眠三、眠二、眠一，不用考虑对手
                         alternatePointList.add(point);
                     }
                 }
