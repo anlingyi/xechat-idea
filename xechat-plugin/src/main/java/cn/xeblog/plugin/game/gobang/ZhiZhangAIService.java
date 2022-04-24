@@ -236,7 +236,7 @@ public class ZhiZhangAIService implements AIService {
         }
 
         // 算杀最大深度
-        int maxDepth = 12;
+        int maxDepth = 8;
         long vcxStartTime = System.currentTimeMillis();
         // 进攻，己方算杀：先VCT、后VCF
         if (this.rounds > 3) {
@@ -524,7 +524,13 @@ public class ZhiZhangAIService implements AIService {
                     return 1;
                 });
 
-                return attackPointList;
+                if (isAI) {
+                    // AI有强进攻点位了，就不用考虑后面的点位了
+                    return attackPointList;
+                }
+
+                // 对手可以选择进攻和防守
+                pointList.addAll(attackPointList);
             }
 
             // VCX进攻
@@ -534,8 +540,14 @@ public class ZhiZhangAIService implements AIService {
         }
 
         if (!defensePointList.isEmpty()) {
-            // 防守
-            pointList.addAll(defensePointList);
+            // 进行防守
+            if (isAI) {
+                // AI优先选择进攻，把防守点位放后面
+                pointList.addAll(defensePointList);
+            } else {
+                // 对手优先考虑防守，把防守点位放前面
+                pointList.addAll(0, defensePointList);
+            }
         }
 
         return pointList;
