@@ -1,9 +1,11 @@
 package cn.xeblog.plugin.game.gobang;
 
 import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.xeblog.plugin.action.ConsoleAction;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.*;
 
@@ -64,6 +66,16 @@ public class ZhiZhangAIService implements AIService {
     private Stack<Point> bestPathStack;
 
     /**
+     * 当前局面的hashcode
+     */
+    private long hashcode;
+
+    /**
+     * 局面缓存
+     */
+    private Map<Long, SituationCache> situationCacheMap;
+
+    /**
      * 声明一个最大值
      */
     private static final int INFINITY = 999999999;
@@ -73,11 +85,29 @@ public class ZhiZhangAIService implements AIService {
      */
     private static final Map<String, Integer> SCORE = new LinkedHashMap<>();
 
+    /**
+     * 黑子 Zobrist
+     */
+    private static final long[][] BLACK_ZOBRIST = new long[15][15];
+
+    /**
+     * 白子 Zobrist
+     */
+    private static final long[][] WHITE_ZOBRIST = new long[15][15];
+
     static {
         // 初始化棋型分数表
         for (ChessModel chessScore : ChessModel.values()) {
             for (String value : chessScore.values) {
                 SCORE.put(value, chessScore.score);
+            }
+        }
+
+        // 初始化Zobrist随机值
+        for (int i = 0; i < BLACK_ZOBRIST.length; i++) {
+            for (int j = 0; j < BLACK_ZOBRIST.length; j++) {
+                BLACK_ZOBRIST[i][j] = RandomUtil.randomLong(1, Long.MAX_VALUE);
+                WHITE_ZOBRIST[i][j] = RandomUtil.randomLong(1, Long.MAX_VALUE);
             }
         }
     }
@@ -189,6 +219,10 @@ public class ZhiZhangAIService implements AIService {
          * 算杀耗时（秒）
          */
         private double vcxTime;
+        /**
+         * 局面缓存命中数
+         */
+        private int cacheHits;
 
 
         public void incrNodes() {
@@ -197,6 +231,41 @@ public class ZhiZhangAIService implements AIService {
 
         public void incrCuts() {
             this.cuts++;
+        }
+
+        public void incrCacheHits() {
+            this.cacheHits++;
+        }
+    }
+
+    /**
+     * 局面缓存
+     */
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    private class SituationCache {
+        /**
+         * 存储VCX点位
+         */
+        private Point point;
+        /**
+         * 局面分数
+         */
+        private int score;
+        /**
+         * 搜索深度
+         */
+        private int depth;
+
+        public SituationCache(int score, int depth) {
+            this.score = score;
+            this.depth = depth;
+        }
+
+        public SituationCache(Point point, int depth) {
+            this.point = point;
+            this.depth = depth;
         }
     }
 
@@ -236,7 +305,7 @@ public class ZhiZhangAIService implements AIService {
         }
 
         // 算杀最大深度
-        int maxDepth = 8;
+        int maxDepth = 12;
         long vcxStartTime = System.currentTimeMillis();
         // 进攻，己方算杀：先VCT、后VCF
         if (this.rounds > 3) {
@@ -255,6 +324,7 @@ public class ZhiZhangAIService implements AIService {
         long vcxEndTime = System.currentTimeMillis();
 
         if (this.bestPoint == null) {
+            this.situationCacheMap = new HashMap<>(2048);
             this.statistics = new Statistics();
             this.statistics.setDepth(depth);
             long minimaxStartTime = System.currentTimeMillis();
@@ -270,6 +340,8 @@ public class ZhiZhangAIService implements AIService {
             ConsoleAction.showSimpleMsg("搜索深度：" + this.statistics.getDepth());
             ConsoleAction.showSimpleMsg("搜索节点数：" + this.statistics.getNodes());
             ConsoleAction.showSimpleMsg("发生剪枝数：" + this.statistics.getCuts());
+            ConsoleAction.showSimpleMsg("缓存总数：" + this.situationCacheMap.size());
+            ConsoleAction.showSimpleMsg("缓存命中数：" + this.statistics.getCacheHits());
             ConsoleAction.showSimpleMsg("算杀命中：" + (this.statistics.getVcx() == 1 ? "VCF" : this.statistics.getVcx() == 2 ? "VCT" : "未命中"));
             ConsoleAction.showSimpleMsg("最佳落子点：" + this.statistics.getPoint());
             ConsoleAction.showSimpleMsg("得分：" + this.statistics.getScore());
@@ -277,6 +349,7 @@ public class ZhiZhangAIService implements AIService {
             ConsoleAction.showSimpleMsg("耗时：" + String.format("%.3f", time) + "s" + ", VCX(" + this.statistics.getVcxTime() + "s), MINIMAX(" + this.statistics.getMinimaxTime() + "s)");
             ConsoleAction.showSimpleMsg("==================================");
         }
+        this.situationCacheMap = null;
 
         return this.bestPoint;
     }
@@ -295,8 +368,8 @@ public class ZhiZhangAIService implements AIService {
         for (int i = 0; i < cols; i++) {
             for (int j = 0; j < rows; j++) {
                 int type = chessData[i][j];
-                this.chessData[i][j] = type;
                 if (type != 0) {
+                    putChess(new Point(i, j, type));
                     chessTotal++;
                 }
             }
@@ -335,18 +408,19 @@ public class ZhiZhangAIService implements AIService {
      * @return
      */
     private Point deepening(int depth, int maxDepth, boolean isVcf) {
+        this.situationCacheMap = new HashMap<>(2048);
         Point point = null;
         for (; depth <= maxDepth; depth += 2) {
-            if (aiConfig.isDebug()) {
-                pathStack = new Stack<>();
+            if (this.aiConfig.isDebug()) {
+                this.pathStack = new Stack<>();
             }
 
             point = vcx(0, depth, isVcf);
             if (point != null) {
-                if (aiConfig.isDebug()) {
+                if (this.aiConfig.isDebug()) {
                     StringBuilder pathOut = new StringBuilder();
                     pathOut.append(isVcf ? "VCF" : "VCT").append("路径：");
-                    bestPathStack.forEach(p -> pathOut.append(p).append(" "));
+                    this.bestPathStack.forEach(p -> pathOut.append(p).append(" "));
                     ConsoleAction.showSimpleMsg(pathOut.toString());
                 }
 
@@ -371,6 +445,17 @@ public class ZhiZhangAIService implements AIService {
      * @return
      */
     private Point vcx(int type, int depth, boolean isVcf) {
+        // 先查看当前局面是否存在缓存
+        SituationCache situationCache = this.situationCacheMap.get(this.hashcode);
+        if (situationCache != null && situationCache.depth >= depth) {
+            if (this.aiConfig.isDebug()) {
+                this.statistics.incrCacheHits();
+            }
+
+            // 缓存存在，且记录的搜索深度比当前深度要深或相等，则直接返回记录的局面点位
+            return situationCache.point;
+        }
+
         if (depth == 0) {
             // 算杀失败
             return null;
@@ -387,16 +472,16 @@ public class ZhiZhangAIService implements AIService {
         for (Point point : pointList) {
             this.statistics.incrNodes();
 
-            if (aiConfig.isDebug()) {
-                pathStack.push(point);
+            if (this.aiConfig.isDebug()) {
+                this.pathStack.push(point);
             }
 
             if (point.score >= RiskScore.HIGH_RISK.score) {
-                if (aiConfig.isDebug()) {
+                if (this.aiConfig.isDebug()) {
                     if (isAI) {
-                        bestPathStack = (Stack<Point>) pathStack.clone();
+                        this.bestPathStack = (Stack<Point>) this.pathStack.clone();
                     }
-                    pathStack.pop();
+                    this.pathStack.pop();
                 }
 
                 // 已经可以形成必胜棋型了，如果是AI落子，就返回当前节点，否则返回空
@@ -407,8 +492,8 @@ public class ZhiZhangAIService implements AIService {
             best = vcx(3 - type, depth - 1, isVcf);
             revokeChess(point);
 
-            if (aiConfig.isDebug()) {
-                pathStack.pop();
+            if (this.aiConfig.isDebug()) {
+                this.pathStack.pop();
             }
 
             if (best == null) {
@@ -430,13 +515,16 @@ public class ZhiZhangAIService implements AIService {
             }
         }
 
+        // 缓存当前局面点位
+        this.situationCacheMap.put(this.hashcode, new SituationCache(best, depth));
+
         return best;
     }
 
     /**
      * 获取算杀落子点
      *
-     * @param type  当前走棋方 1.黑棋 2.白棋
+     * @param type  当前走棋方 0.根节点表示AI走棋 1.黑棋 2.白棋
      * @param isVcf 是否是连续冲四
      * @return
      */
@@ -560,6 +648,8 @@ public class ZhiZhangAIService implements AIService {
      */
     private void putChess(Point point) {
         this.chessData[point.x][point.y] = point.type;
+        // 计算当前局面的hashcode
+        calculateHashCode(point);
     }
 
     /**
@@ -569,6 +659,21 @@ public class ZhiZhangAIService implements AIService {
      */
     private void revokeChess(Point point) {
         this.chessData[point.x][point.y] = 0;
+        // 计算当前局面的hashcode
+        calculateHashCode(point);
+    }
+
+    /**
+     * 计算当前落子局面的hashcode
+     *
+     * @param point
+     * @return
+     */
+    private long calculateHashCode(Point point) {
+        int x = point.x;
+        int y = point.y;
+        this.hashcode ^= point.type == 1 ? BLACK_ZOBRIST[x][y] : WHITE_ZOBRIST[x][y];
+        return this.hashcode;
     }
 
     /**
@@ -702,6 +807,17 @@ public class ZhiZhangAIService implements AIService {
         // 当前是否是AI走棋
         boolean isAI = type == this.ai;
 
+        // 先查看当前局面是否存在缓存
+        SituationCache situationCache = this.situationCacheMap.get(this.hashcode);
+        if (situationCache != null && situationCache.depth >= depth) {
+            if (this.aiConfig.isDebug()) {
+                this.statistics.incrCacheHits();
+            }
+
+            // 缓存存在，且记录的搜索深度比当前深度要深或相等，则直接返回记录的分值
+            return situationCache.score;
+        }
+
         // 到达叶子结点
         if (depth == 0) {
             /**
@@ -717,27 +833,28 @@ public class ZhiZhangAIService implements AIService {
         // 记录选择的最好落子点
         List<Point> bestPointList = new ArrayList<>();
         for (Point point : pointList) {
-            statistics.incrNodes();
+            if (this.aiConfig.isDebug()) {
+                this.statistics.incrNodes();
+            }
 
-            int score;
             if (point.score >= ChessModel.LIANWU.score) {
                 // 落子到这里就赢了，如果是AI落的子就返回最高分，否则返回最低分
-                score = isAI ? INFINITY - 1 : -INFINITY + 1;
+                point.score = isAI ? INFINITY - 1 : -INFINITY + 1;
             } else {
                 /* 模拟 AI -> 玩家 交替落子 */
                 // 落子
                 putChess(point);
                 // 递归生成博弈树，并评估叶子结点的局势
-                score = minimax(3 - type, depth - 1, alpha, beta);
+                point.score = minimax(3 - type, depth - 1, alpha, beta);
                 // 撤销落子
                 revokeChess(point);
             }
 
             if (isAI) {
                 // AI要选对自己最有利的节点（分最高的）
-                if (score >= alpha) {
+                if (point.score >= alpha) {
                     if (isRoot) {
-                        if (score > alpha) {
+                        if (point.score > alpha) {
                             // 找到了更好的落子点，将之前选择的落子点清空
                             bestPointList.clear();
                         }
@@ -746,17 +863,21 @@ public class ZhiZhangAIService implements AIService {
                     }
 
                     // 最高值被刷新，更新alpha值
-                    alpha = score;
+                    alpha = point.score;
                 }
             } else {
                 // 对手要选对AI最不利的节点（分最低的）
-                if (score < beta) {
+                if (point.score < beta) {
                     // 最低值被刷新，更新beta值
-                    beta = score;
+                    beta = point.score;
                 }
             }
 
             if (alpha >= beta) {
+                if (this.aiConfig.isDebug()) {
+                    this.statistics.incrCuts();
+                }
+
                 /*
                  AlphaBeta剪枝
 
@@ -767,7 +888,6 @@ public class ZhiZhangAIService implements AIService {
                  因为对手要选择分数小于beta的分支，AI要从对手给的分支里面选最大的分支，这个最大的分支要和当前的分支(alpha)做比较，
                  现在alpha都比beta大了，下面搜索给出的分支也都是小于alpha的，所以搜索下去没有意义，剪掉提高搜索效率。
                  */
-                statistics.incrCuts();
                 break;
             }
         }
@@ -775,12 +895,21 @@ public class ZhiZhangAIService implements AIService {
         if (isRoot) {
             // 如果有多个落子点，则通过getBestPoint方法选择一个最好的
             this.bestPoint = bestPointList.size() > 1 ? getBestPoint(bestPointList) : bestPointList.get(0);
-            this.bestPoint.score = alpha;
-            statistics.setPoint(this.bestPoint);
-            statistics.setScore(alpha);
+
+            if (this.aiConfig.isDebug()) {
+                this.statistics.setPoint(this.bestPoint);
+                this.statistics.setScore(alpha);
+            }
         }
 
-        return isAI ? alpha : beta;
+        int score = isAI ? alpha : beta;
+
+        if (alpha < beta) {
+            // 缓存当前局面分值
+            this.situationCacheMap.put(this.hashcode, new SituationCache(score, depth));
+        }
+
+        return score;
     }
 
     /**
