@@ -51,6 +51,10 @@ public class Gobang extends AbstractGame<GobangDTO> {
     private JPanel startPanel;
     // 悔棋按钮
     private JButton regretButton;
+    // AI落子按钮
+    private JButton aiTestButton;
+    // AI自动落子
+    private boolean aiAutoPut = true;
 
     // 每个格子的边框大小
     private int border;
@@ -325,6 +329,10 @@ public class Gobang extends AbstractGame<GobangDTO> {
                             aiPutChess();
                             break;
                         case DEBUG:
+                            if (aiTestButton != null && aiAutoPut) {
+                                aiTestButton.doClick();
+                                break;
+                            }
                         case HUMAN_VS_HUMAN:
                             type = 3 - type;
                             put = false;
@@ -482,7 +490,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
         });
         configPanel.add(inputChessRecordButton);
 
-        JButton aiTestButton = new JButton("AI落子");
+        aiTestButton = new JButton("AI落子");
         aiTestButton.addActionListener(e -> {
             if (put || isGameOver) {
                 return;
@@ -500,6 +508,10 @@ public class Gobang extends AbstractGame<GobangDTO> {
             aiPutChess();
         });
         configPanel.add(aiTestButton);
+
+        JCheckBox autoPutCheckBox = new JCheckBox("自动落子", aiAutoPut);
+        autoPutCheckBox.addChangeListener(e -> aiAutoPut = ((JCheckBox) e.getSource()).isSelected());
+        configPanel.add(autoPutCheckBox);
 
         return configPanel;
     }
