@@ -212,6 +212,10 @@ public class ZhiZhangAIService implements AIService {
          */
         private int cuts;
         /**
+         * 算杀深度
+         */
+        private int vcxDepth;
+        /**
          * 算杀命中 0.未命中 1.vcf 2.vct
          */
         private int vcx;
@@ -220,10 +224,13 @@ public class ZhiZhangAIService implements AIService {
          */
         private double vcxTime;
         /**
+         * 局面缓存数
+         */
+        private int caches;
+        /**
          * 局面缓存命中数
          */
         private int cacheHits;
-
 
         public void incrNodes() {
             this.nodes++;
@@ -307,41 +314,37 @@ public class ZhiZhangAIService implements AIService {
         // 算杀最大深度
         int maxDepth = 12;
         long vcxStartTime = System.currentTimeMillis();
-        // 进攻，己方算杀：先VCT、后VCF
+        // 先VCT、后VCF
         if (this.rounds > 3) {
             this.bestPoint = deepeningVcx(true, maxDepth, false);
         }
         if (this.bestPoint == null && this.rounds > 4) {
             this.bestPoint = deepeningVcx(true, maxDepth, true);
         }
-        // 防守，敌方算杀：先VCT、后VCF
-//        if (this.bestPoint == null && this.rounds > 3) {
-//            this.bestPoint = deepeningVcx(false, maxDepth, false);
-//        }
-//        if (this.bestPoint == null && this.rounds > 4) {
-//            this.bestPoint = deepeningVcx(false, maxDepth, true);
-//        }
         long vcxEndTime = System.currentTimeMillis();
+        this.statistics.setVcxTime((vcxEndTime - vcxStartTime) / 1000.00d);
 
         if (this.bestPoint == null) {
-            this.situationCacheMap = new HashMap<>(2048);
-            this.statistics = new Statistics();
-            this.statistics.setDepth(depth);
+            this.statistics.setNodes(0);
+            this.statistics.setCacheHits(0);
             long minimaxStartTime = System.currentTimeMillis();
             // 基于极大极小值搜索获取最佳棋位
-            minimax(0, depth, -INFINITY, INFINITY);
+            this.bestPoint = deepeningMinimax(2, depth);
             long minimaxEndTime = System.currentTimeMillis();
             this.statistics.setMinimaxTime((minimaxEndTime - minimaxStartTime) / 1000.00d);
         }
 
-        this.statistics.setVcxTime((vcxEndTime - vcxStartTime) / 1000.00d);
+        this.statistics.setPoint(this.bestPoint);
+        this.statistics.setScore(this.bestPoint.score);
+        this.statistics.setCaches(situationCacheMap.size());
         if (this.aiConfig.isDebug()) {
             ConsoleAction.showSimpleMsg("============AI统计[第" + this.rounds + "回合]==========");
             ConsoleAction.showSimpleMsg("搜索深度：" + this.statistics.getDepth());
             ConsoleAction.showSimpleMsg("搜索节点数：" + this.statistics.getNodes());
             ConsoleAction.showSimpleMsg("发生剪枝数：" + this.statistics.getCuts());
-            ConsoleAction.showSimpleMsg("缓存总数：" + this.situationCacheMap.size());
+            ConsoleAction.showSimpleMsg("缓存总数：" + this.statistics.getCaches());
             ConsoleAction.showSimpleMsg("缓存命中数：" + this.statistics.getCacheHits());
+            ConsoleAction.showSimpleMsg("算杀深度：" + this.statistics.getVcxDepth());
             ConsoleAction.showSimpleMsg("算杀命中：" + (this.statistics.getVcx() == 1 ? "VCF" : this.statistics.getVcx() == 2 ? "VCT" : "未命中"));
             ConsoleAction.showSimpleMsg("最佳落子点：" + this.statistics.getPoint());
             ConsoleAction.showSimpleMsg("得分：" + this.statistics.getScore());
@@ -411,6 +414,7 @@ public class ZhiZhangAIService implements AIService {
         this.situationCacheMap = new HashMap<>(2048);
         Point point = null;
         for (; depth <= maxDepth; depth += 2) {
+            this.statistics.setVcxDepth(depth);
             if (this.aiConfig.isDebug()) {
                 this.pathStack = new Stack<>();
             }
@@ -425,10 +429,7 @@ public class ZhiZhangAIService implements AIService {
                 }
 
                 // 算杀成功
-                this.statistics.setDepth(depth);
-                this.statistics.setPoint(point);
                 this.statistics.setVcx(isVcf ? 1 : 2);
-                this.statistics.setScore(point.score);
                 break;
             }
         }
@@ -470,9 +471,8 @@ public class ZhiZhangAIService implements AIService {
         Point best = null;
         List<Point> pointList = getVcxPoints(type, isVcf);
         for (Point point : pointList) {
-            this.statistics.incrNodes();
-
             if (this.aiConfig.isDebug()) {
+                this.statistics.incrNodes();
                 this.pathStack.push(point);
             }
 
@@ -830,6 +830,16 @@ public class ZhiZhangAIService implements AIService {
 
         // 启发式搜索
         List<Point> pointList = getHeuristicPoints(type);
+        if (isRoot && pointList.size() == 1) {
+            if (this.aiConfig.isDebug()) {
+                this.statistics.incrNodes();
+            }
+
+            // 只有一个落子点，直接返回就好
+            this.bestPoint = pointList.get(0);
+            return this.bestPoint.score;
+        }
+
         // 记录选择的最好落子点
         List<Point> bestPointList = new ArrayList<>();
         for (Point point : pointList) {
@@ -895,11 +905,6 @@ public class ZhiZhangAIService implements AIService {
         if (isRoot) {
             // 如果有多个落子点，则通过getBestPoint方法选择一个最好的
             this.bestPoint = bestPointList.size() > 1 ? getBestPoint(bestPointList) : bestPointList.get(0);
-
-            if (this.aiConfig.isDebug()) {
-                this.statistics.setPoint(this.bestPoint);
-                this.statistics.setScore(alpha);
-            }
         }
 
         int score = isAI ? alpha : beta;
@@ -1047,6 +1052,33 @@ public class ZhiZhangAIService implements AIService {
 
         // 取最大节点个数
         return pointList.subList(0, Math.min(pointList.size(), max));
+    }
+
+    /**
+     * 迭代加深minimax搜索
+     *
+     * @param depth    当前搜索深度
+     * @param maxDepth 最大搜索深度
+     * @return
+     */
+    private Point deepeningMinimax(int depth, int maxDepth) {
+        this.situationCacheMap = new HashMap<>(2048);
+
+        Point best = null;
+        for (; depth <= maxDepth; depth += 2) {
+            int score = minimax(0, depth, -INFINITY, INFINITY);
+            best = this.bestPoint;
+            this.statistics.setPoint(best);
+            this.statistics.setDepth(depth);
+            this.statistics.setScore(score);
+
+            if (Math.abs(score) >= INFINITY - 1) {
+                // 找到最优解了，结束搜索
+                break;
+            }
+        }
+
+        return best;
     }
 
     /**
