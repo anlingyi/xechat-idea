@@ -291,7 +291,7 @@ public class ZhiZhangAIService implements AIService {
         this.ai = 3 - point.type;
         this.bestPoint = null;
         // AI是黑棋则偏进攻，是白棋则偏防守
-        this.attack = this.ai == 1 ? 1.8f : 1.0f;
+        this.attack = this.ai == 1 ? 1.8f : 0.2f;
         int depth = this.aiConfig.getDepth();
 
         if (this.rounds == 1 && this.ai == 1) {
