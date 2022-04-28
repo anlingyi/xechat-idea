@@ -291,7 +291,7 @@ public class ZhiZhangAIService implements AIService {
         this.ai = 3 - point.type;
         this.bestPoint = null;
         // AI是黑棋则偏进攻，是白棋则偏防守
-        this.attack = this.ai == 1 ? 1.8f : 0.2f;
+        this.attack = this.ai == 1 ? 1.8f : 0.5f;
         int depth = this.aiConfig.getDepth();
 
         if (this.rounds == 1 && this.ai == 1) {
@@ -311,18 +311,18 @@ public class ZhiZhangAIService implements AIService {
             depth = 4;
         }
 
-        // 算杀最大深度
-        int maxDepth = 12;
-        long vcxStartTime = System.currentTimeMillis();
-        // 先VCT、后VCF
-        if (this.rounds > 3) {
-            this.bestPoint = deepeningVcx(true, maxDepth, false);
-        }
-        if (this.bestPoint == null && this.rounds > 4) {
-            this.bestPoint = deepeningVcx(true, maxDepth, true);
-        }
-        long vcxEndTime = System.currentTimeMillis();
-        this.statistics.setVcxTime((vcxEndTime - vcxStartTime) / 1000.00d);
+//        // 算杀最大深度
+//        int maxDepth = 12;
+//        long vcxStartTime = System.currentTimeMillis();
+//        // 先VCT、后VCF
+//        if (this.rounds > 3) {
+//            this.bestPoint = deepeningVcx(true, maxDepth, false);
+//        }
+//        if (this.bestPoint == null && this.rounds > 4) {
+//            this.bestPoint = deepeningVcx(true, maxDepth, true);
+//        }
+//        long vcxEndTime = System.currentTimeMillis();
+//        this.statistics.setVcxTime((vcxEndTime - vcxStartTime) / 1000.00d);
 
         if (this.bestPoint == null) {
             this.statistics.setNodes(0);
@@ -908,11 +908,8 @@ public class ZhiZhangAIService implements AIService {
         }
 
         int score = isAI ? alpha : beta;
-
-        if (alpha < beta) {
-            // 缓存当前局面分值
-            this.situationCacheMap.put(this.hashcode, new SituationCache(score, depth));
-        }
+        // 缓存当前局面分值
+        this.situationCacheMap.put(this.hashcode, new SituationCache(score, depth));
 
         return score;
     }
@@ -957,8 +954,8 @@ public class ZhiZhangAIService implements AIService {
                     continue;
                 }
 
-                if (checkSituation(point, ChessModel.CHONGSI, ChessModel.HUOSI)) {
-                    // 将自己的冲四、活四落子点加入到杀棋点队列
+                if (score >= RiskScore.MEDIUM_RISK.score) {
+                    // 必杀棋
                     killPointList.add(point);
                 }
 
@@ -993,8 +990,10 @@ public class ZhiZhangAIService implements AIService {
                     continue;
                 }
 
-                if (score >= RiskScore.LOW_RISK.score || foeScore >= RiskScore.MEDIUM_RISK.score) {
-                    // 高优先级落子点：活四、双冲四、双活三、冲四活三，需考虑对手的中风险情况（活四、双冲四、冲四活三）
+                if (foeScore >= RiskScore.MEDIUM_RISK.score) {
+                    // 高优先级落子点：考虑对手的中风险及以上情况（活四、双冲四、冲四活三）
+                    // 设置为对手分值
+                    point.score = foeScore;
                     highPriorityPointList.add(point);
                     continue;
                 }
@@ -1014,9 +1013,9 @@ public class ZhiZhangAIService implements AIService {
             }
         }
 
-        if (dangerLevel == 1 && !killPointList.isEmpty()) {
-            // 局势有危险且杀棋队列不为空，则将所有的杀棋点加入到高优先级队列
-            highPriorityPointList.addAll(killPointList);
+        if (dangerLevel < 2 && !killPointList.isEmpty()) {
+            // 局势不是特别危险，且杀棋队列不为空，直接进攻就好
+            return killPointList;
         }
 
         List<Point> pointList;
@@ -1194,6 +1193,8 @@ public class ZhiZhangAIService implements AIService {
         int huosanTotal = 0;
         // 冲四数
         int chongsiTotal = 0;
+        // 统计同一方向即冲四又活三的情况，出现这种情况的优先按活三分计算
+        int tfTotal = 0;
 
         for (int i = 1; i < 5; i++) {
             // 获取当前局势
@@ -1207,6 +1208,10 @@ public class ZhiZhangAIService implements AIService {
                     case HUOSAN:
                         // 活三+1
                         huosanTotal++;
+                        if (checkSituation(situation, ChessModel.CHONGSI)) {
+                            // 同一方向出现活三又出现活四
+                            tfTotal++;
+                        }
                         break;
                     case CHONGSI:
                         // 冲四+1
@@ -1219,10 +1224,10 @@ public class ZhiZhangAIService implements AIService {
             }
         }
 
-        if (chongsiTotal > 1) {
+        if (chongsiTotal > 1 || tfTotal > 1) {
             // 冲四数大于1，+高风险评分
             score += RiskScore.HIGH_RISK.score;
-        } else if (chongsiTotal > 0 && huosanTotal > 0) {
+        } else if (chongsiTotal > 0 && huosanTotal > 0 || tfTotal > 0 && huosanTotal > 1) {
             // 冲四又活三，+中风险评分
             score += RiskScore.MEDIUM_RISK.score;
         } else if (huosanTotal > 1) {
