@@ -277,7 +277,7 @@ public class ZhiZhangAIService implements AIService {
     }
 
     public ZhiZhangAIService() {
-        this(new AIConfig(6, 10, false));
+        this(new AIConfig(6, 10, false, 0, 6));
     }
 
     public ZhiZhangAIService(AIConfig aiConfig) {
@@ -311,18 +311,17 @@ public class ZhiZhangAIService implements AIService {
             depth = 4;
         }
 
-//        // 算杀最大深度
-//        int maxDepth = 12;
-//        long vcxStartTime = System.currentTimeMillis();
-//        // 先VCT、后VCF
-//        if (this.rounds > 3) {
-//            this.bestPoint = deepeningVcx(true, maxDepth, false);
-//        }
-//        if (this.bestPoint == null && this.rounds > 4) {
-//            this.bestPoint = deepeningVcx(true, maxDepth, true);
-//        }
-//        long vcxEndTime = System.currentTimeMillis();
-//        this.statistics.setVcxTime((vcxEndTime - vcxStartTime) / 1000.00d);
+        // 算杀模式
+        int vcx = aiConfig.getVcx();
+        if (vcx > 0) {
+            // 算杀最大深度
+            int vcxDepth = aiConfig.getVcxDepth();
+            long vcxStartTime = System.currentTimeMillis();
+            // VCT/VCF
+            this.bestPoint = deepeningVcx(true, vcxDepth, vcx == 2);
+            long vcxEndTime = System.currentTimeMillis();
+            this.statistics.setVcxTime((vcxEndTime - vcxStartTime) / 1000.00d);
+        }
 
         if (this.bestPoint == null) {
             this.statistics.setNodes(0);
@@ -344,12 +343,14 @@ public class ZhiZhangAIService implements AIService {
             ConsoleAction.showSimpleMsg("发生剪枝数：" + this.statistics.getCuts());
             ConsoleAction.showSimpleMsg("缓存总数：" + this.statistics.getCaches());
             ConsoleAction.showSimpleMsg("缓存命中数：" + this.statistics.getCacheHits());
-            ConsoleAction.showSimpleMsg("算杀深度：" + this.statistics.getVcxDepth());
-            ConsoleAction.showSimpleMsg("算杀命中：" + (this.statistics.getVcx() == 1 ? "VCF" : this.statistics.getVcx() == 2 ? "VCT" : "未命中"));
+            if (vcx > 0) {
+                ConsoleAction.showSimpleMsg("算杀深度：" + this.statistics.getVcxDepth());
+                ConsoleAction.showSimpleMsg("算杀命中：" + (this.statistics.getVcx() == 1 ? "VCF" : this.statistics.getVcx() == 2 ? "VCT" : "未命中"));
+            }
             ConsoleAction.showSimpleMsg("最佳落子点：" + this.statistics.getPoint());
             ConsoleAction.showSimpleMsg("得分：" + this.statistics.getScore());
             double time = this.statistics.getMinimaxTime() + this.statistics.getVcxTime();
-            ConsoleAction.showSimpleMsg("耗时：" + String.format("%.3f", time) + "s" + ", VCX(" + this.statistics.getVcxTime() + "s), MINIMAX(" + this.statistics.getMinimaxTime() + "s)");
+            ConsoleAction.showSimpleMsg("耗时：" + String.format("%.3f", time) + "s" + (vcx > 0 ? ", VCX(" + this.statistics.getVcxTime() + "s)" : "") + ", MINIMAX(" + this.statistics.getMinimaxTime() + "s)");
             ConsoleAction.showSimpleMsg("==================================");
         }
         this.situationCacheMap = null;
