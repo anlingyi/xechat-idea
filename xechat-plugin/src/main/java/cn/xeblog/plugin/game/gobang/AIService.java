@@ -38,6 +38,14 @@ public interface AIService {
          * debug
          */
         private boolean debug;
+        /**
+         * 算杀 0.不开启 1.VCT 2.VCF
+         */
+        private int vcx;
+        /**
+         * 算杀深度
+         */
+        private int vcxDepth;
     }
 
 }

@@ -101,9 +101,9 @@ public class Gobang extends AbstractGame<GobangDTO> {
     static {
         // AI级别初始化
         AI_LEVEL.put("AI·制杖", 1);
-        AI_LEVEL.put("AI·棋跪王", 4);
-        AI_LEVEL.put("AI·沟流儿", 6);
-        AI_LEVEL.put("AI·林必诚", 8);
+        AI_LEVEL.put("AI·棋跪王", 2);
+        AI_LEVEL.put("AI·沟流儿", 3);
+        AI_LEVEL.put("AI·林必诚", 4);
     }
 
     /**
@@ -233,16 +233,17 @@ public class Gobang extends AbstractGame<GobangDTO> {
             }
         };
 
-        Dimension mainDimension = new Dimension(width + 120, height + 50);
+        Dimension mainDimension = new Dimension(width + 180, height + 50);
 
         mainPanel.setLayout(new BorderLayout());
-        mainPanel.setPreferredSize(mainDimension);
+        mainPanel.setMinimumSize(mainDimension);
 
         tips = new JLabel("", JLabel.CENTER);
         tips.setFont(new Font("", Font.BOLD, 13));
         tips.setForeground(new Color(237, 81, 38));
         tips.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 
+        chessPanel.setLayout(null);
         // 设置棋盘宽高
         chessPanel.setPreferredSize(new Dimension(width, height));
         // 设置棋盘背景颜色
@@ -446,7 +447,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
      */
     private JPanel getConfigPanel() {
         JPanel configPanel = new JPanel();
-        configPanel.setPreferredSize(new Dimension(80, 400));
+        configPanel.setLayout(new GridLayout(8, 2));
+        configPanel.setPreferredSize(new Dimension(150, 250));
 
         JLabel label1 = new JLabel("搜索深度：");
         label1.setFont(new Font("", 1, 13));
@@ -466,7 +468,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
         });
         configPanel.add(searchDepthInput);
 
-        JLabel label2 = new JLabel("启发节点数：");
+        JLabel label2 = new JLabel("启发节点：");
         label2.setFont(new Font("", 1, 13));
         configPanel.add(label2);
 
@@ -484,11 +486,44 @@ public class Gobang extends AbstractGame<GobangDTO> {
         });
         configPanel.add(maxNodesInput);
 
-        JButton inputChessRecordButton = new JButton("输入棋谱");
-        inputChessRecordButton.addActionListener(e -> {
-            new InputChessRecordDialog().show();
+
+        JLabel label3 = new JLabel("算杀深度：");
+        label3.setFont(new Font("", 1, 13));
+        configPanel.add(label3);
+
+        JTextField vcxDepthInput = new JTextField();
+        vcxDepthInput.setText(String.valueOf(aiConfig.getVcxDepth()));
+        vcxDepthInput.setColumns(5);
+        vcxDepthInput.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                int keyChar = e.getKeyChar();
+                if (keyChar < KeyEvent.VK_0 || keyChar > KeyEvent.VK_9) {
+                    e.consume();
+                }
+            }
         });
-        configPanel.add(inputChessRecordButton);
+        configPanel.add(vcxDepthInput);
+
+        JLabel label4 = new JLabel("算杀模式：");
+        label4.setFont(new Font("", 1, 13));
+        configPanel.add(label4);
+
+        JRadioButton vcxCloseRadio = new JRadioButton("关闭", aiConfig.getVcx() == 0);
+        vcxCloseRadio.setActionCommand("0");
+        JRadioButton vctRadio = new JRadioButton("VCT", aiConfig.getVcx() == 1);
+        vctRadio.setActionCommand("1");
+        JRadioButton vcfRadio = new JRadioButton("VCF", aiConfig.getVcx() == 2);
+        vcfRadio.setActionCommand("2");
+
+        configPanel.add(vcxCloseRadio);
+        configPanel.add(vctRadio);
+        configPanel.add(vcfRadio);
+
+        ButtonGroup vcxRadioGroup = new ButtonGroup();
+        vcxRadioGroup.add(vcxCloseRadio);
+        vcxRadioGroup.add(vctRadio);
+        vcxRadioGroup.add(vcfRadio);
 
         aiTestButton = new JButton("AI落子");
         aiTestButton.addActionListener(e -> {
@@ -501,13 +536,25 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 type = 2;
             }
             showTips("AI思考中...");
-            aiConfig.setDepth(Math.min(10, Integer.parseInt(searchDepthInput.getText())));
+
+            aiConfig.setDepth(Math.min(20, Integer.parseInt(searchDepthInput.getText())));
             aiConfig.setMaxNodes(Math.min(30, Integer.parseInt(maxNodesInput.getText())));
+            aiConfig.setVcx(Integer.parseInt(vcxRadioGroup.getSelection().getActionCommand()));
+            aiConfig.setVcxDepth(Math.min(20, Integer.parseInt(vcxDepthInput.getText())));
+
             searchDepthInput.setText(String.valueOf(aiConfig.getDepth()));
             maxNodesInput.setText(String.valueOf(aiConfig.getMaxNodes()));
+            vcxDepthInput.setText(String.valueOf(aiConfig.getVcxDepth()));
+
             aiPutChess();
         });
         configPanel.add(aiTestButton);
+
+        JButton inputChessRecordButton = new JButton("输入棋谱");
+        inputChessRecordButton.addActionListener(e -> {
+            new InputChessRecordDialog().show();
+        });
+        configPanel.add(inputChessRecordButton);
 
         JCheckBox autoPutCheckBox = new JCheckBox("自动落子", aiAutoPut);
         autoPutCheckBox.addChangeListener(e -> aiAutoPut = ((JCheckBox) e.getSource()).isSelected());
@@ -681,7 +728,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
         this.aiService = null;
         mainPanel.setLayout(null);
-        mainPanel.setPreferredSize(new Dimension(150, 400));
+        mainPanel.setMinimumSize(new Dimension(150, 400));
 
         startPanel = new JPanel();
         startPanel.setBounds(10, 10, 120, 320);
@@ -723,9 +770,9 @@ public class Gobang extends AbstractGame<GobangDTO> {
         label2.setFont(new Font("", 1, 13));
         startPanel.add(label2);
 
-        JRadioButton blackChessRadio = new JRadioButton("黑棋", false);
+        JRadioButton blackChessRadio = new JRadioButton("黑棋", true);
         blackChessRadio.setActionCommand("1");
-        JRadioButton whiteChessRadio = new JRadioButton("白棋", true);
+        JRadioButton whiteChessRadio = new JRadioButton("白棋", false);
         whiteChessRadio.setActionCommand("2");
 
         ButtonGroup chessRadioGroup = new ButtonGroup();
@@ -1065,7 +1112,28 @@ public class Gobang extends AbstractGame<GobangDTO> {
     }
 
     private AIService createAI() {
-        aiConfig = new AIService.AIConfig(aiLevel, 10, gameMode == GameMode.DEBUG);
+        boolean debug = gameMode == GameMode.DEBUG;
+        aiConfig = new AIService.AIConfig(6, 10, debug, 0, 6);
+
+        switch (aiLevel) {
+            case 1:
+                aiConfig.setDepth(1);
+                break;
+            case 2:
+                aiConfig.setDepth(4);
+                break;
+            case 3:
+                aiConfig.setDepth(6);
+                aiConfig.setVcx(1);
+                aiConfig.setVcxDepth(8);
+                break;
+            case 4:
+                aiConfig.setDepth(8);
+                aiConfig.setVcx(1);
+                aiConfig.setVcxDepth(10);
+                break;
+        }
+
         return new ZhiZhangAIService(aiConfig);
     }
 
