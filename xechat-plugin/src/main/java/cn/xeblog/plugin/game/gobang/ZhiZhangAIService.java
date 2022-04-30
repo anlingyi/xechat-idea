@@ -1029,7 +1029,9 @@ public class ZhiZhangAIService implements AIService {
                     return randomPoint(type, 1);
                 }
 
-                // 返回候补落子点
+                // 打乱一下
+                Collections.shuffle(alternatePointList);
+                // 返回打乱后的候补落子点
                 pointList = alternatePointList;
             } else {
                 // 返回低优先级落子点
