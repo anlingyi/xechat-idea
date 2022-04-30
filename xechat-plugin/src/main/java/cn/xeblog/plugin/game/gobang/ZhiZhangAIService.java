@@ -392,7 +392,7 @@ public class ZhiZhangAIService implements AIService {
      */
     private Point deepeningVcx(boolean isAi, int maxDepth, boolean isVcf) {
         this.ai = isAi ? this.ai : 3 - this.ai;
-        Point point = deepening(2, maxDepth, isVcf);
+        Point point = deepening(1, maxDepth, isVcf);
         if (!isAi) {
             this.ai = 3 - this.ai;
             if (point != null) {
