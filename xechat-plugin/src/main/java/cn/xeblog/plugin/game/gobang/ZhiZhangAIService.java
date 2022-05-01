@@ -106,8 +106,8 @@ public class ZhiZhangAIService implements AIService {
         // 初始化Zobrist随机值
         for (int i = 0; i < BLACK_ZOBRIST.length; i++) {
             for (int j = 0; j < BLACK_ZOBRIST.length; j++) {
-                BLACK_ZOBRIST[i][j] = RandomUtil.randomLong(1, Long.MAX_VALUE);
-                WHITE_ZOBRIST[i][j] = RandomUtil.randomLong(1, Long.MAX_VALUE);
+                BLACK_ZOBRIST[i][j] = RandomUtil.randomLong();
+                WHITE_ZOBRIST[i][j] = RandomUtil.randomLong();
             }
         }
     }
