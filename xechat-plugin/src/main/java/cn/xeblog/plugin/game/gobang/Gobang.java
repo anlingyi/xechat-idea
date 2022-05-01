@@ -1113,7 +1113,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
     private AIService createAI() {
         boolean debug = gameMode == GameMode.DEBUG;
-        aiConfig = new AIService.AIConfig(6, 10, debug, 0, 7);
+        aiConfig = new AIService.AIConfig(6, 10, debug, 0, 8);
 
         switch (aiLevel) {
             case 1:
@@ -1129,7 +1129,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
             case 4:
                 aiConfig.setDepth(8);
                 aiConfig.setVcx(1);
-                aiConfig.setVcxDepth(9);
+                aiConfig.setVcxDepth(10);
                 break;
         }
 
