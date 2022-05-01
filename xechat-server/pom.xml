@@ -6,7 +6,7 @@
 
     <groupId>cn.xeblog</groupId>
     <artifactId>xechat-server</artifactId>
-    <version>1.4.9-beta</version>
+    <version>1.5.0-beta</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -19,7 +19,7 @@
         <dependency>
             <groupId>cn.xeblog</groupId>
             <artifactId>xechat-commons</artifactId>
-            <version>1.4.9-beta</version>
+            <version>1.5.0-beta</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
