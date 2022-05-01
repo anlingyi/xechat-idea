@@ -180,6 +180,19 @@ public class ZhiZhangAIService implements AIService {
         LOW_RISK(100000);
 
         int score;
+
+        /**
+         * 判断分数是否处于区间 [leftScore, rightScore)
+         *
+         * @param score      分数
+         * @param leftScore  左区分值
+         * @param rightScore 右区分值
+         * @return
+         */
+        public static boolean between(int score, RiskScore leftScore, RiskScore rightScore) {
+            return score >= leftScore.score && score < rightScore.score;
+        }
+
     }
 
     /**
@@ -968,8 +981,8 @@ public class ZhiZhangAIService implements AIService {
                 if (foeScore >= ChessModel.LIANWU.score) {
                     // 对手连五了，局势很危险！！
                     level = 2;
-                } else if (foeScore >= ChessModel.HUOSI.score) {
-                    // 对手活四了，局势有危险！
+                } else if (foeScore >= RiskScore.MEDIUM_RISK.score) {
+                    // 对手有活四、双冲四、冲四活三的点位了，局势有危险！
                     level = 1;
                 }
 
@@ -991,10 +1004,9 @@ public class ZhiZhangAIService implements AIService {
                     continue;
                 }
 
-                if (foeScore >= RiskScore.MEDIUM_RISK.score) {
-                    // 高优先级落子点：考虑对手的中风险及以上情况（活四、双冲四、冲四活三）
-                    // 设置为对手分值
-                    point.score = foeScore;
+                if (RiskScore.between(score, RiskScore.LOW_RISK, RiskScore.MEDIUM_RISK)
+                        || RiskScore.between(foeScore, RiskScore.LOW_RISK, RiskScore.MEDIUM_RISK)) {
+                    // 高优先级落子点：多活三，需考虑对手
                     highPriorityPointList.add(point);
                     continue;
                 }
