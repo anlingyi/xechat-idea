@@ -9,7 +9,7 @@
 * 即时聊天
 * 游戏对战
 
-了解更多：[https://xeblog.cn/?tag=xechat-idea](https://xeblog.cn/?tag=xechat-idea)
+[了解更多...](https://xeblog.cn/?tag=xechat-idea)
 
 ![](https://oss.xeblog.cn/prod/3ba0020c0aff46a984896ad3f231b7ea.png)
 
@@ -84,13 +84,27 @@ java -jar target/xechat-server-xxx.jar
 
 ### IDEA插件端
 
-#### 运行
+#### 修改IDEA版本
+
+修改 `build.gradle` 配置文件，将 `IDEA` 版本号改为你本地正在使用的版本
+
+```
+intellij {
+    version '2021.2'
+}
+```
+
+#### 本地运行
+
+> Tasks > intellij > runIde
 
 ![image.png](https://oss.xeblog.cn/prod/cb07b490036d4755b06c4aa1bc1f8411.png)
 
-#### 部署
+#### 插件部署
 
 **打包**
+
+> Tasks > build > assemble
 
 ![image.png](https://oss.xeblog.cn/prod/ca9baea17f3748e59c0cef1f01bd0aa0.png)
 
@@ -99,7 +113,7 @@ java -jar target/xechat-server-xxx.jar
 
 **安装**
 
-`IDEA > Preferences > Plugins`
+> IDEA > Preferences > Plugins
 
 ![image.png](https://oss.xeblog.cn/prod/9e07f0a7b3fb4c7bae0da2d8d1548388.png)
 
