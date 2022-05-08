@@ -1,20 +1,19 @@
 package cn.xeblog.plugin.util;
 
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.ByteUtil;
+import cn.hutool.core.util.IdUtil;
+import cn.xeblog.commons.entity.UserMsgDTO;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.MessageAction;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.intellij.util.ui.ImageUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 /**
  * @author anlingyi
@@ -23,60 +22,7 @@ import java.net.URL;
 public class UploadUtils {
 
     private static boolean UPLOADING;
-    private static final String PREFIX = "--";
-    private static final String BOUNDARY = "*****";
-    private static final String WRAP = "\r\n";
-    private static final String TRANSPORT_START = PREFIX + BOUNDARY + WRAP;
-    private static final String TRANSPORT_END = PREFIX + BOUNDARY + WRAP;
     private static final String ACCEPT_IMAGE_TYPE = "jpg,jpeg,gif,png";
-
-    private static String upload(byte[] bytes, String fileName) {
-        UPLOADING = true;
-        ConsoleAction.showSimpleMsg("图片上传中...");
-
-        String imgUrl = null;
-        try {
-            URL url = new URL("https://sm.ms/api/v2/upload");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoOutput(true);
-            connection.setUseCaches(false);
-            connection.setRequestMethod("POST");
-            connection.addRequestProperty("Content-Type", "multipart/form-data;boundary=" + BOUNDARY);
-            connection.addRequestProperty("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36");
-
-            DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-            out.writeBytes(TRANSPORT_START);
-            out.writeBytes("Content-Disposition: form-data; name=smfile; filename=" + fileName + WRAP);
-            out.writeBytes(WRAP);
-            out.write(bytes);
-            out.writeBytes(WRAP);
-            out.writeBytes(TRANSPORT_END);
-            out.flush();
-            out.close();
-
-            if (HttpURLConnection.HTTP_OK == connection.getResponseCode()) {
-                InputStream in = connection.getInputStream();
-                String str = IOUtils.toString(in, "UTF-8");
-                in.close();
-
-                Gson gson = new Gson();
-                JsonObject json = gson.fromJson(str, JsonObject.class);
-                JsonObject data = json.get("data") == null ? null : json.get("data").getAsJsonObject();
-                if (data == null) {
-                    imgUrl = json.get("images") == null ? null : json.get("images").getAsString();
-                } else {
-                    imgUrl = data.get("url").getAsString();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            ConsoleAction.showSimpleMsg("图片上传失败！");
-        } finally {
-            UPLOADING = false;
-        }
-
-        return imgUrl;
-    }
 
     public static void uploadImageFile(File file) {
         String fileType = file.getName().substring(file.getName().lastIndexOf(".") + 1);
@@ -86,7 +32,7 @@ public class UploadUtils {
         }
 
         try (FileInputStream inputStream = new FileInputStream(file)) {
-            sendImgAsync(IOUtils.toByteArray(inputStream), file.getName());
+            sendImgAsync(IOUtils.toByteArray(inputStream), generateFileName(fileType));
         } catch (Exception e) {
             e.printStackTrace();
             ConsoleAction.showSimpleMsg("图片上传失败！");
@@ -96,12 +42,17 @@ public class UploadUtils {
     public static void uploadImage(Image image) {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             BufferedImage bufferedImage = ImageUtil.toBufferedImage(image);
-            ImageIO.write(bufferedImage, "jpg", out);
-            sendImgAsync(out.toByteArray(), System.currentTimeMillis() + ".jpg");
+            ImageIO.write(bufferedImage, "png", out);
+            sendImgAsync(out.toByteArray(), generateFileName("png"));
         } catch (IOException e) {
             e.printStackTrace();
             ConsoleAction.showSimpleMsg("图片上传失败！");
         }
+    }
+
+    private static String generateFileName(String fileType) {
+        fileType = fileType == null ? "jpg" : fileType;
+        return IdUtil.fastUUID() + "." + fileType;
     }
 
     private static void sendImgAsync(byte[] bytes, String fileName) {
@@ -110,14 +61,19 @@ public class UploadUtils {
             return;
         }
 
-        new Thread(() -> {
-            String url = upload(bytes, fileName);
-            if (StringUtils.isBlank(url)) {
-                ConsoleAction.showSimpleMsg("图片上传失败！");
-                return;
-            }
+        UPLOADING = true;
+        ConsoleAction.showSimpleMsg("图片上传中...");
 
-            MessageAction.send(url, Action.CHAT);
+        new Thread(() -> {
+            try {
+                byte[] newBytes = ArrayUtil.addAll(ByteUtil.intToBytes(fileName.length()), fileName.getBytes(), bytes);
+                MessageAction.send(new UserMsgDTO(newBytes, UserMsgDTO.MsgType.IMAGE), Action.CHAT);
+            } catch (Exception e) {
+                ConsoleAction.showSimpleMsg("图片上传失败！");
+                e.printStackTrace();
+            } finally {
+                UPLOADING = false;
+            }
         }).start();
     }
 }

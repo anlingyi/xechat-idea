@@ -4,10 +4,15 @@ import cn.xeblog.plugin.entity.TextRender;
 import cn.xeblog.plugin.enums.Command;
 import cn.xeblog.plugin.enums.Style;
 import cn.xeblog.plugin.mode.ModeContext;
+import com.intellij.ide.actions.OpenFileAction;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.project.ProjectManager;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 
 /**
@@ -52,6 +57,26 @@ public class ConsoleAction {
             e.printStackTrace();
         }
         gotoConsoleLow();
+    }
+
+    public static void renderImage(String filePath) {
+        renderText("[", Style.DEFAULT);
+
+        JLabel imgLabel = new JLabel("查看图片");
+        imgLabel.setAlignmentY(0.85f);
+        imgLabel.setToolTipText("点击查看图片");
+        imgLabel.setForeground(StyleConstants.getForeground(Style.DEFAULT.get()));
+        imgLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                ApplicationManager.getApplication().invokeLater(() -> {
+                    OpenFileAction.openFile(filePath, ProjectManager.getInstance().getOpenProjects()[0]);
+                });
+            }
+        });
+        console.insertComponent(imgLabel);
+
+        renderText("]\n", Style.DEFAULT);
     }
 
     public static void clean() {

@@ -1,11 +1,11 @@
 package cn.xeblog.plugin.ui;
 
+import cn.xeblog.commons.entity.UserMsgDTO;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.enums.Command;
-import cn.xeblog.plugin.game.AbstractGame;
 import cn.xeblog.plugin.util.UploadUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -40,7 +40,6 @@ public class MainWindow {
         ConsoleAction.setConsole(console);
         ConsoleAction.setPanel(leftPanel);
         ConsoleAction.setConsoleScroll(consoleScroll);
-        AbstractGame.setMainPanel(rightPanel);
 
         Command.HELP.exec(null);
 
@@ -62,6 +61,7 @@ public class MainWindow {
                         return;
                     }
 
+                    cleanContent();
                     // 粘贴图片
                     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                     Transferable transferable = clipboard.getContents(null);
@@ -87,8 +87,12 @@ public class MainWindow {
         return MAIN_WINDOW;
     }
 
-    public JComponent getComponent() {
+    public JPanel getMainPanel() {
         return mainPanel;
+    }
+
+    public JPanel getRightPanel() {
+        return rightPanel;
     }
 
     private void sendMsg() {
@@ -105,7 +109,7 @@ public class MainWindow {
                 Command.handle(content);
             } else {
                 if (DataCache.isOnline) {
-                    MessageAction.send(content, Action.CHAT);
+                    MessageAction.send(new UserMsgDTO(content), Action.CHAT);
                 } else {
                     ConsoleAction.showLoginMsg();
                 }

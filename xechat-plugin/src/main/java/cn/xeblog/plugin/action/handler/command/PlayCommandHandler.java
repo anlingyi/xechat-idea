@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.action.handler.command;
 
+import cn.hutool.core.util.NumberUtil;
 import cn.xeblog.commons.entity.GameDTO;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
@@ -32,6 +33,11 @@ public class PlayCommandHandler extends AbstractCommandHandler {
         int len = args.length;
         if (len < 1) {
             ConsoleAction.showSimpleMsg("游戏编号不能为空！");
+            return;
+        }
+
+        if (!NumberUtil.isNumber(args[0])) {
+            ConsoleAction.showSimpleMsg("[" + args[0] + "]" + "不正确的游戏编号！");
             return;
         }
 
