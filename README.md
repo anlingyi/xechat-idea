@@ -102,9 +102,9 @@ intellij {
 
 #### 插件部署
 
-> 修改服务端地址
+> 提醒：修改服务端地址
 
-进入到 `cn.xeblog.plugin.client.XEChatClient` ，修改以下字段值
+进入到 `cn.xeblog.plugin.client.XEChatClient` ，修改以下变量值
 
 ```Java
     private static final String HOST = "localhost"; // 服务端IP
