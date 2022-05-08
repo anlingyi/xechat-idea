@@ -22,7 +22,7 @@ public enum ModeEnum implements Mode {
             Style.initStyle();
         }
     },
-    MUDDY_WATER("浑水摸鱼") {
+    TROUBLED_WATERS("浑水摸鱼") {
         @Override
         public void handleStyle(MutableAttributeSet style) {
             StyleConstants.setForeground(style, JBColor.background());

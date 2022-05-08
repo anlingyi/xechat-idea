@@ -3,11 +3,9 @@ package cn.xeblog.plugin.game.gobang;
 import cn.hutool.core.util.StrUtil;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
-import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.commons.entity.GobangDTO;
 import cn.xeblog.commons.entity.Response;
-import cn.xeblog.commons.enums.Action;
 import cn.xeblog.plugin.enums.Command;
 import cn.xeblog.plugin.game.AbstractGame;
 import com.intellij.openapi.ui.ComboBox;
@@ -728,7 +726,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
         this.aiService = null;
         mainPanel.setLayout(null);
-        mainPanel.setMinimumSize(new Dimension(150, 400));
+        mainPanel.setMinimumSize(new Dimension(150, 420));
 
         startPanel = new JPanel();
         startPanel.setBounds(10, 10, 120, 320);
@@ -1084,7 +1082,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
         dto.setY(point.y);
         dto.setType(point.type);
         dto.setOpponentId(DataCache.userMap.get(opponent));
-        MessageAction.send(dto, Action.GAME);
+        sendMsg(dto);
     }
 
     private void showTips(String msg) {

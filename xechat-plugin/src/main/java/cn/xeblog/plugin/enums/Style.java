@@ -24,7 +24,7 @@ public enum Style {
         @Override
         protected void init() {
             super.init();
-            StyleConstants.setForeground(style, new Color(157, 41, 51));
+            StyleConstants.setForeground(style, new Color(232, 81, 88));
             StyleConstants.setBold(style, true);
         }
     },
@@ -32,7 +32,7 @@ public enum Style {
         @Override
         protected void init() {
             super.init();
-            StyleConstants.setForeground(style, new Color(157, 41, 51));
+            StyleConstants.setForeground(style, new Color(232, 81, 88));
         }
     }
     ;

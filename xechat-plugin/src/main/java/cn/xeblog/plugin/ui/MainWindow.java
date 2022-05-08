@@ -5,7 +5,6 @@ import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.enums.Command;
-import cn.xeblog.plugin.game.AbstractGame;
 import cn.xeblog.plugin.util.UploadUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -40,7 +39,6 @@ public class MainWindow {
         ConsoleAction.setConsole(console);
         ConsoleAction.setPanel(leftPanel);
         ConsoleAction.setConsoleScroll(consoleScroll);
-        AbstractGame.setMainPanel(rightPanel);
 
         Command.HELP.exec(null);
 
@@ -87,8 +85,12 @@ public class MainWindow {
         return MAIN_WINDOW;
     }
 
-    public JComponent getComponent() {
+    public JPanel getMainPanel() {
         return mainPanel;
+    }
+
+    public JPanel getRightPanel() {
+        return rightPanel;
     }
 
     private void sendMsg() {
