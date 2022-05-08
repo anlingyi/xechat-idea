@@ -1,6 +1,7 @@
 package cn.xeblog.plugin.enums;
 
 import cn.xeblog.plugin.mode.ModeContext;
+import com.intellij.ui.JBColor;
 
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
@@ -41,6 +42,7 @@ public enum Style {
 
     protected void init() {
         style = new SimpleAttributeSet();
+        StyleConstants.setForeground(style, JBColor.foreground());
     }
 
     public MutableAttributeSet get() {

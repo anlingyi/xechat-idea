@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.ui;
 
+import cn.xeblog.commons.entity.UserMsgDTO;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.MessageAction;
@@ -60,6 +61,7 @@ public class MainWindow {
                         return;
                     }
 
+                    cleanContent();
                     // 粘贴图片
                     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                     Transferable transferable = clipboard.getContents(null);
@@ -107,7 +109,7 @@ public class MainWindow {
                 Command.handle(content);
             } else {
                 if (DataCache.isOnline) {
-                    MessageAction.send(content, Action.CHAT);
+                    MessageAction.send(new UserMsgDTO(content), Action.CHAT);
                 } else {
                     ConsoleAction.showLoginMsg();
                 }
