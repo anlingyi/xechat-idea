@@ -102,6 +102,15 @@ intellij {
 
 #### 插件部署
 
+> 修改服务端地址
+
+进入到 `cn.xeblog.plugin.client.XEChatClient` ，修改以下字段值
+
+```Java
+    private static final String HOST = "localhost"; // 服务端IP
+    private static final int PORT = 1024; // 服务端端口
+```
+
 **打包**
 
 > Tasks > build > assemble
