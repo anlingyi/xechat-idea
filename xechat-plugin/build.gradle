@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'cn.xeblog'
-version '1.5.1-beta'
+version '1.5.1-beta2'
 
 sourceCompatibility = 11
 targetCompatibility = 11

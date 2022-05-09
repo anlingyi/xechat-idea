@@ -1,13 +1,13 @@
 package cn.xeblog.plugin.util;
 
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.ByteUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.xeblog.commons.entity.UserMsgDTO;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.MessageAction;
 import com.intellij.util.ui.ImageUtil;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.apache.commons.io.IOUtils;
 
 import javax.imageio.ImageIO;
@@ -66,8 +66,11 @@ public class UploadUtils {
 
         new Thread(() -> {
             try {
-                byte[] newBytes = ArrayUtil.addAll(ByteUtil.intToBytes(fileName.length()), fileName.getBytes(), bytes);
-                MessageAction.send(new UserMsgDTO(newBytes, UserMsgDTO.MsgType.IMAGE), Action.CHAT);
+                ByteBuf byteBuf = Unpooled.buffer();
+                byteBuf.writeInt(fileName.length());
+                byteBuf.writeBytes(fileName.getBytes());
+                byteBuf.writeBytes(bytes);
+                MessageAction.send(new UserMsgDTO(byteBuf.array(), UserMsgDTO.MsgType.IMAGE), Action.CHAT);
             } catch (Exception e) {
                 ConsoleAction.showSimpleMsg("图片上传失败！");
                 e.printStackTrace();

@@ -61,7 +61,6 @@ public class MainWindow {
                         return;
                     }
 
-                    cleanContent();
                     // 粘贴图片
                     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                     Transferable transferable = clipboard.getContents(null);
@@ -69,9 +68,11 @@ public class MainWindow {
                         if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
                             List<File> fileList = (List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
                             UploadUtils.uploadImageFile(fileList.get(0));
+                            cleanContent();
                         } else if (transferable.isDataFlavorSupported(DataFlavor.imageFlavor)) {
                             Image image = (Image) transferable.getTransferData(DataFlavor.imageFlavor);
                             UploadUtils.uploadImage(image);
+                            cleanContent();
                         }
                     } catch (Exception exception) {
                         exception.printStackTrace();

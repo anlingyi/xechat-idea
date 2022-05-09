@@ -1,7 +1,6 @@
 package cn.xeblog.plugin.action.handler.message;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.ByteUtil;
 import cn.xeblog.commons.entity.UserMsgDTO;
 import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.plugin.action.ConsoleAction;
@@ -9,10 +8,12 @@ import cn.xeblog.commons.entity.Response;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.plugin.annotation.DoMessage;
 import cn.xeblog.plugin.enums.Style;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.Arrays;
 
 /**
  * @author anlingyi
@@ -32,17 +33,16 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
         if (body.getMsgType() == UserMsgDTO.MsgType.TEXT) {
             ConsoleAction.showSimpleMsg((String) body.getContent());
         } else {
-            int len = 4;
             byte[] bytes = (byte[]) body.getContent();
-            int fileNameLength = ByteUtil.bytesToInt(Arrays.copyOfRange(bytes, 0, len));
-            String fileName = new String(Arrays.copyOfRange(bytes, len, fileNameLength + len));
+            ByteBuf byteBuf = Unpooled.wrappedBuffer(bytes);
+            int fileNameLength = byteBuf.readInt();
+            String fileName = new String(ByteBufUtil.getBytes(byteBuf.readBytes(fileNameLength)));
             String filePath = IMAGES_DIR + "/" + fileName;
             File imageFile = new File(filePath);
             if (!imageFile.exists()) {
                 FileUtil.mkdir(IMAGES_DIR);
-                int off = len + fileNameLength;
                 try (FileOutputStream out = new FileOutputStream(imageFile)) {
-                    out.write(bytes, off, bytes.length - off);
+                    byteBuf.readBytes(out, byteBuf.readableBytes());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
