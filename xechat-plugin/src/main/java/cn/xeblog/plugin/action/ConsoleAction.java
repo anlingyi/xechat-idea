@@ -6,6 +6,7 @@ import cn.xeblog.plugin.enums.Style;
 import cn.xeblog.plugin.mode.ModeContext;
 import com.intellij.ide.actions.OpenFileAction;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 
 import javax.swing.*;
@@ -70,7 +71,8 @@ public class ConsoleAction {
             @Override
             public void mouseClicked(MouseEvent e) {
                 ApplicationManager.getApplication().invokeLater(() -> {
-                    OpenFileAction.openFile(filePath, ProjectManager.getInstance().getOpenProjects()[0]);
+                    Project[] projects = ProjectManager.getInstance().getOpenProjects();
+                    OpenFileAction.openFile(filePath, projects[projects.length - 1]);
                 });
             }
         });
