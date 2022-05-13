@@ -41,7 +41,10 @@ public class LoginCommandHandler extends AbstractCommandHandler {
             return;
         }
 
-        ConnectionAction conn = new ConnectionAction();
+        ConnectionAction conn = DataCache.connectionAction;
+        if (conn == null) {
+            conn = new ConnectionAction();
+        }
         if (len > 2) {
             setConnection(1, conn);
         }

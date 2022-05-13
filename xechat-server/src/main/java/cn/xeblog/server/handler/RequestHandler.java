@@ -1,6 +1,7 @@
 package cn.xeblog.server.handler;
 
 import cn.xeblog.commons.entity.Request;
+import cn.xeblog.commons.enums.Action;
 import cn.xeblog.server.factory.ActionHandlerFactory;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -20,6 +21,10 @@ public class RequestHandler {
     }
 
     public void exec() {
+        if (request.getAction() == Action.HEARTBEAT) {
+            return;
+        }
+
         ActionHandlerFactory.INSTANCE.produce(request.getAction()).handle(ctx, request.getBody());
     }
 

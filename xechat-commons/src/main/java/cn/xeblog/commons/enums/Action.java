@@ -11,6 +11,6 @@ public enum Action {
     SET_STATUS,
     GAME_INVITE,
     GAME_INVITE_RESULT,
-    GAME_OVER
-    ;
+    GAME_OVER,
+    HEARTBEAT;
 }

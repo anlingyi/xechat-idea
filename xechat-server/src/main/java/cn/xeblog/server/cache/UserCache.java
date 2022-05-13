@@ -37,6 +37,29 @@ public final class UserCache {
         USERNAME_MAP.remove(user.getUsername());
     }
 
+    public static void removeByUsername(String username) {
+        String key = getKeyByUsername(username);
+        if (key == null) {
+            return;
+        }
+
+        USER_MAP.remove(key);
+        USERNAME_MAP.remove(username);
+    }
+
+    public static User getUserByUsername(String username) {
+        String key = getKeyByUsername(username);
+        if (key == null) {
+            return null;
+        }
+
+        return USER_MAP.get(key);
+    }
+
+    public static String getKeyByUsername(String username) {
+        return USERNAME_MAP.get(username);
+    }
+
     public static void clear() {
         USER_MAP.clear();
     }

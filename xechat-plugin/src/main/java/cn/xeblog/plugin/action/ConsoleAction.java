@@ -91,6 +91,11 @@ public class ConsoleAction {
     }
 
     public synchronized static void gotoConsoleLow() {
+        JScrollBar verticalScrollBar = consoleScroll.getVerticalScrollBar();
+        if (verticalScrollBar.getValue() + 20 < verticalScrollBar.getMaximum() - verticalScrollBar.getHeight()) {
+            return;
+        }
+
         console.setCaretPosition(console.getDocument().getLength());
     }
 

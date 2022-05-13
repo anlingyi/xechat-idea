@@ -17,7 +17,7 @@ public abstract class AbstractResponseHistoryService {
 
     protected abstract void addHistoryHandler(Response response);
 
-    public abstract List<Response> getHistory();
+    public abstract List<Response> getHistory(int limit);
 
     protected Response clone(Response origin) {
         Response resp = new Response();
