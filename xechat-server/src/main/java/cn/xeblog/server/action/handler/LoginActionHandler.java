@@ -38,12 +38,12 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
         UserCache.add(id, user);
 
         List<Response> historyMsgList = ObjectFactory.getObject(AbstractResponseHistoryService.class).getHistory();
+        ChannelAction.sendOnlineUsers();
+        ChannelAction.send(ResponseBuilder.system(user.getUsername() + "进入了鱼塘！"));
+
         if (historyMsgList != null && historyMsgList.size() > 0) {
             ctx.writeAndFlush(ResponseBuilder.build(null, new HistoryMsgDTO(historyMsgList), MessageType.HISTORY_MSG));
         }
-
-        ChannelAction.sendOnlineUsers();
-        ChannelAction.send(ResponseBuilder.system(user.getUsername() + "进入了鱼塘！"));
     }
 
 }

@@ -16,6 +16,7 @@ public class HistoryMessageHandler extends AbstractMessageHandler<HistoryMsgDTO>
 
     @Override
     protected void process(Response<HistoryMsgDTO> response) {
+        ConsoleAction.showSimpleMsg("正在加载历史消息...");
         response.getBody().getMsgList().forEach(msg -> MessageHandlerFactory.INSTANCE.produce(msg.getType()).handle(msg));
         ConsoleAction.showSimpleMsg("------以上是历史消息------");
     }

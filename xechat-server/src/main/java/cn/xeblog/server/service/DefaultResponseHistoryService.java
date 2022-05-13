@@ -29,7 +29,7 @@ public class DefaultResponseHistoryService extends AbstractResponseHistoryServic
     private int putIndex;
 
     public DefaultResponseHistoryService() {
-        this(10);
+        this(15);
     }
 
     public DefaultResponseHistoryService(int size) {
