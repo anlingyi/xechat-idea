@@ -6,6 +6,7 @@ import cn.xeblog.plugin.annotation.DoCommand;
 import cn.xeblog.plugin.builder.RequestBuilder;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.UserStatus;
+import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.enums.Command;
 
 /**
@@ -30,6 +31,7 @@ public class SetStatusCommandHandler extends AbstractCommandHandler {
         }
 
         MessageAction.send(userStatus, Action.SET_STATUS);
+        DataCache.userStatus = userStatus;
     }
 
     private static UserStatus getUserStatus(int index) {

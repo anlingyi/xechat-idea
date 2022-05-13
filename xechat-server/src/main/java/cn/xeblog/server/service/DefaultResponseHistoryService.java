@@ -29,7 +29,7 @@ public class DefaultResponseHistoryService extends AbstractResponseHistoryServic
     private int putIndex;
 
     public DefaultResponseHistoryService() {
-        this(15);
+        this(50);
     }
 
     public DefaultResponseHistoryService(int size) {
@@ -78,13 +78,23 @@ public class DefaultResponseHistoryService extends AbstractResponseHistoryServic
     }
 
     @Override
-    public List<Response> getHistory() {
-        List<Response> list = new ArrayList<>();
+    public List<Response> getHistory(int limit) {
+        List<Response> list = new ArrayList<>(limit);
 
         readWriteLock.readLock().lock();
         try {
+            int readCount = Math.min(limit, count);
             int start = takeIndex;
-            for (int i = 0; i < count; i++) {
+            int outLen = start - readCount;
+            if (outLen >= 0) {
+                start = outLen;
+            } else {
+                start -= readCount;
+                if (start < 0) {
+                    start += count;
+                }
+            }
+            for (int i = 0; i < readCount; i++) {
                 list.add(queue[start]);
                 if (++start == size) {
                     start = 0;

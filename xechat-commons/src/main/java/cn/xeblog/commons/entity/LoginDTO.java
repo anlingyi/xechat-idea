@@ -20,4 +20,6 @@ public class LoginDTO implements Serializable {
 
     private UserStatus status;
 
+    private boolean reconnected;
+
 }

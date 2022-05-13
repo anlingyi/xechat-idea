@@ -6,6 +6,7 @@ import cn.xeblog.commons.entity.Response;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.ssl.SslContext;
+import io.netty.handler.timeout.IdleStateHandler;
 
 /**
  * @author anlingyi
@@ -21,6 +22,7 @@ public class DefaultChannelInitializer extends ChannelInitializer<SocketChannel>
 
     protected void initChannel(SocketChannel ch) throws Exception {
         ch.pipeline()
+                .addLast(new IdleStateHandler(10, 5, 10))
                 .addLast(sslContext.newHandler(ch.alloc()))
                 .addLast(new ProtostuffDecoder(Response.class))
                 .addLast(new ProtostuffEncoder())

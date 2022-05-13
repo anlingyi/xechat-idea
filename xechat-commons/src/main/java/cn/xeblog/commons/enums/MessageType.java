@@ -12,5 +12,6 @@ public enum MessageType {
     GAME_INVITE,
     GAME_INVITE_RESULT,
     GAME_OVER,
-    HISTORY_MSG;
+    HISTORY_MSG,
+    HEARTBEAT;
 }
