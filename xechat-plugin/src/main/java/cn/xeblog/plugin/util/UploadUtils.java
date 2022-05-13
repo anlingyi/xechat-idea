@@ -23,6 +23,7 @@ public class UploadUtils {
 
     private static boolean UPLOADING;
     private static final String ACCEPT_IMAGE_TYPE = "jpg,jpeg,gif,png";
+    private static final int MAX_SIZE = 10 << 20;
 
     public static void uploadImageFile(File file) {
         String fileType = file.getName().substring(file.getName().lastIndexOf(".") + 1);
@@ -58,6 +59,11 @@ public class UploadUtils {
     private static void sendImgAsync(byte[] bytes, String fileName) {
         if (UPLOADING) {
             ConsoleAction.showSimpleMsg("请等待之前的图片上传完成！");
+            return;
+        }
+
+        if (bytes.length > MAX_SIZE) {
+            ConsoleAction.showSimpleMsg("图片大小不能超过" + (MAX_SIZE >> 20) + "MB！");
             return;
         }
 
