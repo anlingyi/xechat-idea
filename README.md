@@ -144,3 +144,4 @@ http://plugins.xeblog.cn
 
 ![image.png](https://oss.xeblog.cn/prod/bb9ee5821ca84cca935f9ccab0040643.png)
 
+如有条件，还请自行部署服务端。
