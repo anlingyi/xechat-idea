@@ -53,7 +53,7 @@ public class LoginCommandHandler extends AbstractCommandHandler {
         }
 
         DataCache.username = username;
-        ConsoleAction.showSimpleMsg("正在登录中...");
+        ConsoleAction.showSimpleMsg("正在连接服务器...");
         conn.exec();
     }
 
