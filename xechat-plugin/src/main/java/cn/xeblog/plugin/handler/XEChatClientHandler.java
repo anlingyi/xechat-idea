@@ -27,6 +27,7 @@ public class XEChatClientHandler extends SimpleChannelInboundHandler<Response> {
         boolean reconnected = DataCache.reconnected;
         if (!reconnected) {
             ConsoleAction.clean();
+            ConsoleAction.showSimpleMsg("正在登录中...");
         }
 
         UserStatus status = DataCache.userStatus;
@@ -79,6 +80,7 @@ public class XEChatClientHandler extends SimpleChannelInboundHandler<Response> {
                     MessageAction.send(null, Action.HEARTBEAT);
                     break;
                 case READER_IDLE:
+                    break;
                 case ALL_IDLE:
                     ctx.close();
                     DataCache.reconnected = true;

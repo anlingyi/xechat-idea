@@ -22,7 +22,7 @@ public class DefaultChannelInitializer extends ChannelInitializer<SocketChannel>
 
     protected void initChannel(SocketChannel ch) throws Exception {
         ch.pipeline()
-                .addLast(new IdleStateHandler(10, 5, 10))
+                .addLast(new IdleStateHandler(0, 0, 14))
                 .addLast(sslContext.newHandler(ch.alloc()))
                 .addLast(new ProtostuffDecoder(Request.class))
                 .addLast(new ProtostuffEncoder())
