@@ -11,7 +11,9 @@
 
 [了解更多...](https://xeblog.cn/?tag=xechat-idea)
 
-![](https://oss.xeblog.cn/prod/3ba0020c0aff46a984896ad3f231b7ea.png)
+![](https://oss.xeblog.cn/prod/9502360a6dd04d1fa55f5d906e9404c5.png)
+
+![](https://oss.xeblog.cn/prod/87397d4da728467e912450f94e41b2ef.jpg)
 
 ### 项目结构
 
@@ -128,6 +130,17 @@ intellij {
 
 选择打包后的文件安装 `build/distributions/xechat-plugin-xxx.zip`
 
+## 安装体验
 
+添加插件库 `Plugins > 设置按钮 > Manage Plugin Repositories...`
 
+```
+http://plugins.xeblog.cn
+```
+
+![image.png](https://oss.xeblog.cn/prod/7381109b1fe04a3d9732238f267e53ed.png)
+
+搜索 “xechat” 安装
+
+![image.png](https://oss.xeblog.cn/prod/bb9ee5821ca84cca935f9ccab0040643.png)
 
