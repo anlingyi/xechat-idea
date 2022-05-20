@@ -61,8 +61,6 @@ public class ConsoleAction {
     }
 
     public static void renderImage(String filePath) {
-        renderText("[", Style.DEFAULT);
-
         JLabel imgLabel = new JLabel("查看图片");
         imgLabel.setAlignmentY(0.85f);
         imgLabel.setToolTipText("点击查看图片");
@@ -76,9 +74,12 @@ public class ConsoleAction {
                 });
             }
         });
-        console.insertComponent(imgLabel);
 
-        renderText("]\n", Style.DEFAULT);
+        synchronized (console) {
+            renderText("[", Style.DEFAULT);
+            console.insertComponent(imgLabel);
+            renderText("]\n", Style.DEFAULT);
+        }
     }
 
     public static void clean() {

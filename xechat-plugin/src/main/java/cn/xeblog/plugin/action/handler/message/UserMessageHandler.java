@@ -27,17 +27,15 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
     @Override
     protected void process(Response<UserMsgDTO> response) {
         User user = response.getUser();
-        ConsoleAction.renderText(String.format("[%s] %s(%s)：", response.getTime(), user.getUsername(),
-                user.getStatus().alias()), Style.USER_NAME);
         UserMsgDTO body = response.getBody();
-        if (body.getMsgType() == UserMsgDTO.MsgType.TEXT) {
-            ConsoleAction.showSimpleMsg((String) body.getContent());
-        } else {
+        String filePath = null;
+        boolean isImage = body.getMsgType() == UserMsgDTO.MsgType.IMAGE;
+        if (isImage) {
             byte[] bytes = (byte[]) body.getContent();
             ByteBuf byteBuf = Unpooled.wrappedBuffer(bytes);
             int fileNameLength = byteBuf.readInt();
             String fileName = new String(ByteBufUtil.getBytes(byteBuf.readBytes(fileNameLength)));
-            String filePath = IMAGES_DIR + "/" + fileName;
+            filePath = IMAGES_DIR + "/" + fileName;
             File imageFile = new File(filePath);
             if (!imageFile.exists()) {
                 FileUtil.mkdir(IMAGES_DIR);
@@ -47,8 +45,14 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
                     e.printStackTrace();
                 }
             }
+        }
 
+        ConsoleAction.renderText(String.format("[%s] %s(%s)：", response.getTime(), user.getUsername(),
+                user.getStatus().alias()), Style.USER_NAME);
+        if (isImage) {
             ConsoleAction.renderImage(filePath);
+        } else {
+            ConsoleAction.showSimpleMsg((String) body.getContent());
         }
     }
 
