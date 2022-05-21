@@ -77,8 +77,12 @@ public class ConsoleAction {
 
         synchronized (console) {
             renderText("[", Style.DEFAULT);
+            JScrollBar verticalScrollBar = consoleScroll.getVerticalScrollBar();
+            int beforeScrollVal = verticalScrollBar.getValue();
+            updateCaretPosition(-1);
             console.insertComponent(imgLabel);
             renderText("]\n", Style.DEFAULT);
+            SwingUtilities.invokeLater(() -> verticalScrollBar.setValue(beforeScrollVal));
         }
     }
 
@@ -86,18 +90,22 @@ public class ConsoleAction {
         console.setText("");
     }
 
-    public synchronized static void setConsoleTitle(String title) {
-        ((TitledBorder) panel.getBorder()).setTitle(title);
-        panel.updateUI();
+    public static void setConsoleTitle(String title) {
+        synchronized (panel) {
+            ((TitledBorder) panel.getBorder()).setTitle(title);
+            panel.updateUI();
+        }
     }
 
-    public synchronized static void gotoConsoleLow() {
-        JScrollBar verticalScrollBar = consoleScroll.getVerticalScrollBar();
-        if (verticalScrollBar.getValue() + 20 < verticalScrollBar.getMaximum() - verticalScrollBar.getHeight()) {
-            return;
-        }
+    public static void gotoConsoleLow() {
+        synchronized (consoleScroll) {
+            JScrollBar verticalScrollBar = consoleScroll.getVerticalScrollBar();
+            if (verticalScrollBar.getValue() + 20 < verticalScrollBar.getMaximum() - verticalScrollBar.getHeight()) {
+                return;
+            }
 
-        console.setCaretPosition(console.getDocument().getLength());
+            updateCaretPosition(-1);
+        }
     }
 
     public static void showErrorMsg() {
@@ -123,4 +131,12 @@ public class ConsoleAction {
     public static void showSystemMsg(String time, String msg) {
         ConsoleAction.renderText(String.format("[%s] 系统消息：%s\n", time, msg), Style.SYSTEM_MSG);
     }
+
+    private static void updateCaretPosition(int position) {
+        if (position == -1) {
+            position = console.getDocument().getLength();
+        }
+        console.setCaretPosition(position);
+    }
+
 }
