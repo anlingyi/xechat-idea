@@ -1,10 +1,12 @@
 package cn.xeblog.plugin.action.handler.command;
 
+import cn.hutool.core.util.StrUtil;
 import cn.xeblog.plugin.action.ConnectionAction;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.annotation.DoCommand;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.enums.Command;
+import cn.xeblog.plugin.util.ParamsUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -14,7 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 @DoCommand(Command.LOGIN)
 public class LoginCommandHandler extends AbstractCommandHandler {
 
-    private String[] args;
+    private static boolean CONNECTING;
 
     @Override
     public void process(String[] args) {
@@ -22,15 +24,16 @@ public class LoginCommandHandler extends AbstractCommandHandler {
             ConsoleAction.showSimpleMsg("已是登录状态！");
             return;
         }
-
-        this.args = args;
-        int len = args.length;
-        if (len < 1) {
-            ConsoleAction.showSimpleMsg("用户名不能为空！");
+        if (CONNECTING) {
+            ConsoleAction.showSimpleMsg("请等待之前的连接...");
             return;
         }
 
-        String username = args[0];
+        int len = args.length;
+        String username = DataCache.username;
+        if (len > 0) {
+            username = args[0];
+        }
 
         if (StringUtils.isBlank(username)) {
             ConsoleAction.showSimpleMsg("用户名不能为空！");
@@ -45,28 +48,19 @@ public class LoginCommandHandler extends AbstractCommandHandler {
         if (conn == null) {
             conn = new ConnectionAction();
         }
-        if (len > 2) {
-            setConnection(1, conn);
+        String host = ParamsUtils.getValue(args, "-h");
+        String port = ParamsUtils.getValue(args, "-p");
+        if (StrUtil.isNotBlank(host)) {
+            conn.setHost(host);
         }
-        if (len > 4) {
-            setConnection(3, conn);
+        if (StrUtil.isNotBlank(port)) {
+            conn.setPort(Integer.parseInt(port));
         }
 
+        CONNECTING = true;
         DataCache.username = username;
         ConsoleAction.showSimpleMsg("正在连接服务器...");
-        conn.exec();
-    }
-
-    private void setConnection(int index, ConnectionAction conn) {
-        int k = index + 1;
-        switch (StringUtils.lowerCase(this.args[index])) {
-            case "-h":
-                conn.setHost(this.args[k]);
-                return;
-            case "-p":
-                conn.setPort(Integer.parseInt(this.args[k]));
-                return;
-        }
+        conn.exec((flag) -> CONNECTING = false);
     }
 
     @Override

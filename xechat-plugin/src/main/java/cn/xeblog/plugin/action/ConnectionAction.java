@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.function.Consumer;
+
 /**
  * @author anlingyi
  * @date 2021/8/22 9:02 下午
@@ -19,9 +21,9 @@ public class ConnectionAction {
 
     private int port;
 
-    public void exec() {
+    public void exec(Consumer<Boolean> consumer) {
         DataCache.connectionAction = this;
-        new Thread(() -> XEChatClient.run(host, port)).start();
+        new Thread(() -> XEChatClient.run(host, port, consumer)).start();
     }
 
 }
