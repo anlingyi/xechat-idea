@@ -67,7 +67,7 @@ public class XEChatClientHandler extends SimpleChannelInboundHandler<Response> {
             }
 
             ConsoleAction.showSimpleMsg("正在重新连接服务器...");
-            connectionAction.exec();
+            connectionAction.exec(null);
         }
     }
 

@@ -12,6 +12,7 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 
 import java.io.InputStream;
+import java.util.function.Consumer;
 
 /**
  * @author anlingyi
@@ -40,10 +41,10 @@ public class XEChatClient {
     }
 
     public static void run() {
-        run(HOST, PORT);
+        run(HOST, PORT, null);
     }
 
-    public static void run(String host, int port) {
+    public static void run(String host, int port, Consumer<Boolean> consumer) {
         if (host == null) {
             host = HOST;
         }
@@ -51,6 +52,7 @@ public class XEChatClient {
             port = PORT;
         }
 
+        boolean flag = false;
         EventLoopGroup group = new NioEventLoopGroup();
         try {
             Bootstrap bootstrap = new Bootstrap();
@@ -60,9 +62,14 @@ public class XEChatClient {
                     .handler(new DefaultChannelInitializer(sslContext));
             ChannelFuture channelFuture = bootstrap.connect(host, port).sync();
             channelFuture.channel().closeFuture().sync();
+            flag = true;
         } catch (Exception e) {
+            flag = false;
             ConsoleAction.showSimpleMsg("连接服务器失败！");
         } finally {
+            if (consumer != null) {
+                consumer.accept(flag);
+            }
             group.shutdownGracefully();
         }
     }
