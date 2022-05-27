@@ -1,6 +1,8 @@
 package cn.xeblog.server.action.handler;
 
 import cn.xeblog.commons.enums.Action;
+import cn.xeblog.commons.enums.MessageType;
+import cn.xeblog.server.action.ChannelAction;
 import cn.xeblog.server.annotation.DoAction;
 import cn.xeblog.server.builder.ResponseBuilder;
 import cn.xeblog.commons.entity.User;
@@ -15,13 +17,8 @@ public class SetStatusActionHandler extends AbstractActionHandler<UserStatus> {
 
     @Override
     protected void process(User user, UserStatus body) {
-        if (user.getStatus() == UserStatus.PLAYING) {
-            user.send(ResponseBuilder.system("正在游戏中，不能修改状态！"));
-            return;
-        }
-
         user.setStatus(body);
-        user.send(ResponseBuilder.system("状态修改成功！"));
+        ChannelAction.send(ResponseBuilder.build(user, body, MessageType.STATUS_UPDATE));
     }
 
 }

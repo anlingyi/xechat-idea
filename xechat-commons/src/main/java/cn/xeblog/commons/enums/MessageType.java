@@ -9,9 +9,11 @@ public enum MessageType {
     SYSTEM,
     ONLINE_USERS,
     GAME,
-    GAME_INVITE,
-    GAME_INVITE_RESULT,
     GAME_OVER,
     HISTORY_MSG,
+    GAME_ROOM,
+    GAME_ROOM_CREATED,
+    GAME_ROOM_USER_LEFT,
+    STATUS_UPDATE,
     HEARTBEAT;
 }

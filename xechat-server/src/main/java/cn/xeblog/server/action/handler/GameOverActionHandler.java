@@ -1,13 +1,14 @@
 package cn.xeblog.server.action.handler;
 
 import cn.xeblog.commons.entity.GameDTO;
+import cn.xeblog.commons.entity.GameRoom;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.server.annotation.DoAction;
 import cn.xeblog.server.builder.ResponseBuilder;
 import cn.xeblog.commons.entity.Response;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.enums.MessageType;
-import cn.xeblog.commons.enums.UserStatus;
+import cn.xeblog.server.cache.UserCache;
 
 /**
  * @author anlingyi
@@ -17,15 +18,14 @@ import cn.xeblog.commons.enums.UserStatus;
 public class GameOverActionHandler extends AbstractGameActionHandler<GameDTO> {
 
     @Override
-    protected void process(User user, User opponent, GameDTO body) {
-        user.setStatus(UserStatus.FISHING);
+    protected void process(User user, GameRoom gameRoom, GameDTO body) {
         Response resp = ResponseBuilder.build(user, body, MessageType.GAME_OVER);
-        user.send(resp);
-
-        if (opponent != null) {
-            opponent.setStatus(UserStatus.FISHING);
-            opponent.send(resp);
-        }
+        gameRoom.getUsers().forEach((k, v) -> {
+            User player = UserCache.get(v.getId());
+            if (player != null) {
+                player.send(resp);
+            }
+        });
     }
 
 }

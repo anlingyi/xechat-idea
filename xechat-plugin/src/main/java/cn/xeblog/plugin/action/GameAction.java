@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.action;
 
+import cn.xeblog.commons.entity.GameDTO;
 import cn.xeblog.commons.entity.Response;
 import cn.xeblog.commons.enums.Game;
 import cn.xeblog.plugin.factory.GameFactory;
@@ -27,26 +28,25 @@ public class GameAction {
     private static String nickname;
 
     /**
-     * 对手昵称
+     * 邀请人昵称
      */
-    private static String opponent;
+    private static String inviter;
 
     /**
-     * 是否是主动邀请
+     * 当前游戏房间号
      */
-    private static boolean proactive;
+    private static String roomId;
 
-    /**
-     * 是否是离线游戏
-     */
-    private static boolean offlineGame;
+    public static void setRoomId(String roomId) {
+        GameAction.roomId = roomId;
+    }
 
-    public static void setOfflineGame(boolean bol) {
-        GameAction.offlineGame = bol;
+    public static String getRoomId() {
+        return roomId;
     }
 
     public static boolean isOfflineGame() {
-        return offlineGame;
+        return roomId == null;
     }
 
     public static String getNickname() {
@@ -61,20 +61,16 @@ public class GameAction {
         GameAction.game = game;
     }
 
-    public static void setOpponent(String opponent) {
-        GameAction.opponent = opponent;
+    public static void setInviter(String inviter) {
+        GameAction.inviter = inviter;
     }
 
-    public static void setProactive(boolean proactive) {
-        GameAction.proactive = proactive;
-    }
-
-    public static String getOpponent() {
-        return opponent;
+    public static String getInviter() {
+        return inviter;
     }
 
     public static boolean isProactive() {
-        return proactive;
+        return inviter == null;
     }
 
     public static Game getGame() {
@@ -89,9 +85,9 @@ public class GameAction {
         return game.getName();
     }
 
-    public static void handle(Response response) {
+    public static void handle(Response<GameDTO> response) {
         if (playing()) {
-            action.handle(response);
+            action.handle(response.getBody());
         }
     }
 
@@ -103,21 +99,21 @@ public class GameAction {
         clean();
     }
 
-    public static void create() {
+    public static AbstractGame create() {
         if (game == null) {
-            return;
+            return null;
         }
 
         GameAction.action = GameFactory.produce(game);
+        return action;
     }
 
     public static void clean() {
         game = null;
         action = null;
-        opponent = null;
+        inviter = null;
         nickname = null;
-        proactive = false;
-        offlineGame = false;
+        roomId = null;
     }
 
     public static boolean playing() {

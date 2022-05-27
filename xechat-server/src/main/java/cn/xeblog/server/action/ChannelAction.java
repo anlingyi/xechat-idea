@@ -1,9 +1,9 @@
 package cn.xeblog.server.action;
 
-import cn.xeblog.commons.entity.Response;
+import cn.xeblog.commons.entity.*;
 import cn.xeblog.server.builder.ResponseBuilder;
+import cn.xeblog.server.cache.GameRoomCache;
 import cn.xeblog.server.cache.UserCache;
-import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.server.factory.ObjectFactory;
 import cn.xeblog.server.service.AbstractResponseHistoryService;
@@ -56,7 +56,7 @@ public class ChannelAction {
     }
 
     public static void sendOnlineUsers() {
-        send(ResponseBuilder.build(null, UserCache.getUsernameMap(), MessageType.ONLINE_USERS));
+        send(ResponseBuilder.build(null, new UserListMsgDTO(UserCache.listUser()), MessageType.ONLINE_USERS));
     }
 
     public static void cleanUser(ChannelHandlerContext ctx) {
@@ -73,10 +73,30 @@ public class ChannelAction {
 
         log.debug("清理用户, username -> {}", user.getUsername());
 
+        GameRoom gameRoom = GameRoomCache.getGameRoomByUserId(user.getId());
+        if (gameRoom != null) {
+            gameRoom.getUsers().forEach((k, v) -> {
+                if (v.getId().equals(user.getId())) {
+                    return;
+                }
+
+                User player = UserCache.get(v.getId());
+                if (player != null) {
+                    player.send(ResponseBuilder.build(user, new GameRoomMsgDTO(GameRoomMsgDTO.MsgType.PLAYER_LEFT, null), MessageType.GAME_ROOM));
+                }
+            });
+            GameRoomCache.leftRoom(gameRoom.getId(), user);
+        }
+
         UserCache.remove(id);
         sendOnlineUsers();
         send(ResponseBuilder.system(user.getUsername() + "离开了鱼塘！"));
 
         return user;
     }
+
+    public static void updateUserStatus(User user) {
+        send(ResponseBuilder.build(user, user.getStatus(), MessageType.STATUS_UPDATE));
+    }
+
 }

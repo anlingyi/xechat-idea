@@ -5,6 +5,7 @@ import io.netty.channel.Channel;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * @author anlingyi
@@ -16,6 +17,10 @@ import java.io.Serializable;
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    @Getter
+    @Setter
+    private String id;
 
     @Getter
     @Setter
@@ -35,4 +40,16 @@ public class User implements Serializable {
         channel.writeAndFlush(response);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id.equals(user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

@@ -1,13 +1,13 @@
 package cn.xeblog.server.action.handler;
 
 import cn.hutool.core.util.StrUtil;
-import cn.xeblog.commons.entity.GameDTO;
-import cn.xeblog.commons.entity.GameInviteResultDTO;
-import cn.xeblog.commons.enums.InviteStatus;
+import cn.xeblog.commons.entity.*;
+import cn.xeblog.commons.enums.Game;
 import cn.xeblog.commons.enums.MessageType;
+import cn.xeblog.commons.enums.UserStatus;
 import cn.xeblog.server.action.ChannelAction;
 import cn.xeblog.server.builder.ResponseBuilder;
-import cn.xeblog.commons.entity.User;
+import cn.xeblog.server.cache.GameRoomCache;
 
 /**
  * @author anlingyi
@@ -17,18 +17,24 @@ public abstract class AbstractGameActionHandler<T extends GameDTO> extends Abstr
 
     @Override
     protected void process(User user, GameDTO body) {
-        User opponent = null;
-        if (StrUtil.isNotBlank(body.getOpponentId())) {
-            opponent = ChannelAction.getUser(body.getOpponentId());
-            if (opponent == null) {
-                user.send(ResponseBuilder.build(user, new GameInviteResultDTO(body, InviteStatus.OFFLINE), MessageType.GAME_INVITE_RESULT));
+        GameRoom gameRoom = null;
+        if (StrUtil.isNotBlank(body.getRoomId())) {
+            gameRoom = GameRoomCache.getGameRoom(body.getRoomId());
+            if (gameRoom == null) {
+                user.setStatus(UserStatus.FISHING);
+                user.send(ResponseBuilder.build(null, new GameRoomMsgDTO(GameRoomMsgDTO.MsgType.GAME_ERROR, "游戏房间不存在！"), MessageType.GAME_ROOM));
+                ChannelAction.updateUserStatus(user);
                 return;
             }
+
+            Game game = gameRoom.getGame();
+            gameRoom.setGame(game);
+            body.setGame(game);
         }
 
-        process(user, opponent, (T) body);
+        process(user, gameRoom, (T) body);
     }
 
-    protected abstract void process(User user, User opponent, T body);
+    protected abstract void process(User user, GameRoom gameRoom, T body);
 
 }

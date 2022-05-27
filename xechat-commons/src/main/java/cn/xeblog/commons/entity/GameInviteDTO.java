@@ -6,15 +6,16 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author anlingyi
- * @date 2020/6/5
+ * @date 2022/5/25 11:44 上午
  */
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class GobangDTO extends GameDTO {
+@NoArgsConstructor
+public class GameInviteDTO {
 
-    private int x;
-    private int y;
-    private int type;
+    /**
+     * 被邀请玩家
+     */
+    private String playerId;
 
 }

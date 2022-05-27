@@ -1,12 +1,11 @@
 package cn.xeblog.plugin.game.gobang;
 
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
-import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.commons.entity.GobangDTO;
-import cn.xeblog.commons.entity.Response;
-import cn.xeblog.plugin.enums.Command;
+import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.game.AbstractGame;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
@@ -21,10 +20,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
+import java.util.List;
 
 /**
  * 五子棋
@@ -33,6 +30,11 @@ import java.util.Stack;
  * @date 2020/6/5
  */
 public class Gobang extends AbstractGame<GobangDTO> {
+
+    /**
+     * 在线对战是否开始
+     */
+    private boolean started;
 
     // 行数，y
     private static final int ROWS = 15;
@@ -51,6 +53,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
     private JButton regretButton;
     // AI落子按钮
     private JButton aiTestButton;
+    // 游戏按钮面板
+    private JPanel gameButtonPanel;
     // AI自动落子
     private boolean aiAutoPut = true;
 
@@ -108,6 +112,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
      * 初始化游戏数据
      */
     private void initValue() {
+        started = false;
         lastPoint = null;
         chessData = new int[COLS][ROWS];
         currentChessTotal = 0;
@@ -142,18 +147,29 @@ public class Gobang extends AbstractGame<GobangDTO> {
         }
     }
 
+
     @Override
-    public void handle(Response<GobangDTO> response) {
-        GobangDTO gobangDTO = response.getBody();
-        setChess(new Point(gobangDTO.getX(), gobangDTO.getY(), gobangDTO.getType()));
+    public void handle(GobangDTO body) {
+        if (started) {
+            setChess(new Point(body.getX(), body.getY(), body.getType()));
 
-        if (type == 2) {
-            changePlayer();
-        }
+            if (type == 2) {
+                changePlayer();
+            }
 
-        checkStatus(nextPlayer);
-        if (isGameOver) {
-            return;
+            checkStatus(nextPlayer);
+            if (isGameOver) {
+                return;
+            }
+        } else {
+            started = true;
+            type = body.getType();
+            if (type == 2) {
+                put = true;
+                changePlayer();
+                showTips(player + (GameAction.getNickname().equals(player) ? "(你)" : "") + "先下手为强！");
+                return;
+            }
         }
 
         put = false;
@@ -182,12 +198,16 @@ public class Gobang extends AbstractGame<GobangDTO> {
         }
 
         isGameOver = flag;
+        if (isGameOver && gameMode == GameMode.ONLINE) {
+            gameButtonPanel.add(getGameOverButton());
+            gameButtonPanel.updateUI();
+        }
     }
 
     private void initChessPanel() {
         initValue();
         player = GameAction.getNickname();
-        if (GameAction.getOpponent() == null) {
+        if (GameAction.getRoomId() == null) {
             switch (gameMode) {
                 case HUMAN_VS_PC:
                     aiService = createAI();
@@ -212,15 +232,14 @@ public class Gobang extends AbstractGame<GobangDTO> {
                     break;
             }
         } else {
-            nextPlayer = GameAction.getOpponent();
+            put = true;
             gameMode = GameMode.ONLINE;
-            if (GameAction.isProactive()) {
-                type = 1;
-            } else {
-                changePlayer();
-                type = 2;
-                put = true;
-            }
+            gameRoom.getUsers().forEach((k, v) -> {
+                if (!v.getUsername().equals(player)) {
+                    nextPlayer = v.getUsername();
+                    return;
+                }
+            });
         }
 
         chessPanel = new JPanel() {
@@ -233,6 +252,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
         Dimension mainDimension = new Dimension(width + 180, height + 50);
 
+        mainPanel.removeAll();
         mainPanel.setLayout(new BorderLayout());
         mainPanel.setMinimumSize(mainDimension);
 
@@ -262,10 +282,12 @@ public class Gobang extends AbstractGame<GobangDTO> {
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new BorderLayout());
         JPanel chessButtonPanel = new JPanel();
-        JPanel gameButtonPanel = new JPanel();
+        gameButtonPanel = new JPanel();
         bottomPanel.add(chessButtonPanel, BorderLayout.NORTH);
         bottomPanel.add(gameButtonPanel, BorderLayout.SOUTH);
-        if (gameMode != GameMode.ONLINE) {
+        if (gameMode == GameMode.ONLINE) {
+            showTips("请等待...");
+        } else {
             regretButton = getRegretButton();
             chessButtonPanel.add(regretButton);
 
@@ -283,11 +305,12 @@ public class Gobang extends AbstractGame<GobangDTO> {
         mainPanel.add(topPanel, BorderLayout.NORTH);
         mainPanel.add(centerPanel, BorderLayout.CENTER);
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+        mainPanel.updateUI();
 
         boolean isDebug = gameMode == GameMode.DEBUG;
         if (isDebug) {
             showTips("调试模式");
-        } else {
+        } else if (gameMode != GameMode.ONLINE) {
             showTips(player + (GameAction.getNickname().equals(player) ? "(你)" : "") + "先下手为强！");
         }
 
@@ -369,12 +392,6 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 }
             }
         }).start();
-    }
-
-    private JButton getExitButton() {
-        JButton exitButton = new JButton("退出游戏");
-        exitButton.addActionListener(e -> Command.GAME_OVER.exec(null));
-        return exitButton;
     }
 
     private JButton getRegretButton() {
@@ -718,18 +735,15 @@ public class Gobang extends AbstractGame<GobangDTO> {
     }
 
     private void initStartPanel() {
-        if (GameAction.getOpponent() != null) {
-            border = 14;
-            initChessPanel();
-            return;
-        }
-
         this.aiService = null;
+        mainPanel.removeAll();
         mainPanel.setLayout(null);
-        mainPanel.setMinimumSize(new Dimension(150, 420));
+        mainPanel.setEnabled(true);
+        mainPanel.setVisible(true);
+        mainPanel.setMinimumSize(new Dimension(150, 400));
 
         startPanel = new JPanel();
-        startPanel.setBounds(10, 10, 120, 320);
+        startPanel.setBounds(10, 10, 120, 400);
 
         mainPanel.add(startPanel);
 
@@ -818,7 +832,13 @@ public class Gobang extends AbstractGame<GobangDTO> {
         });
 
         startPanel.add(startGameButton);
+        if (DataCache.isOnline) {
+            List<Integer> numsList = new ArrayList();
+            numsList.add(2);
+            startPanel.add(getCreateRoomButton(numsList));
+        }
         startPanel.add(getExitButton());
+        mainPanel.updateUI();
     }
 
     @Override
@@ -827,8 +847,16 @@ public class Gobang extends AbstractGame<GobangDTO> {
     }
 
     @Override
-    public void start() {
-        super.start();
+    protected void start() {
+        border = 14;
+        initChessPanel();
+        if (isHomeowner) {
+            int randomType = RandomUtil.randomInt(1, 3);
+            GobangDTO msg = new GobangDTO();
+            msg.setType(3 - randomType);
+            sendMsg(msg);
+            handle(new GobangDTO(0, 0, randomType));
+        }
     }
 
     public boolean putChess(int x, int y, int type) {
@@ -1076,12 +1104,10 @@ public class Gobang extends AbstractGame<GobangDTO> {
     }
 
     private void send(Point point) {
-        String opponent = GameAction.getOpponent();
         GobangDTO dto = new GobangDTO();
         dto.setX(point.x);
         dto.setY(point.y);
         dto.setType(point.type);
-        dto.setOpponentId(DataCache.userMap.get(opponent));
         sendMsg(dto);
     }
 

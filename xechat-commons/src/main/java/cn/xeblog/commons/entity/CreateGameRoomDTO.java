@@ -9,17 +9,21 @@ import java.io.Serializable;
 
 /**
  * @author anlingyi
- * @date 2020/8/17
+ * @date 2022/5/25 10:22 上午
  */
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class GameDTO implements Serializable {
+@NoArgsConstructor
+public class CreateGameRoomDTO implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
-    private String roomId;
-
+    /**
+     * 当前游戏
+     */
     private Game game;
+
+    /**
+     * 几人房
+     */
+    private int nums;
 
 }

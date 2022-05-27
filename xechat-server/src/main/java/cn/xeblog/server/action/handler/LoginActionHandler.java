@@ -34,8 +34,8 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
             return;
         }
 
-        User user = new User(username, body.getStatus(), ctx.channel());
         String id = ChannelAction.getId(ctx);
+        User user = new User(id, username, body.getStatus(), ctx.channel());
         UserCache.add(id, user);
 
         ChannelAction.sendOnlineUsers();
