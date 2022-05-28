@@ -12,6 +12,8 @@ import cn.xeblog.plugin.enums.Command;
 import cn.xeblog.plugin.ui.MainWindow;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.ui.DialogWrapper;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -77,35 +79,49 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
     }
 
     protected void showCreateGameRoomPanel(List<Integer> numsList) {
-        mainPanel.removeAll();
-        mainPanel.setVisible(true);
-        mainPanel.setLayout(null);
-        mainPanel.setMinimumSize(new Dimension(150, 400));
+        new CreateGameRoomDialog(numsList).show();
+    }
 
-        JPanel panel = new JPanel();
-        panel.setBounds(10, 10, 120, 400);
+    private static class CreateGameRoomDialog extends DialogWrapper {
 
-        JLabel label = new JLabel("房间人数：");
-        label.setFont(new Font("", 1, 13));
-        panel.add(label);
+        private JPanel main;
+        private ComboBox numsBox;
+        private List<Integer> numsList;
 
-        ComboBox numsBox = new ComboBox();
-        numsList.forEach(nums -> numsBox.addItem(nums));
-        panel.add(numsBox);
+        CreateGameRoomDialog(List<Integer> numsList) {
+            super(true);
+            this.numsList = numsList;
 
-        JButton createRoomButton = new JButton("创建");
-        createRoomButton.addActionListener(e -> {
+            setTitle("创建房间");
+            setResizable(false);
+            setOKActionEnabled(true);
+            setOKButtonText("创建");
+            setCancelButtonText("取消");
+            init();
+        }
+
+        @Override
+        protected @Nullable JComponent createCenterPanel() {
+            main = new JPanel();
+            main.setPreferredSize(new Dimension(200, 50));
+            JLabel label = new JLabel("房间人数：");
+            label.setFont(new Font("", 1, 13));
+            main.add(label);
+
+            numsBox = new ComboBox();
+            numsList.forEach(nums -> numsBox.addItem(nums));
+            main.add(numsBox);
+
+            return main;
+        }
+
+        @Override
+        protected void doOKAction() {
             int nums = Integer.parseInt(numsBox.getSelectedItem().toString());
-            createRoom(GameAction.getGame(), nums);
-        });
-        panel.add(createRoomButton);
+            GameAction.getAction().createRoom(GameAction.getGame(), nums);
+            super.doOKAction();
+        }
 
-        JButton backButton = new JButton("返回");
-        backButton.addActionListener(e -> init());
-        panel.add(backButton);
-
-        mainPanel.add(panel);
-        mainPanel.updateUI();
     }
 
     protected void showGameRoomPanel() {
