@@ -1,7 +1,7 @@
 package cn.xeblog.server.action.handler;
 
-import cn.xeblog.commons.entity.GameDTO;
-import cn.xeblog.commons.entity.GameRoom;
+import cn.xeblog.commons.entity.game.GameDTO;
+import cn.xeblog.commons.entity.game.GameRoom;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.server.annotation.DoAction;
 import cn.xeblog.server.builder.ResponseBuilder;

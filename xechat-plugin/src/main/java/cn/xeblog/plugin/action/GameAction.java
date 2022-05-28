@@ -1,6 +1,6 @@
 package cn.xeblog.plugin.action;
 
-import cn.xeblog.commons.entity.GameDTO;
+import cn.xeblog.commons.entity.game.GameDTO;
 import cn.xeblog.commons.entity.Response;
 import cn.xeblog.commons.enums.Game;
 import cn.xeblog.plugin.factory.GameFactory;

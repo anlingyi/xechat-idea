@@ -1,6 +1,7 @@
 package cn.xeblog.plugin.game;
 
-import cn.xeblog.commons.entity.*;
+import cn.xeblog.commons.entity.User;
+import cn.xeblog.commons.entity.game.*;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.Game;
 import cn.xeblog.commons.enums.InviteStatus;
@@ -20,10 +21,19 @@ import java.util.TimerTask;
  */
 public abstract class GameRoomHandler implements GameRoomEventHandler {
 
+    /**
+     * 邀请超时任务缓存
+     */
     private Map<String, Timer> timeoutTask = new HashMap<>();
 
+    /**
+     * 当前游戏房间
+     */
     protected GameRoom gameRoom;
 
+    /**
+     * 当前是否为房主
+     */
     protected boolean isHomeowner;
 
     /**
@@ -82,6 +92,9 @@ public abstract class GameRoomHandler implements GameRoomEventHandler {
         }, 0, 1000);
     }
 
+    /**
+     * 游戏开始请求
+     */
     public void gameStart() {
         GameRoomMsgDTO msg = new GameRoomMsgDTO();
         msg.setRoomId(gameRoom.getId());
@@ -89,6 +102,9 @@ public abstract class GameRoomHandler implements GameRoomEventHandler {
         MessageAction.send(msg, Action.GAME_ROOM);
     }
 
+    /**
+     * 游戏结束请求
+     */
     public void gameOver() {
         GameRoomMsgDTO msg = new GameRoomMsgDTO();
         msg.setRoomId(gameRoom.getId());
@@ -96,6 +112,9 @@ public abstract class GameRoomHandler implements GameRoomEventHandler {
         MessageAction.send(msg, Action.GAME_ROOM);
     }
 
+    /**
+     * 关闭房间请求
+     */
     public void closeRoom() {
         GameRoomMsgDTO msg = new GameRoomMsgDTO();
         msg.setRoomId(gameRoom.getId());
@@ -103,6 +122,9 @@ public abstract class GameRoomHandler implements GameRoomEventHandler {
         MessageAction.send(msg, Action.GAME_ROOM);
     }
 
+    /**
+     * 玩家准备请求
+     */
     public void playerReady() {
         GameRoomMsgDTO msg = new GameRoomMsgDTO();
         msg.setRoomId(gameRoom.getId());
@@ -114,31 +136,26 @@ public abstract class GameRoomHandler implements GameRoomEventHandler {
     public void roomCreated(GameRoom gameRoom) {
         this.gameRoom = gameRoom;
         this.isHomeowner = true;
-        System.out.println("房间已创建：" + gameRoom);
     }
 
     @Override
     public void playerJoined(User player) {
-        System.out.println("玩家已加入：" + player);
         gameRoom.addUser(player);
         cleanTask(player);
     }
 
     @Override
     public void playerInviteFailed(User player) {
-        System.out.println("玩家邀请失败：" + player);
         cleanTask(player);
     }
 
     @Override
     public void playerLeft(User player) {
-        System.out.println("玩家已离开房间：" + player);
         gameRoom.removeUser(player);
     }
 
     @Override
     public void playerReadied(User player) {
-        System.out.println("玩家已准备：" + player);
         gameRoom.readied(player);
     }
 
@@ -149,19 +166,17 @@ public abstract class GameRoomHandler implements GameRoomEventHandler {
 
     @Override
     public void roomClosed() {
-        System.out.println("房间已关闭：" + gameRoom);
         gameRoom = null;
     }
 
     @Override
     public void gameStarted(GameRoom gameRoom) {
-        System.out.println("游戏已开始：" + gameRoom);
         this.gameRoom = gameRoom;
     }
 
     @Override
     public void gameEnded() {
-        System.out.println("游戏已结束：" + gameRoom);
+
     }
 
     private void cleanTask(User player) {

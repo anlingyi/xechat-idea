@@ -1,5 +1,6 @@
-package cn.xeblog.commons.entity;
+package cn.xeblog.commons.entity.game.gobang;
 
+import cn.xeblog.commons.entity.game.GameDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

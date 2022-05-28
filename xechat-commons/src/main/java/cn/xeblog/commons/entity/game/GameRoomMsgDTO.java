@@ -1,4 +1,4 @@
-package cn.xeblog.commons.entity;
+package cn.xeblog.commons.entity.game;
 
 import cn.xeblog.commons.enums.Game;
 import lombok.AllArgsConstructor;

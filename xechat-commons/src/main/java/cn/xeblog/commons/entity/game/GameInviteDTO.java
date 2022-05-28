@@ -1,4 +1,4 @@
-package cn.xeblog.commons.entity;
+package cn.xeblog.commons.entity.game;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

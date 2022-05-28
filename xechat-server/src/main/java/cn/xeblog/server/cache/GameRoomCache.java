@@ -1,12 +1,11 @@
 package cn.xeblog.server.cache;
 
-import cn.xeblog.commons.entity.GameRoom;
+import cn.xeblog.commons.entity.game.GameRoom;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.enums.UserStatus;
 import cn.xeblog.server.action.ChannelAction;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;

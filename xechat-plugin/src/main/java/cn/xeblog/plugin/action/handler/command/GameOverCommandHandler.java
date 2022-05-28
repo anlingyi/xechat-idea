@@ -1,6 +1,6 @@
 package cn.xeblog.plugin.action.handler.command;
 
-import cn.xeblog.commons.entity.GameRoomMsgDTO;
+import cn.xeblog.commons.entity.game.GameRoomMsgDTO;
 import cn.xeblog.commons.enums.Game;
 import cn.xeblog.commons.enums.UserStatus;
 import cn.xeblog.plugin.action.ConsoleAction;

@@ -1,6 +1,6 @@
 package cn.xeblog.plugin.game;
 
-import cn.xeblog.commons.entity.GameRoom;
+import cn.xeblog.commons.entity.game.GameRoom;
 import cn.xeblog.commons.entity.User;
 
 /**

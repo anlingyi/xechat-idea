@@ -1,11 +1,11 @@
 package cn.xeblog.plugin.action.handler.command;
 
-import cn.xeblog.commons.entity.GameRoomMsgDTO;
+import cn.xeblog.commons.entity.game.GameRoomMsgDTO;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.annotation.DoCommand;
-import cn.xeblog.commons.entity.GameInviteResultDTO;
+import cn.xeblog.commons.entity.game.GameInviteResultDTO;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.InviteStatus;
 import cn.xeblog.plugin.enums.Command;

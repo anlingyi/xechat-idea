@@ -1,6 +1,10 @@
 package cn.xeblog.server.action.handler;
 
 import cn.xeblog.commons.entity.*;
+import cn.xeblog.commons.entity.game.GameInviteDTO;
+import cn.xeblog.commons.entity.game.GameInviteResultDTO;
+import cn.xeblog.commons.entity.game.GameRoom;
+import cn.xeblog.commons.entity.game.GameRoomMsgDTO;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.InviteStatus;
 import cn.xeblog.commons.enums.MessageType;

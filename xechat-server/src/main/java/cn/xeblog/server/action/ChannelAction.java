@@ -1,6 +1,8 @@
 package cn.xeblog.server.action;
 
 import cn.xeblog.commons.entity.*;
+import cn.xeblog.commons.entity.game.GameRoom;
+import cn.xeblog.commons.entity.game.GameRoomMsgDTO;
 import cn.xeblog.server.builder.ResponseBuilder;
 import cn.xeblog.server.cache.GameRoomCache;
 import cn.xeblog.server.cache.UserCache;

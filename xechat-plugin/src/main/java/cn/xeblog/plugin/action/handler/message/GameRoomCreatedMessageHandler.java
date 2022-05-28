@@ -1,6 +1,6 @@
 package cn.xeblog.plugin.action.handler.message;
 
-import cn.xeblog.commons.entity.GameRoom;
+import cn.xeblog.commons.entity.game.GameRoom;
 import cn.xeblog.commons.entity.Response;
 import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.plugin.action.GameAction;

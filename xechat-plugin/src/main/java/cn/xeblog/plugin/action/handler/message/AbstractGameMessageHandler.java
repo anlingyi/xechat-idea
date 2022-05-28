@@ -1,6 +1,6 @@
 package cn.xeblog.plugin.action.handler.message;
 
-import cn.xeblog.commons.entity.GameDTO;
+import cn.xeblog.commons.entity.game.GameDTO;
 
 /**
  * @author anlingyi

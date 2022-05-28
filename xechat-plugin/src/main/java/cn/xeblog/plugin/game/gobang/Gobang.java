@@ -4,7 +4,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
-import cn.xeblog.commons.entity.GobangDTO;
+import cn.xeblog.commons.entity.game.gobang.GobangDTO;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.game.AbstractGame;
 import com.intellij.openapi.ui.ComboBox;
@@ -31,9 +31,7 @@ import java.util.List;
  */
 public class Gobang extends AbstractGame<GobangDTO> {
 
-    /**
-     * 在线对战是否开始
-     */
+    // 在线对战是否已开始
     private boolean started;
 
     // 行数，y
@@ -299,8 +297,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
             });
             gameButtonPanel.add(restartButton);
             gameButtonPanel.add(getOutputChessRecordButton());
+            gameButtonPanel.add(getExitButton());
         }
-        gameButtonPanel.add(getExitButton());
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
         mainPanel.add(centerPanel, BorderLayout.CENTER);
