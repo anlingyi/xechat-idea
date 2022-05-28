@@ -13,6 +13,7 @@ import cn.xeblog.plugin.ui.MainWindow;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.ui.components.JBScrollPane;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -31,8 +32,9 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
     protected final JPanel mainPanel;
 
     private JPanel gameUserPanel;
-    private JPanel onlineUserPanel;
+    private JPanel onlineUserListPanel;
     private JButton startGameButton;
+    private JLabel readyLabel;
 
     public AbstractGame() {
         this.mainPanel = MainWindow.getInstance().getRightPanel();
@@ -128,15 +130,34 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         mainPanel.removeAll();
         mainPanel.setVisible(true);
         mainPanel.setLayout(null);
-        mainPanel.setMinimumSize(new Dimension(300, 400));
+        mainPanel.setMinimumSize(new Dimension(300, 200));
 
         JPanel panel = new JPanel();
-        panel.setBounds(10, 10, 280, 400);
+        panel.setBounds(10, 10, 280, 500);
+
+        JLabel titleLabel = new JLabel("欢迎进入【" + gameRoom.getGame().getName() + "】游戏房间~");
+        titleLabel.setFont(new Font("", 1, 14));
+        titleLabel.setForeground(new Color(239, 106, 106));
+        panel.add(titleLabel);
 
         Box hBox = Box.createHorizontalBox();
-        JLabel label1 = new JLabel("[房间玩家]");
+        JLabel label1 = new JLabel("【房间玩家】");
         label1.setFont(new Font("", 1, 13));
         hBox.add(label1);
+
+        readyLabel = new JLabel("准备");
+        readyLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        readyLabel.setFont(new Font("", 1, 12));
+        readyLabel.setForeground(new Color(255, 104, 104));
+        readyLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (readyLabel.isEnabled()) {
+                    playerReady();
+                }
+            }
+        });
+        hBox.add(readyLabel);
 
         Box vBox = Box.createVerticalBox();
         gameUserPanel = new JPanel();
@@ -144,26 +165,31 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         flushGameRoomUsers();
 
         Box hBox2 = Box.createHorizontalBox();
-        JLabel label2 = new JLabel("[在线玩家]");
+        JLabel label2 = new JLabel("【在线玩家】");
         label2.setFont(new Font("", 1, 13));
         hBox2.add(label2);
 
         JLabel flushOnlineUserLabel = new JLabel("刷新");
         flushOnlineUserLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         flushOnlineUserLabel.setFont(new Font("", 1, 12));
+        flushOnlineUserLabel.setForeground(new Color(255, 104, 104));
         flushOnlineUserLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 flushOnlineUsers();
             }
         });
-        hBox2.add(Box.createHorizontalStrut(10));
         hBox2.add(flushOnlineUserLabel);
 
         Box vBox2 = Box.createVerticalBox();
-        onlineUserPanel = new JPanel();
-        vBox2.add(onlineUserPanel);
+        JPanel onlineUserMainPanel = new JPanel(new BorderLayout());
+        onlineUserMainPanel.setPreferredSize(new Dimension(250, 150));
+        onlineUserListPanel = new JPanel();
         flushOnlineUsers();
+        JBScrollPane onlineUserScrollBar = new JBScrollPane(onlineUserListPanel);
+        onlineUserScrollBar.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        onlineUserMainPanel.add(onlineUserScrollBar);
+        vBox2.add(onlineUserMainPanel);
 
         Box hBox3 = Box.createHorizontalBox();
         if (gameRoom.getHomeowner().equals(DataCache.username)) {
@@ -186,11 +212,16 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         }
 
         Box mainVBox = Box.createVerticalBox();
+        mainVBox.add(Box.createVerticalStrut(20));
         mainVBox.add(hBox);
+        mainVBox.add(Box.createVerticalStrut(10));
         mainVBox.add(vBox);
-        mainVBox.add(hBox2);
-        mainVBox.add(vBox2);
+        mainVBox.add(Box.createVerticalStrut(10));
         mainVBox.add(hBox3);
+        mainVBox.add(Box.createVerticalStrut(10));
+        mainVBox.add(hBox2);
+        mainVBox.add(Box.createVerticalStrut(10));
+        mainVBox.add(vBox2);
         panel.add(mainVBox);
 
         mainPanel.add(panel);
@@ -207,10 +238,11 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
             return 1;
         });
 
-        onlineUserPanel.removeAll();
-        userList.forEach(user -> {
+        onlineUserListPanel.removeAll();
+        Box vBox = Box.createVerticalBox();
+        for (User user : userList) {
             if (user.getUsername().equals(DataCache.username)) {
-                return;
+                continue;
             }
 
             JPanel userPanel = new JPanel();
@@ -220,67 +252,67 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
             if (user.getStatus() == UserStatus.FISHING) {
                 JLabel inviteLabel = new JLabel("邀请");
                 inviteLabel.setFont(new Font("", 1, 12));
+                inviteLabel.setForeground(new Color(93, 187, 70));
                 inviteLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 inviteLabel.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        invitePlayer(user.getUsername());
-                        inviteLabel.setEnabled(false);
-                        inviteLabel.setText("已邀请");
+                        if (inviteLabel.isEnabled()) {
+                            invitePlayer(user.getUsername());
+                            inviteLabel.setEnabled(false);
+                            inviteLabel.setText("已邀请");
+                        }
                     }
                 });
                 userPanel.add(inviteLabel);
             }
-            onlineUserPanel.add(userPanel);
-        });
-        onlineUserPanel.updateUI();
+            vBox.add(userPanel);
+        }
+
+        onlineUserListPanel.add(vBox);
+        onlineUserListPanel.updateUI();
     }
 
     private void flushGameRoomUsers() {
         int nums = gameRoom.getNums();
         List<GameRoom.Player> userList = new ArrayList<>(gameRoom.getUsers().values());
         int currentNums = userList.size();
-        gameUserPanel.removeAll();
         int readyCount = 0;
-        Box hBox = Box.createHorizontalBox();
+        Box vBox = Box.createVerticalBox();
+        gameUserPanel.removeAll();
         for (int i = 0; i < nums; i++) {
+            Color color = new Color(69, 232, 232);
             GameRoom.Player player = i >= currentNums ? null : userList.get(i);
             String username = null;
             if (player != null) {
                 username = player.getUsername();
+                if (player.getUsername().equals(gameRoom.getHomeowner())) {
+                    username += " [房主]";
+                }
                 if (player.isReadied()) {
                     readyCount++;
-                    username += "(已准备)";
+                    username += " (OK)";
+                    color = new Color(107, 215, 80);
                 }
+                username = (i + 1) + ". " + username;
             }
 
-            Box vBox = Box.createVerticalBox();
-            vBox.setAlignmentX(Component.CENTER_ALIGNMENT);
-            JLabel usernameLabel = new JLabel(username == null ? "空位" : username);
+            if (username == null) {
+                color = new Color(171, 170, 170);
+                username = "[虚位以待]";
+            }
+            JLabel usernameLabel = new JLabel(username);
+            usernameLabel.setForeground(color);
             usernameLabel.setFont(new Font("", 0, 13));
             vBox.add(usernameLabel);
-            if (player != null && !player.isReadied() && DataCache.username.equals(username)) {
-                JLabel readyLabel = new JLabel("准备");
-                readyLabel.setFont(new Font("", 1, 12));
-                readyLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                readyLabel.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        readyLabel.setEnabled(false);
-                        playerReady();
-                    }
-                });
-                vBox.add(readyLabel);
-            }
-            hBox.add(vBox);
-            hBox.add(Box.createHorizontalStrut(10));
+            vBox.add(Box.createVerticalStrut(5));
         }
 
         if (startGameButton != null) {
             startGameButton.setEnabled(readyCount == nums);
         }
 
-        gameUserPanel.add(hBox);
+        gameUserPanel.add(vBox);
         gameUserPanel.updateUI();
     }
 
@@ -339,7 +371,13 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
     @Override
     public void playerReadied(User player) {
         super.playerReadied(player);
-        invoke(() -> flushGameRoomUsers());
+        invoke(() -> {
+            if (player.getUsername().equals(DataCache.username)) {
+                readyLabel.setEnabled(false);
+                readyLabel.setText("已准备");
+            }
+            flushGameRoomUsers();
+        });
     }
 
     @Override

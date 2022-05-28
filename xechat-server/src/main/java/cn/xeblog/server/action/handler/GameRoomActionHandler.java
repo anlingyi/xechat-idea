@@ -68,9 +68,9 @@ public class GameRoomActionHandler extends AbstractGameActionHandler<GameRoomMsg
         }
 
         gameRoom.removeInviteUser(player);
-        Response response = ResponseBuilder.build(user, body, MessageType.GAME_ROOM);
+        Response response = ResponseBuilder.build(player, body, MessageType.GAME_ROOM);
         if (dto.getStatus() == InviteStatus.ACCEPT) {
-            if (GameRoomCache.joinRoom(gameRoom.getId(), user)) {
+            if (GameRoomCache.joinRoom(gameRoom.getId(), player)) {
                 dto.setGameRoom(gameRoom);
                 sendMsg(gameRoom, response);
             } else {
