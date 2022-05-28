@@ -17,7 +17,7 @@ public enum Command {
     SHOW_STATUS("showStatus", "查看可用状态值"),
     SET_STATUS("setStatus", "设置当前状态"),
     SHOW_GAME("showGame", "游戏列表"),
-    PLAY("play", "游戏功能，play {游戏编号} {对方昵称(可选)}"),
+    PLAY("play", "游戏功能，play {游戏编号}"),
     JOIN("join", "加入游戏 | 拒绝邀请：此命令后加任意字符"),
     GAME_OVER("over", "结束游戏"),
     MODE("mode", "模式设置，mode {模式编号}"),

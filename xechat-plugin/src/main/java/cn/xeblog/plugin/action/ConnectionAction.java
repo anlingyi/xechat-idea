@@ -1,6 +1,5 @@
 package cn.xeblog.plugin.action;
 
-import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.client.XEChatClient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,7 +21,6 @@ public class ConnectionAction {
     private int port;
 
     public void exec(Consumer<Boolean> consumer) {
-        DataCache.connectionAction = this;
         new Thread(() -> XEChatClient.run(host, port, consumer)).start();
     }
 

@@ -2,6 +2,8 @@ package cn.xeblog.server.cache;
 
 import cn.xeblog.commons.entity.User;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -74,6 +76,10 @@ public final class UserCache {
 
     public static boolean existUsername(String username) {
         return USERNAME_MAP.get(username) != null;
+    }
+
+    public static List<User> listUser() {
+        return new ArrayList<>(USER_MAP.values());
     }
 
 }

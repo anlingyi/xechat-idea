@@ -3,7 +3,6 @@ package cn.xeblog.plugin.action.handler.command;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.annotation.DoCommand;
-import cn.xeblog.plugin.builder.RequestBuilder;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.UserStatus;
 import cn.xeblog.plugin.cache.DataCache;
@@ -32,6 +31,7 @@ public class SetStatusCommandHandler extends AbstractCommandHandler {
 
         MessageAction.send(userStatus, Action.SET_STATUS);
         DataCache.userStatus = userStatus;
+        ConsoleAction.showSimpleMsg("[" + userStatus.alias() + "]状态设置成功！");
     }
 
     private static UserStatus getUserStatus(int index) {

@@ -1,4 +1,4 @@
-package cn.xeblog.commons.entity;
+package cn.xeblog.commons.entity.game;
 
 import cn.xeblog.commons.enums.Game;
 import lombok.AllArgsConstructor;
@@ -18,7 +18,7 @@ public class GameDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String opponentId;
+    private String roomId;
 
     private Game game;
 

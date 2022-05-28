@@ -1,6 +1,6 @@
-package cn.xeblog.commons.entity;
+package cn.xeblog.commons.entity.game.gobang;
 
-import cn.xeblog.commons.enums.Game;
+import cn.xeblog.commons.entity.game.GameDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,8 +18,4 @@ public class GobangDTO extends GameDTO {
     private int y;
     private int type;
 
-    @Override
-    public Game getGame() {
-        return Game.GOBANG;
-    }
 }

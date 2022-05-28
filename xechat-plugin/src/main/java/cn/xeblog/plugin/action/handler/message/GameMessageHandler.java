@@ -2,7 +2,7 @@ package cn.xeblog.plugin.action.handler.message;
 
 import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.plugin.action.GameAction;
-import cn.xeblog.commons.entity.GameDTO;
+import cn.xeblog.commons.entity.game.GameDTO;
 import cn.xeblog.commons.entity.Response;
 import cn.xeblog.plugin.annotation.DoMessage;
 

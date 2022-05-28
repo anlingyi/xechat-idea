@@ -1,4 +1,4 @@
-package cn.xeblog.commons.entity;
+package cn.xeblog.commons.entity.game;
 
 import cn.xeblog.commons.enums.InviteStatus;
 import lombok.AllArgsConstructor;
@@ -12,12 +12,15 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GameInviteResultDTO extends GameDTO {
+public class GameInviteResultDTO {
 
     private InviteStatus status;
 
-    public GameInviteResultDTO(GameDTO gameDTO, InviteStatus status) {
-        super(gameDTO.getOpponentId(), gameDTO.getGame());
+    private GameRoom gameRoom;
+
+    private String playerId;
+
+    public GameInviteResultDTO(InviteStatus status) {
         this.status = status;
     }
 

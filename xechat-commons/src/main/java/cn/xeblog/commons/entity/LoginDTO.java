@@ -22,4 +22,6 @@ public class LoginDTO implements Serializable {
 
     private boolean reconnected;
 
+    private String pluginVersion;
+
 }

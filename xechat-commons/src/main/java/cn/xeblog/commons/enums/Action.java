@@ -9,8 +9,9 @@ public enum Action {
     CHAT,
     GAME,
     SET_STATUS,
-    GAME_INVITE,
-    GAME_INVITE_RESULT,
     GAME_OVER,
+    GAME_ROOM,
+    CREATE_GAME_ROOM,
+    LIST_USERS,
     HEARTBEAT;
 }
