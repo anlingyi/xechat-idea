@@ -22,16 +22,17 @@ public class GameRoomCache {
     private static final Map<String, GameRoom> USER_ROOM_MAP = new ConcurrentHashMap<>(32);
 
     public static GameRoom seize(String rooId) {
-        synchronized (GAME_ROOM_MAP) {
-            if (existRoom(rooId)) {
-                return null;
-            }
+        if (existRoom(rooId)) {
+            return null;
+        }
 
-            GameRoom gameRoom = new GameRoom();
-            gameRoom.setId(rooId);
-            GAME_ROOM_MAP.put(rooId, gameRoom);
+        GameRoom gameRoom = new GameRoom();
+        gameRoom.setId(rooId);
+        if (GAME_ROOM_MAP.put(rooId, gameRoom) == null) {
             return gameRoom;
         }
+
+        return null;
     }
 
     public static void addRoom(GameRoom gameRoom) {

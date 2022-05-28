@@ -72,13 +72,21 @@ public class GameRoom implements Serializable {
 
     public boolean addUser(User user) {
         synchronized (users) {
-            if (users.size() > nums - 1) {
+            if (getCurrentNums() > nums - 1) {
+                return false;
+            }
+
+            if (existUser(user)) {
                 return false;
             }
 
             users.put(user.getUsername(), new Player(user.getId(), user.getUsername()));
             return true;
         }
+    }
+
+    private boolean existUser(User user) {
+        return users.get(user.getUsername()) != null;
     }
 
     public boolean removeUser(User user) {
@@ -105,26 +113,22 @@ public class GameRoom implements Serializable {
 
     public boolean readied(User user) {
         Player player = users.get(user.getUsername());
-        synchronized (player) {
-            if (player == null) {
-                return false;
-            }
-
-            player.setReadied(true);
-            return true;
+        if (player == null) {
+            return false;
         }
+
+        player.setReadied(true);
+        return true;
     }
 
     public boolean readyCancelled(User user) {
         Player player = users.get(user.getUsername());
-        synchronized (player) {
-            if (player == null) {
-                return false;
-            }
-
-            player.setReadied(false);
-            return true;
+        if (player == null) {
+            return false;
         }
+
+        player.setReadied(false);
+        return true;
     }
 
 }
