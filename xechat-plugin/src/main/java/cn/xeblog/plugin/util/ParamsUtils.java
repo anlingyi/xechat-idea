@@ -19,4 +19,14 @@ public class ParamsUtils {
         return value;
     }
 
+    public static boolean hasKey(String[] args, String key) {
+        for (String arg : args) {
+            if (arg.equalsIgnoreCase(key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 }

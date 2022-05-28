@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.action.handler.command;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xeblog.plugin.action.ConnectionAction;
 import cn.xeblog.plugin.action.ConsoleAction;
@@ -44,10 +45,15 @@ public class LoginCommandHandler extends AbstractCommandHandler {
             return;
         }
 
-        ConnectionAction conn = DataCache.connectionAction;
-        if (conn == null) {
-            conn = new ConnectionAction();
+        if (ParamsUtils.hasKey(args, "-c")) {
+            DataCache.connectionAction = null;
         }
+
+        ConnectionAction conn = new ConnectionAction();
+        if (DataCache.connectionAction != null) {
+            BeanUtil.copyProperties(DataCache.connectionAction, conn);
+        }
+
         String host = ParamsUtils.getValue(args, "-h");
         String port = ParamsUtils.getValue(args, "-p");
         if (StrUtil.isNotBlank(host)) {
@@ -60,7 +66,12 @@ public class LoginCommandHandler extends AbstractCommandHandler {
         CONNECTING = true;
         DataCache.username = username;
         ConsoleAction.showSimpleMsg("正在连接服务器...");
-        conn.exec((flag) -> CONNECTING = false);
+        conn.exec((flag) -> {
+            CONNECTING = false;
+            if (flag) {
+                DataCache.connectionAction = conn;
+            }
+        });
     }
 
     @Override

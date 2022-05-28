@@ -9,6 +9,7 @@ import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.commons.entity.Response;
+import cn.xeblog.plugin.util.IdeaUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleStateEvent;
@@ -37,7 +38,7 @@ public class XEChatClientHandler extends SimpleChannelInboundHandler<Response> {
         if (GameAction.playing()) {
             status = UserStatus.PLAYING;
         }
-        MessageAction.send(new LoginDTO(DataCache.username, status, reconnected), Action.LOGIN);
+        MessageAction.send(new LoginDTO(DataCache.username, status, reconnected, IdeaUtils.getPluginVersion()), Action.LOGIN);
         DataCache.reconnected = false;
     }
 
@@ -48,7 +49,7 @@ public class XEChatClientHandler extends SimpleChannelInboundHandler<Response> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        ConsoleAction.showSimpleMsg("不好意思，你网卡了！");
+        ConsoleAction.showSimpleMsg("哎呀~ 网络波动啦！");
         cause.printStackTrace();
     }
 
