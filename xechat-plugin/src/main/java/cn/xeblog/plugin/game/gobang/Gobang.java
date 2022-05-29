@@ -32,9 +32,6 @@ import java.util.List;
  */
 public class Gobang extends AbstractGame<GobangDTO> {
 
-    // 在线对战是否已开始
-    private boolean started;
-
     // 行数，y
     private static final int ROWS = 15;
     // 列数，x
@@ -73,8 +70,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
     private int type;
     // 游戏是否结束
     private boolean isGameOver;
-    // 游戏状态 0.进行中 1.赢 2.平
-    private int status;
+    // 游戏状态 -2.初始化 -1.待开始 0.进行中 1.赢 2.平
+    private int status = -2;
     // 标记是否已下棋子
     private boolean put;
     // 高亮棋子
@@ -111,12 +108,11 @@ public class Gobang extends AbstractGame<GobangDTO> {
      * 初始化游戏数据
      */
     private void initValue() {
-        started = false;
         lastPoint = null;
         chessData = new int[COLS][ROWS];
         currentChessTotal = 0;
         isGameOver = false;
-        status = 0;
+        status = -2;
         put = false;
         chessSize = Math.round(border * 0.75f);
         width = ROWS * border + border;
@@ -149,7 +145,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
     @Override
     public void handle(GobangDTO body) {
-        if (started) {
+        if (status > -1) {
             setChess(new Point(body.getX(), body.getY(), body.getType()));
 
             if (type == 2) {
@@ -161,7 +157,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 return;
             }
         } else {
-            started = true;
+            status = 0;
             type = body.getType();
             if (type == 2) {
                 put = true;
@@ -178,9 +174,12 @@ public class Gobang extends AbstractGame<GobangDTO> {
     @Override
     public void playerLeft(User player) {
         super.playerLeft(player);
-        isGameOver = true;
-        gameButtonPanel.add(getGameOverButton());
-        gameButtonPanel.updateUI();
+        if (!isGameOver && status > -2) {
+            showTips("游戏结束：对手逃跑了~");
+            isGameOver = true;
+            gameButtonPanel.add(getGameOverButton());
+            gameButtonPanel.updateUI();
+        }
     }
 
     private void checkStatus(String username) {
@@ -290,6 +289,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
         bottomPanel.setLayout(new BorderLayout());
         JPanel chessButtonPanel = new JPanel();
         gameButtonPanel = new JPanel();
+        status = -1;
         bottomPanel.add(chessButtonPanel, BorderLayout.NORTH);
         bottomPanel.add(gameButtonPanel, BorderLayout.SOUTH);
         if (gameMode == GameMode.ONLINE) {

@@ -135,4 +135,8 @@ public class GameRoom implements Serializable {
         return homeowner.getUsername().equals(username);
     }
 
+    public boolean isOvered() {
+        return nums <= getCurrentNums();
+    }
+
 }
