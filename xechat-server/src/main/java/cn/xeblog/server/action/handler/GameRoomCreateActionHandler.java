@@ -1,5 +1,6 @@
 package cn.xeblog.server.action.handler;
 
+import cn.xeblog.commons.entity.Response;
 import cn.xeblog.commons.entity.game.CreateGameRoomDTO;
 import cn.xeblog.commons.entity.game.GameRoom;
 import cn.xeblog.commons.entity.User;
@@ -23,22 +24,20 @@ public class GameRoomCreateActionHandler extends AbstractActionHandler<CreateGam
 
     @Override
     protected void process(User user, CreateGameRoomDTO body) {
-        int times = 0;
         String roomId = generateRoomId();
-        GameRoom gameRoom;
-        while ((gameRoom = GameRoomCache.seize(roomId)) == null) {
-            roomId = generateRoomId();
-            if (++times > 3) {
-                return;
-            }
+        GameRoom gameRoom = GameRoomCache.seize(roomId);
+        Response<GameRoom> response = ResponseBuilder.build(null, gameRoom, MessageType.GAME_ROOM_CREATED);
+        if (gameRoom == null) {
+            log.debug("游戏房间创建失败 -> roomId: {}", roomId);
+            user.send(response);
+            return;
         }
 
         gameRoom.setGame(body.getGame());
         gameRoom.setNums(body.getNums());
-        gameRoom.setHomeowner(user.getUsername());
-        GameRoomCache.addRoom(gameRoom);
+        gameRoom.setHomeowner(user);
         GameRoomCache.joinRoom(roomId, user);
-        user.send(ResponseBuilder.build(null, gameRoom, MessageType.GAME_ROOM_CREATED));
+        user.send(response);
         log.debug("游戏房间创建成功 -> {}", gameRoom);
     }
 

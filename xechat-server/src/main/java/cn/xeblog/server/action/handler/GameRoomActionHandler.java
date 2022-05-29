@@ -79,10 +79,16 @@ public class GameRoomActionHandler extends AbstractGameActionHandler<GameRoomMsg
                 player.send(ResponseBuilder.build(null, new GameRoomMsgDTO(GameRoomMsgDTO.MsgType.GAME_ERROR, "加入游戏房间失败！"), MessageType.GAME_ROOM));
             }
         } else {
-            player.setStatus(UserStatus.FISHING);
-            ChannelAction.updateUserStatus(player);
-            user.send(response);
-            player.send(response);
+            if (player.getStatus() == UserStatus.PLAYING) {
+                player.setStatus(UserStatus.FISHING);
+                ChannelAction.updateUserStatus(player);
+            }
+            // 通知房主
+            gameRoom.getHomeowner().send(response);
+            if (dto.getStatus() != InviteStatus.REJECT) {
+                // 通知玩家
+                player.send(response);
+            }
         }
     }
 

@@ -100,7 +100,7 @@ public class GameRoomMessageHandler extends AbstractGameMessageHandler<GameRoomM
                 ConsoleAction.showSystemMsg(response.getTime(), player.getUsername() + "拒绝和你一起游戏！");
                 break;
             case TIMEOUT:
-                boolean isMe = player.getUsername().equals(DataCache.username);
+                boolean isMe = player.getUsername().equals(GameAction.getNickname());
                 String text = isMe ? "游戏邀请已经超时！" : player.getUsername() + "游戏邀请超时！";
                 ConsoleAction.showSystemMsg(response.getTime(), text);
                 if (isMe) {
@@ -127,7 +127,7 @@ public class GameRoomMessageHandler extends AbstractGameMessageHandler<GameRoomM
         if (GameAction.playing()) {
             GameAction.getAction().roomClosed();
         }
-        GameAction.over();
+        GameAction.clean();
     }
 
 }

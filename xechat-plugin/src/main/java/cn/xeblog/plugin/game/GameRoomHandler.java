@@ -24,7 +24,7 @@ public abstract class GameRoomHandler implements GameRoomEventHandler {
     /**
      * 邀请超时任务缓存
      */
-    private Map<String, Timer> timeoutTask = new HashMap<>();
+    private Map<String, Timer> timeoutTask;
 
     /**
      * 当前游戏房间
@@ -77,8 +77,12 @@ public abstract class GameRoomHandler implements GameRoomEventHandler {
             @Override
             public void run() {
                 boolean timeout = --time < 0;
-                if (GameAction.isOver() || timeout) {
+                if (gameRoom == null || timeout) {
                     timer.cancel();
+                }
+
+                if (gameRoom == null) {
+                    return;
                 }
 
                 if (timeout) {
@@ -135,18 +139,23 @@ public abstract class GameRoomHandler implements GameRoomEventHandler {
     @Override
     public void roomCreated(GameRoom gameRoom) {
         this.gameRoom = gameRoom;
+        this.timeoutTask = new HashMap<>();
         this.isHomeowner = true;
     }
 
     @Override
     public void playerJoined(User player) {
         gameRoom.addUser(player);
-        cleanTask(player);
+        if (isHomeowner) {
+            cleanTask(player);
+        }
     }
 
     @Override
     public void playerInviteFailed(User player) {
-        cleanTask(player);
+        if (isHomeowner) {
+            cleanTask(player);
+        }
     }
 
     @Override
@@ -167,6 +176,7 @@ public abstract class GameRoomHandler implements GameRoomEventHandler {
     @Override
     public void roomClosed() {
         gameRoom = null;
+        timeoutTask = null;
     }
 
     @Override

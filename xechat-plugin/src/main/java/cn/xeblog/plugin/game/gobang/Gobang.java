@@ -2,6 +2,7 @@ package cn.xeblog.plugin.game.gobang;
 
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.xeblog.commons.entity.User;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.commons.entity.game.gobang.GobangDTO;
@@ -174,6 +175,14 @@ public class Gobang extends AbstractGame<GobangDTO> {
         showTips(player + "(你)：思考中...");
     }
 
+    @Override
+    public void playerLeft(User player) {
+        super.playerLeft(player);
+        isGameOver = true;
+        gameButtonPanel.add(getGameOverButton());
+        gameButtonPanel.updateUI();
+    }
+
     private void checkStatus(String username) {
         boolean isDebug = gameMode == GameMode.DEBUG;
         boolean flag = true;
@@ -205,7 +214,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
     private void initChessPanel() {
         initValue();
         player = GameAction.getNickname();
-        if (GameAction.getRoomId() == null) {
+        if (GameAction.isOfflineGame()) {
             switch (gameMode) {
                 case HUMAN_VS_PC:
                     aiService = createAI();
