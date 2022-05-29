@@ -43,17 +43,36 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         }
     }
 
+    /**
+     * 游戏初始化
+     */
     protected abstract void init();
 
+    /**
+     * 游戏开始
+     */
     protected abstract void start();
 
+    /**
+     * 游戏数据处理
+     *
+     * @param body 数据内容
+     */
     public abstract void handle(T body);
 
+    /**
+     * 发送游戏数据
+     *
+     * @param body 数据内容
+     */
     protected void sendMsg(GameDTO body) {
         body.setRoomId(gameRoom.getId());
         MessageAction.send(body, Action.GAME);
     }
 
+    /**
+     * 游戏结束
+     */
     public void over() {
         invoke(() -> {
             mainPanel.setVisible(false);
@@ -192,7 +211,7 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         vBox2.add(onlineUserMainPanel);
 
         Box hBox3 = Box.createHorizontalBox();
-        if (gameRoom.getHomeowner().equals(DataCache.username)) {
+        if (isHomeowner) {
             startGameButton = new JButton("开始游戏");
             startGameButton.setEnabled(false);
             startGameButton.addActionListener(e -> {
@@ -241,7 +260,7 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         onlineUserListPanel.removeAll();
         Box vBox = Box.createVerticalBox();
         for (User user : userList) {
-            if (user.getUsername().equals(DataCache.username)) {
+            if (user.getUsername().equals(GameAction.getNickname())) {
                 continue;
             }
 
@@ -286,7 +305,7 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
             String username = null;
             if (player != null) {
                 username = player.getUsername();
-                if (player.getUsername().equals(gameRoom.getHomeowner())) {
+                if (gameRoom.isHomeowner(player.getUsername())) {
                     username += " [房主]";
                 }
                 if (player.isReadied()) {
@@ -352,14 +371,10 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
     @Override
     public void playerLeft(User player) {
         super.playerLeft(player);
-        if (gameRoom.getHomeowner().equals(player.getUsername())) {
-            GameAction.over();
-        } else {
-            invoke(() -> {
-                flushGameRoomUsers();
-                flushOnlineUsers();
-            });
-        }
+        invoke(() -> {
+            flushGameRoomUsers();
+            flushOnlineUsers();
+        });
     }
 
     @Override
@@ -372,7 +387,7 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
     public void playerReadied(User player) {
         super.playerReadied(player);
         invoke(() -> {
-            if (player.getUsername().equals(DataCache.username)) {
+            if (player.getUsername().equals(GameAction.getNickname())) {
                 readyLabel.setEnabled(false);
                 readyLabel.setText("已准备");
             }

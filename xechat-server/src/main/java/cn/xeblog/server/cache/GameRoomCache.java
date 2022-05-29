@@ -17,28 +17,41 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class GameRoomCache {
 
+    /**
+     * 游戏房间缓存，key -> roomId
+     */
     private static final Map<String, GameRoom> GAME_ROOM_MAP = new ConcurrentHashMap<>(32);
 
+    /**
+     * 玩家当前所在游戏房间缓存，key -> username
+     */
     private static final Map<String, GameRoom> USER_ROOM_MAP = new ConcurrentHashMap<>(32);
 
-    public static GameRoom seize(String rooId) {
-        if (existRoom(rooId)) {
+    /**
+     * 抢占房间
+     *
+     * @param roomId 房间ID
+     * @return GameRoom 为null表示房间抢占失败
+     */
+    public static GameRoom seize(String roomId) {
+        if (existRoom(roomId)) {
             return null;
         }
 
         GameRoom gameRoom = new GameRoom();
-        gameRoom.setId(rooId);
-        if (GAME_ROOM_MAP.put(rooId, gameRoom) == null) {
+        gameRoom.setId(roomId);
+        if (GAME_ROOM_MAP.put(roomId, gameRoom) == null) {
             return gameRoom;
         }
 
         return null;
     }
 
-    public static void addRoom(GameRoom gameRoom) {
-        GAME_ROOM_MAP.put(gameRoom.getId(), gameRoom);
-    }
-
+    /**
+     * 移除房间
+     *
+     * @param roomId 房间ID
+     */
     public static void removeRoom(String roomId) {
         GameRoom gameRoom = getGameRoom(roomId);
         if (gameRoom == null) {
@@ -62,8 +75,8 @@ public class GameRoomCache {
             }
         });
         if (userSet.size() > 0) {
-            gameRoom.getInviteUsers().forEach(player -> {
-                if (player.getUsername().equals(gameRoom.getHomeowner())) {
+            userSet.forEach(player -> {
+                if (gameRoom.isHomeowner(player.getUsername())) {
                     return;
                 }
 
@@ -73,10 +86,23 @@ public class GameRoomCache {
         }
     }
 
+    /**
+     * 判断房间是否存在
+     *
+     * @param roomId 房间ID
+     * @return
+     */
     public static boolean existRoom(String roomId) {
         return GAME_ROOM_MAP.containsKey(roomId);
     }
 
+    /**
+     * 玩家加入房间
+     *
+     * @param roomId 房间ID
+     * @param user   玩家
+     * @return
+     */
     public static boolean joinRoom(String roomId, User user) {
         GameRoom gameRoom = GAME_ROOM_MAP.get(roomId);
         if (gameRoom == null) {
@@ -95,6 +121,13 @@ public class GameRoomCache {
         return false;
     }
 
+    /**
+     * 玩家离开房间
+     *
+     * @param roomId 房间ID
+     * @param user   玩家
+     * @return
+     */
     public static boolean leftRoom(String roomId, User user) {
         GameRoom gameRoom = GAME_ROOM_MAP.get(roomId);
         if (gameRoom == null) {
@@ -103,7 +136,7 @@ public class GameRoomCache {
 
         if (gameRoom.removeUser(user)) {
             USER_ROOM_MAP.remove(user.getId());
-            if (gameRoom.getCurrentNums() == 0 || user.getUsername().equals(gameRoom.getHomeowner())) {
+            if (gameRoom.getCurrentNums() == 0 || gameRoom.isHomeowner(user.getUsername())) {
                 removeRoom(gameRoom.getId());
             }
             return true;

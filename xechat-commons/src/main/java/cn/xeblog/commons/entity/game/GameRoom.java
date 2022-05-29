@@ -34,7 +34,7 @@ public class GameRoom implements Serializable {
     /**
      * 房主
      */
-    private String homeowner;
+    private User homeowner;
 
     /**
      * 房间内玩家
@@ -129,6 +129,10 @@ public class GameRoom implements Serializable {
 
         player.setReadied(false);
         return true;
+    }
+
+    public boolean isHomeowner(String username) {
+        return homeowner.getUsername().equals(username);
     }
 
 }

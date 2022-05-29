@@ -25,6 +25,12 @@ public class PlayCommandHandler extends AbstractCommandHandler {
             return;
         }
 
+        if (GameAction.getInviter() != null) {
+            ConsoleAction.showSimpleMsg(GameAction.isProactive() ? "请等待【" + GameAction.getInviter() + "】加入游戏！"
+                    : "【" + GameAction.getInviter() + "】已邀请你加入游戏，请确认！");
+            return;
+        }
+
         int len = args.length;
         if (len < 1) {
             ConsoleAction.showSimpleMsg("游戏编号不能为空！");
@@ -42,27 +48,21 @@ public class PlayCommandHandler extends AbstractCommandHandler {
             return;
         }
 
-        boolean isOffline = !DataCache.isOnline;
-        if (game.isRequiredLogin() && isOffline) {
+        boolean isOnline = DataCache.isOnline;
+        if (game.isRequiredLogin() && !isOnline) {
             ConsoleAction.showLoginMsg();
             return;
         }
 
-        if (GameAction.getInviter() != null) {
-            ConsoleAction.showSimpleMsg(GameAction.isProactive() ? "请等待【" + GameAction.getInviter() + "】加入游戏！"
-                    : "【" + GameAction.getInviter() + "】已邀请你加入游戏，请确认！");
-            return;
-        }
-
         String nickname = "玩家";
-        if (!isOffline) {
+        if (isOnline) {
             nickname = DataCache.username;
         }
 
         GameAction.setNickname(nickname);
         GameAction.setGame(game);
         GameAction.create();
-        if (!isOffline) {
+        if (isOnline) {
             MessageAction.send(UserStatus.PLAYING, Action.SET_STATUS);
         }
 
