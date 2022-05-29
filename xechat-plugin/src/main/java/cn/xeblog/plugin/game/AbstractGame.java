@@ -268,7 +268,7 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
             JLabel label = new JLabel(user.getUsername() + "(" + user.getStatus().alias() + ")");
             label.setFont(new Font("", 0, 13));
             userPanel.add(label);
-            if (user.getStatus() == UserStatus.FISHING) {
+            if (isHomeowner && user.getStatus() == UserStatus.FISHING && !gameRoom.isOvered()) {
                 JLabel inviteLabel = new JLabel("邀请");
                 inviteLabel.setFont(new Font("", 1, 12));
                 inviteLabel.setForeground(new Color(93, 187, 70));
