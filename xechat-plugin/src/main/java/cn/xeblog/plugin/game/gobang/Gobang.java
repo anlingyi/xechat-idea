@@ -196,10 +196,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
                     showTips("游戏结束：平局~ 卧槽？？？");
                 }
                 break;
-            case 0:
-                flag = false;
-                break;
             default:
+                flag = false;
                 break;
         }
 
@@ -289,7 +287,6 @@ public class Gobang extends AbstractGame<GobangDTO> {
         bottomPanel.setLayout(new BorderLayout());
         JPanel chessButtonPanel = new JPanel();
         gameButtonPanel = new JPanel();
-        status = -1;
         bottomPanel.add(chessButtonPanel, BorderLayout.NORTH);
         bottomPanel.add(gameButtonPanel, BorderLayout.SOUTH);
         if (gameMode == GameMode.ONLINE) {
@@ -325,6 +322,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
             aiPutChess();
         }
 
+        status = -1;
         chessPanel.addMouseListener(new MouseAdapter() {
             // 监听鼠标点击事件
             @Override
@@ -858,11 +856,19 @@ public class Gobang extends AbstractGame<GobangDTO> {
         border = 14;
         initChessPanel();
         if (isHomeowner) {
+            // 自旋等待一段时间，再发送游戏数据
+            spinMoment(100);
             int randomType = RandomUtil.randomInt(1, 3);
             GobangDTO msg = new GobangDTO();
             msg.setType(3 - randomType);
             sendMsg(msg);
             handle(new GobangDTO(0, 0, randomType));
+        }
+    }
+
+    private void spinMoment(long millis) {
+        long endTime = System.currentTimeMillis() + millis;
+        while (endTime > System.currentTimeMillis()) {
         }
     }
 
@@ -1119,7 +1125,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
     }
 
     private void showTips(String msg) {
-        if (isGameOver) {
+        if (isGameOver || tips == null) {
             return;
         }
 
