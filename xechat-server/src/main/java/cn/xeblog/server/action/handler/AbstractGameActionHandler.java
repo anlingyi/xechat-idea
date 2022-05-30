@@ -20,20 +20,22 @@ public abstract class AbstractGameActionHandler<T extends GameDTO> extends Abstr
 
     @Override
     protected void process(User user, GameDTO body) {
+        String msg = "游戏房间不存在！";
         GameRoom gameRoom = null;
         if (StrUtil.isNotBlank(body.getRoomId())) {
+            msg = "游戏房间已关闭！";
             gameRoom = GameRoomCache.getGameRoom(body.getRoomId());
-            if (gameRoom == null) {
-                user.setStatus(UserStatus.FISHING);
-                user.send(ResponseBuilder.build(null, new GameRoomMsgDTO(GameRoomMsgDTO.MsgType.GAME_ERROR, "游戏房间不存在！"), MessageType.GAME_ROOM));
-                ChannelAction.updateUserStatus(user);
-                return;
-            }
-
-            Game game = gameRoom.getGame();
-            gameRoom.setGame(game);
-            body.setGame(game);
         }
+        if (gameRoom == null) {
+            user.setStatus(UserStatus.FISHING);
+            user.send(ResponseBuilder.build(null, new GameRoomMsgDTO(GameRoomMsgDTO.MsgType.GAME_ERROR, msg), MessageType.GAME_ROOM));
+            ChannelAction.updateUserStatus(user);
+            return;
+        }
+
+        Game game = gameRoom.getGame();
+        gameRoom.setGame(game);
+        body.setGame(game);
 
         process(user, gameRoom, (T) body);
     }

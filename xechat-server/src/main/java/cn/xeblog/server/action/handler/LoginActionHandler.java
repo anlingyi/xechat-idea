@@ -48,6 +48,8 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
         boolean needUpdate = VersionComparator.INSTANCE.compare(currentPluginVersion, userPluginVersion) > 0;
         if (needUpdate) {
             ctx.writeAndFlush(ResponseBuilder.system("温馨提醒~ 请尽快更新插件版本至 [v" + CommonConstants.PLUGIN_VERSION + "]！"));
+            ctx.close();
+            return;
         }
 
         boolean isReconnect = body.isReconnected();
