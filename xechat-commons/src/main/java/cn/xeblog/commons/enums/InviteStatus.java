@@ -8,5 +8,5 @@ public enum InviteStatus {
     ACCEPT,
     REJECT,
     TIMEOUT,
-    OFFLINE;
+    FAILED;
 }

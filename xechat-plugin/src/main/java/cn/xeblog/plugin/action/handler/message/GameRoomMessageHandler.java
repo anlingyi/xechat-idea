@@ -5,9 +5,12 @@ import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.entity.game.GameInviteResultDTO;
 import cn.xeblog.commons.entity.game.GameRoom;
 import cn.xeblog.commons.entity.game.GameRoomMsgDTO;
+import cn.xeblog.commons.enums.Action;
+import cn.xeblog.commons.enums.InviteStatus;
 import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
+import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.annotation.DoMessage;
 import cn.xeblog.plugin.cache.DataCache;
 
@@ -55,7 +58,11 @@ public class GameRoomMessageHandler extends AbstractGameMessageHandler<GameRoomM
 
     private void roomClosed(Response<GameRoomMsgDTO> response) {
         User player = response.getUser();
-        ConsoleAction.showSystemMsg(response.getTime(), player.getUsername() + "关闭了房间！");
+        ConsoleAction.showSystemMsg(response.getTime(), player.getUsername() + "关闭了游戏房间！");
+        if (!GameAction.playing()) {
+            GameAction.clean();
+            return;
+        }
         GameAction.getAction().roomClosed();
     }
 
@@ -73,6 +80,16 @@ public class GameRoomMessageHandler extends AbstractGameMessageHandler<GameRoomM
 
     private void playerInvite(Response<GameRoomMsgDTO> response) {
         GameRoomMsgDTO msg = response.getBody();
+        if (!GameAction.isOver()) {
+            // 发送邀请失败消息
+            GameRoomMsgDTO failedMsg = new GameRoomMsgDTO();
+            failedMsg.setRoomId(msg.getRoomId());
+            failedMsg.setContent(new GameInviteResultDTO(InviteStatus.FAILED));
+            failedMsg.setMsgType(GameRoomMsgDTO.MsgType.PLAYER_INVITE_RESULT);
+            MessageAction.send(failedMsg, Action.GAME_ROOM);
+            return;
+        }
+
         User user = response.getUser();
         GameAction.setRoomId(msg.getRoomId());
         GameAction.setNickname(DataCache.username);
@@ -109,9 +126,9 @@ public class GameRoomMessageHandler extends AbstractGameMessageHandler<GameRoomM
                 }
 
                 break;
-            case OFFLINE:
-                ConsoleAction.showSystemMsg(response.getTime(), "对方已经下线了！");
-                return;
+            case FAILED:
+                ConsoleAction.showSystemMsg(response.getTime(), player.getUsername() + "邀请失败！");
+                break;
         }
 
         GameAction.getAction().playerInviteFailed(player);

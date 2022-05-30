@@ -36,7 +36,11 @@ public class GameRoomActionHandler extends AbstractGameActionHandler<GameRoomMsg
                 break;
             case ROOM_CLOSE:
                 GameRoomCache.removeRoom(gameRoom.getId());
-                sendMsg(gameRoom, ResponseBuilder.build(user, body, MessageType.GAME_ROOM));
+                Response resp = ResponseBuilder.build(user, body, MessageType.GAME_ROOM);
+                // 通知已收到游戏邀请但还未进入游戏房间的用户
+                gameRoom.getInviteUsers().forEach(player -> player.send(resp));
+                // 通知房间内的用户
+                sendMsg(gameRoom, resp);
                 break;
             case GAME_START:
                 gameRoom.getUsers().forEach((k, v) -> v.setReadied(false));
@@ -85,8 +89,8 @@ public class GameRoomActionHandler extends AbstractGameActionHandler<GameRoomMsg
             }
             // 通知房主
             gameRoom.getHomeowner().send(response);
-            if (dto.getStatus() != InviteStatus.REJECT) {
-                // 通知玩家
+            if (dto.getStatus() == InviteStatus.TIMEOUT) {
+                // 通知玩家游戏邀请超时
                 player.send(response);
             }
         }
