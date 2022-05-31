@@ -4,6 +4,7 @@ import cn.xeblog.plugin.entity.TextRender;
 import cn.xeblog.plugin.enums.Command;
 import cn.xeblog.plugin.enums.Style;
 import cn.xeblog.plugin.mode.ModeContext;
+import com.intellij.ide.BrowserUtil;
 import com.intellij.ide.actions.OpenFileAction;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
@@ -12,6 +13,7 @@ import com.intellij.openapi.project.ProjectManager;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -34,6 +36,10 @@ public class ConsoleAction {
         for (TextRender textRender : list) {
             renderText(textRender.getText(), textRender.getStyle());
         }
+    }
+
+    public static void renderText(String text) {
+        renderText(text, Style.DEFAULT);
     }
 
     public static void renderText(String text, Style style) {
@@ -64,6 +70,7 @@ public class ConsoleAction {
         JLabel imgLabel = new JLabel("查看图片");
         imgLabel.setAlignmentY(0.85f);
         imgLabel.setToolTipText("点击查看图片");
+        imgLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         imgLabel.setForeground(StyleConstants.getForeground(Style.DEFAULT.get()));
         imgLabel.addMouseListener(new MouseAdapter() {
             @Override
@@ -76,14 +83,32 @@ public class ConsoleAction {
         });
 
         synchronized (console) {
-            renderText("[", Style.DEFAULT);
-            JScrollBar verticalScrollBar = consoleScroll.getVerticalScrollBar();
-            int beforeScrollVal = verticalScrollBar.getValue();
-            updateCaretPosition(-1);
-            console.insertComponent(imgLabel);
-            renderText("]\n", Style.DEFAULT);
-            SwingUtilities.invokeLater(() -> verticalScrollBar.setValue(beforeScrollVal));
+            renderText("[");
+            renderComponent(imgLabel);
+            renderText("]\n");
         }
+    }
+
+    public static void renderUrl(String title, String url) {
+        JLabel label = new JLabel(title);
+        label.setAlignmentY(0.85f);
+        label.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        label.setForeground(StyleConstants.getForeground(Style.DEFAULT.get()));
+        label.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                BrowserUtil.browse(url);
+            }
+        });
+        renderComponent(label);
+    }
+
+    public static void renderComponent(Component component) {
+        JScrollBar verticalScrollBar = consoleScroll.getVerticalScrollBar();
+        int beforeScrollVal = verticalScrollBar.getValue();
+        updateCaretPosition(-1);
+        console.insertComponent(component);
+        SwingUtilities.invokeLater(() -> verticalScrollBar.setValue(beforeScrollVal));
     }
 
     public static void clean() {
@@ -113,7 +138,7 @@ public class ConsoleAction {
     }
 
     public static void showLoginMsg() {
-        ConsoleAction.showSimpleMsg("请先登录！登录命令：" + Command.LOGIN.getCommand());
+        ConsoleAction.showSimpleMsg("请先登录！登录命令：" + Command.LOGIN.getCommand() + "，帮助命令：" + Command.HELP.getCommand());
     }
 
     public static void setConsole(JTextPane console) {
