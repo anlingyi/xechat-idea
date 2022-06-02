@@ -10,22 +10,13 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Game {
-    GOBANG("五子棋", 0, 1, false);
+    GOBANG("五子棋", false),
+    LANDLORDS("斗地主", false);
 
     /**
      * 游戏名称
      */
     private String name;
-
-    /**
-     * 最小邀请玩家数
-     */
-    private int minPlayers;
-
-    /**
-     * 最大邀请玩家数
-     */
-    private int maxPlayers;
 
     /**
      * 是否必须要登录
