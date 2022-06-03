@@ -249,7 +249,7 @@ public class PokerUtil {
                     } else {
                         return null;
                     }
-                } else if (maxShunzi > 1 && maxLen == 3
+                } else if (size > 7 && maxShunzi > 1 && maxLen == 3
                         && (singlePokers.size() == maxShunzi && pairPokers.size() == 0 || pairPokers.size() == maxShunzi)) {
                     // 载人飞机
                     pokerInfo.setPokerModel(PokerModel.PLAIN_MANNED);
