@@ -62,9 +62,9 @@ public class PokerUtil {
 
                 // 牌值相同，则按花色排序
                 if (p1.getSuits().ordinal() > p2.getSuits().ordinal()) {
-                    return after;
+                    return before;
                 }
-                return before;
+                return after;
             }
 
             if (p1.getSort() > p2.getSort()) {
@@ -120,9 +120,7 @@ public class PokerUtil {
         int size = pokers.size();
         PokerInfo pokerInfo = new PokerInfo();
         if (size > 1) {
-            if (size > 2) {
-                sorted(pokers, false);
-            } else if (size == 2) {
+            if (size == 2) {
                 if (pokers.get(0).getValue() + pokers.get(1).getValue() == 33) {
                     // 火箭
                     pokerInfo.setPokers(pokers);

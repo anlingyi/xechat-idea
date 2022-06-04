@@ -17,6 +17,10 @@ public class AllocPokerDTO implements Serializable {
      */
     private List<Poker> pokers;
     /**
+     * 底牌
+     */
+    private List<Poker> lastPokers;
+    /**
      * 是否优先叫分
      */
     private boolean prioritized;
