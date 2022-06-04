@@ -866,12 +866,6 @@ public class Gobang extends AbstractGame<GobangDTO> {
         }
     }
 
-    private void spinMoment(long millis) {
-        long endTime = System.currentTimeMillis() + millis;
-        while (endTime > System.currentTimeMillis()) {
-        }
-    }
-
     public boolean putChess(int x, int y, int type) {
         if (isGameOver) {
             return false;

@@ -37,11 +37,7 @@ public class LandlordsGameDTO extends GameDTO {
         /**
          * 出牌
          */
-        OUT_POKER,
-        /**
-         * 游戏结束
-         */
-        GAME_OVER
+        OUT_POKER
     }
 
 }

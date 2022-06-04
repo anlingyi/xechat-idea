@@ -45,4 +45,13 @@ public class PlayerNode {
         return this.pokerTotal;
     }
 
+    @Override
+    public String toString() {
+        return "PlayerNode{" +
+                "player='" + player + '\'' +
+                ", pokerTotal=" + pokerTotal +
+                ", role=" + role +
+                '}';
+    }
+
 }

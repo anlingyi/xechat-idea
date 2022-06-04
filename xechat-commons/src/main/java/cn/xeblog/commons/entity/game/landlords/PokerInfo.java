@@ -33,6 +33,10 @@ public class PokerInfo {
      * @return
      */
     public boolean biggerThanIt(PokerInfo pokerInfo) {
+        if (pokerInfo == null) {
+            return true;
+        }
+
         PokerModel itsPokerModel = pokerInfo.getPokerModel();
         if (this.pokerModel == PokerModel.ROCKET) {
             // 我是火箭，我大

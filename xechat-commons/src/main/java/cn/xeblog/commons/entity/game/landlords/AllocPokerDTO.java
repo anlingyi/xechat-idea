@@ -1,6 +1,8 @@
 package cn.xeblog.commons.entity.game.landlords;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
@@ -10,6 +12,8 @@ import java.util.List;
  * @date 2022/6/3 4:09 下午
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class AllocPokerDTO implements Serializable {
 
     /**
