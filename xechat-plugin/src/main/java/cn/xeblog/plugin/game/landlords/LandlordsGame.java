@@ -90,6 +90,11 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
      */
     private Player maxScorePlayer;
 
+    /**
+     * 最大叫分
+     */
+    private int maxScore;
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
@@ -121,13 +126,23 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         }
     }
 
+    private void initValue() {
+        state = 0;
+        maxScore = 0;
+        pokers = null;
+        lastPokers = null;
+        pokerInfo = null;
+        lastPokerInfo = null;
+        lastPlayer = null;
+        currentPlayer = null;
+        maxScorePlayer = null;
+        playerMap = new HashMap<>();
+        selectedPokers = new ArrayList<>();
+        receiveCounter = new AtomicInteger();
+    }
+
     @Override
     protected void init() {
-        state = 0;
-        playerMap = null;
-        currentPlayer = null;
-        receiveCounter = null;
-
         mainPanel.removeAll();
         mainPanel.setLayout(null);
         mainPanel.setEnabled(true);
@@ -158,11 +173,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
 
     @Override
     protected void start() {
-        playerMap = new HashMap<>();
-        selectedPokers = new ArrayList<>();
-        receiveCounter = new AtomicInteger();
-        lastPokerInfo = null;
-        lastPlayer = null;
+        initValue();
 
         buildPlayerNode();
         showGamePanel();
@@ -230,16 +241,22 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                 break;
             case CALL_SCORE:
                 Player nextPlayer = playerMap.get(playerNode.getNextPlayer().getPlayer());
+                String tips;
                 int score = (int) body.getData();
-                String tips = score == 0 ? "不叫！" : score + "分！";
+                if (score == 0) {
+                    tips = "不叫！";
+                } else {
+                    tips = score + "分！";
+                    if (score > maxScore) {
+                        maxScore = score;
+                        maxScorePlayer = player;
+                    }
+                }
+
                 if (isMe) {
                     showPlayerTips(tips);
                 } else {
                     player.showTips(tips);
-                }
-
-                if (score > 0) {
-                    maxScorePlayer = player;
                 }
 
                 boolean isOk = receivedAndOk();
@@ -293,7 +310,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                     }
                 } else {
                     if (nextPlayer.getPlayerNode() == currentPlayer) {
-                        showCallScoreButton(score);
+                        showCallScoreButton(maxScore);
                     } else {
                         nextPlayer.showTips("叫分中...");
                     }
