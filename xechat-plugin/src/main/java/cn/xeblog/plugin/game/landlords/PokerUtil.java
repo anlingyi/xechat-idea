@@ -176,7 +176,8 @@ public class PokerUtil {
             for (int i = 0; i < len; i++) {
                 int currentValue = sortedValues.get(i);
                 List<Poker> currentPokerList = pokersMap.get(currentValue);
-                if (currentPokerList.size() == maxLen) {
+                int currentSize = currentPokerList.size();
+                if (currentSize == maxLen) {
                     currentPokerList.forEach(poker -> poker.setSort(1));
                 }
 
@@ -190,11 +191,13 @@ public class PokerUtil {
 
                 int nextValue = sortedValues.get(i + 1);
                 List<Poker> nextPokerList = pokersMap.get(nextValue);
-                if (currentValue < 15 && nextValue < 15 && currentValue + 1 == nextValue && nextPokerList.size() == currentPokerList.size()) {
+                if (currentValue < 15 && nextValue < 15 && currentValue + 1 == nextValue && nextPokerList.size() == currentSize) {
                     shunzi++;
                 } else {
                     shunzi = 1;
-                    maxShunzi = 0;
+                    if (maxLen == 1) {
+                        maxShunzi = 0;
+                    }
                 }
             }
 

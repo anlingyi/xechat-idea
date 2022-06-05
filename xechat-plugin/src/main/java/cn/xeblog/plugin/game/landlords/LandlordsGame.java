@@ -373,8 +373,9 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         JPanel centerPanel = new JPanel();
 
         JPanel textPanel = new JPanel();
-        textPanel.setPreferredSize(new Dimension(300, 30));
         tipsLabel = new JLabel();
+        tipsLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        tipsLabel.setPreferredSize(new Dimension(200, 40));
         tipsLabel.setForeground(playerTipsColor);
         textPanel.add(tipsLabel);
         centerPanel.add(textPanel);
@@ -484,6 +485,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
             pokersScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             pokerMainPanel.add(pokersScroll);
             mainPanel.add(pokerMainPanel);
+            nicknameLabel.setText(playerNode.getPlayer());
             nicknameLabel.setPreferredSize(new Dimension(300, 30));
             mainPanel.add(nicknameLabel);
             mainPanel.add(roleLabel);
@@ -620,7 +622,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     }
 
     private void showTips(String tips) {
-        tipsLabel.setText(tips);
+        tipsLabel.setText("<html>" + tips + "</html>");
         tipsLabel.updateUI();
     }
 
