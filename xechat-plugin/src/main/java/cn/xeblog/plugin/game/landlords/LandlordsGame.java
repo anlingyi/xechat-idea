@@ -215,8 +215,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                 if (isMe) {
                     pokers = allocPokerList;
                     lastPokers = allocPokerDTO.getLastPokers();
-                    showTips("底牌");
-                    showPokers(lastPokers);
+                    showTips("正在确定地主...");
                 }
                 flushPlayerPanel(player);
 
@@ -258,9 +257,13 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
 
                 if (!isOk && score == 3 || isOk && maxScorePlayer != null) {
                     state = 3;
+
                     PlayerNode maxScorePlayerNode = maxScorePlayer.getPlayerNode();
                     maxScorePlayerNode.setRole(2);
                     maxScorePlayerNode.setPokerTotal(playerNode.getPokerTotal() + 3);
+
+                    showTips(maxScorePlayerNode.getPlayer() + (maxScorePlayerNode == currentPlayer ? "(你)" : "") + "成为地主！");
+                    showPokers(lastPokers);
 
                     PlayerNode prevPlayerNode = maxScorePlayerNode.getPrevPlayer();
                     PlayerNode nextPlayerNode = maxScorePlayerNode.getNextPlayer();
@@ -288,8 +291,6 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                         maxScorePlayer.showTips("思考中...");
                         playerMap.get(maxScorePlayerNode.getPlayer()).flushRole();
                     }
-                    showTips(maxScorePlayerNode.getPlayer() + (maxScorePlayerNode == currentPlayer ? "(你)" : "") + "先出牌");
-                    showPokers(null);
                 } else {
                     if (nextPlayer.getPlayerNode() == currentPlayer) {
                         showCallScoreButton(score);
