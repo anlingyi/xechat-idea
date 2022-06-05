@@ -3,6 +3,7 @@ package cn.xeblog.plugin.factory;
 import cn.xeblog.commons.enums.Game;
 import cn.xeblog.plugin.game.AbstractGame;
 import cn.xeblog.plugin.game.gobang.Gobang;
+import cn.xeblog.plugin.game.landlords.LandlordsGame;
 
 /**
  * @author anlingyi
@@ -17,6 +18,8 @@ public class GameFactory {
         switch (game) {
             case GOBANG:
                 return new Gobang();
+            case LANDLORDS:
+                return new LandlordsGame();
         }
 
         return null;

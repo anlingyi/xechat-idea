@@ -15,13 +15,18 @@ public class HelpCommandHandler extends AbstractCommandHandler {
     @Override
     public void process(String[] args) {
         StringBuilder sb = new StringBuilder();
-        sb.append("支持的命令（命令参数使用空格分开）\n");
+        sb.append(" 命令列表 & 触发命令前缀 \"" + Command.COMMAND_PREFIX + "\"\n");
         for (Command command : Command.values()) {
             sb.append("· ").append(command.getCommand()).append("：")
                     .append(command.getDesc()).append("\n");
         }
-        sb.append("当前版本：v").append(IdeaUtils.getPluginVersion());
+        sb.append("\n Version ").append(IdeaUtils.getPluginVersion());
         ConsoleAction.showSimpleMsg(sb.toString());
+        ConsoleAction.renderText("--------------\n ");
+        ConsoleAction.renderUrl("[开源]", "https://github.com/anlingyi/xechat-idea");
+        ConsoleAction.renderText("  ");
+        ConsoleAction.renderUrl("[更多]", "https://xeblog.cn/?tag=xechat-idea");
+        ConsoleAction.renderText("\n--------------\n");
     }
 
     @Override

@@ -6,6 +6,7 @@ import cn.xeblog.commons.enums.UserStatus;
 import cn.xeblog.server.action.ChannelAction;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -67,7 +68,7 @@ public class GameRoomCache {
             });
         }
 
-        Set<User> userSet = gameRoom.getInviteUsers();
+        Set<User> userSet = new HashSet<>(gameRoom.getInviteUsers());
         gameRoom.getUsers().forEach((k, v) -> {
             User user = UserCache.get(v.getId());
             if (user != null) {

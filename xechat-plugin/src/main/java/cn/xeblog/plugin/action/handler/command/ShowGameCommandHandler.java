@@ -18,13 +18,7 @@ public class ShowGameCommandHandler extends AbstractCommandHandler {
         Game[] games = Game.values();
         for (int i = 0; i < games.length; i++) {
             Game game = games[i];
-            sb.append(i).append(".")
-                    .append(game.getName())
-                    .append("(可邀请").append(game.getMinPlayers());
-            if (game.getMaxPlayers() > 0) {
-                sb.append("~").append(game.getMaxPlayers());
-            }
-            sb.append("人)").append(" ");
+            sb.append(i).append(".").append(game.getName()).append("\n");
         }
 
         ConsoleAction.showSimpleMsg(sb.toString());

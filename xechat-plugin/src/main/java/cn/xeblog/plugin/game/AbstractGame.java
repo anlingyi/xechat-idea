@@ -411,4 +411,10 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         ApplicationManager.getApplication().invokeLater(runnable);
     }
 
+    protected void spinMoment(long millis) {
+        long endTime = System.currentTimeMillis() + millis;
+        while (endTime > System.currentTimeMillis()) {
+        }
+    }
+
 }
