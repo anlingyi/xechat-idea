@@ -7,7 +7,9 @@ import cn.xeblog.commons.entity.game.landlords.AllocPokerDTO;
 import cn.xeblog.commons.entity.game.landlords.LandlordsGameDTO;
 import cn.xeblog.commons.entity.game.landlords.Poker;
 import cn.xeblog.commons.entity.game.landlords.PokerInfo;
+import cn.xeblog.commons.enums.Game;
 import cn.xeblog.plugin.action.GameAction;
+import cn.xeblog.plugin.annotation.DoGame;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.game.AbstractGame;
 import com.intellij.ui.components.JBScrollPane;
@@ -28,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author anlingyi
  * @date 2022/6/2 1:13 下午
  */
+@DoGame(Game.LANDLORDS)
 public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
 
     private JPanel startPanel;
