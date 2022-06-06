@@ -223,16 +223,9 @@ public class PokerUtil {
                 } else {
                     return null;
                 }
-            } else if (size == 4) {
-                if (maxLen == 4) {
-                    // 炸弹
-                    pokerInfo.setPokerModel(PokerModel.BOMB);
-                } else if (maxLen == 3) {
-                    // 三带一单
-                    pokerInfo.setPokerModel(PokerModel.THREE_ONE_SINGLE);
-                } else {
-                    return null;
-                }
+            } else if (size == 4 && maxLen == 3) {
+                // 三带一单
+                pokerInfo.setPokerModel(PokerModel.THREE_ONE_SINGLE);
             } else if (size == 5 && maxLen == 3 && minLen == 2) {
                 // 三带一对
                 pokerInfo.setPokerModel(PokerModel.THREE_ONE_PAIR);
