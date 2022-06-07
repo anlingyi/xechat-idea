@@ -3,9 +3,11 @@ package cn.xeblog.plugin.game.gobang;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xeblog.commons.entity.User;
+import cn.xeblog.commons.enums.Game;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.commons.entity.game.gobang.GobangDTO;
+import cn.xeblog.plugin.annotation.DoGame;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.game.AbstractGame;
 import com.intellij.openapi.ui.ComboBox;
@@ -30,6 +32,7 @@ import java.util.List;
  * @author anlingyi
  * @date 2020/6/5
  */
+@DoGame(Game.GOBANG)
 public class Gobang extends AbstractGame<GobangDTO> {
 
     // 行数，y
