@@ -118,13 +118,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         }
 
         public void flushRole() {
-            String role = "待定";
-            if (playerNode.getRole() == 1) {
-                role = "农民";
-            } else if (playerNode.getRole() == 2) {
-                role = "地主";
-            }
-            roleLabel.setText(role + "：" + playerNode.getPokerTotal());
+            roleLabel.setText(playerNode.getRoleInfo() + "：" + playerNode.getPokerTotal());
             roleLabel.updateUI();
         }
     }
@@ -329,13 +323,18 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                         player.showTips(tips2);
                     }
                 } else {
-                    if (!isMe) {
-                        player.showTips("");
+                    String pokerModeInfo = getPokerDisplayModel(outPokerInfo);
+                    if (isMe) {
+                        showPlayerTips(pokerModeInfo);
+                    } else {
+                        player.showTips(pokerModeInfo);
                     }
+
+                    String lastPlayerRole = playerNode.getRoleInfo();
                     lastPlayer = playerNode.getPlayer();
                     lastPokerInfo = outPokerInfo;
                     boolean isOver = playerNode.minusPoker(outPokerInfo.getPokers().size()) == 0;
-                    showTips(body.getPlayer() + "已出牌");
+                    showTips("[" + lastPlayerRole + "]" + lastPlayer + (isMe ? "(你)" : "") + "已出牌");
                     showPokerInfo(lastPokerInfo);
                     player.flushRole();
                     if (isOver) {
@@ -639,6 +638,43 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
             pokerList.forEach(poker -> outPokerPanel.add(getPokerPanel(poker)));
         }
         outPokerPanel.updateUI();
+    }
+
+    private String getPokerDisplayModel(PokerInfo pokerInfo) {
+        if (pokerInfo != null) {
+            String minValue = getPokerDisplayValue(pokerInfo.getPokers().get(0).getValue());
+            String maxValue = getPokerDisplayValue(pokerInfo.getValue());
+            switch (pokerInfo.getPokerModel()) {
+                case ROCKET:
+                    return "王炸";
+                case BOMB:
+                    return "炸弹";
+                case SINGLE:
+                    return "单张" + minValue;
+                case PAIR:
+                    return "对" + minValue;
+                case THREE:
+                    return "三张" + minValue;
+                case THREE_ONE_SINGLE:
+                    return "三带一";
+                case THREE_ONE_PAIR:
+                    return "三带一对";
+                case SHUN_ZI_SINGLE:
+                    return "单顺子(" + minValue + "~" + maxValue + ")";
+                case SHUN_ZI_PAIR:
+                    return "双顺子(" + minValue + "~" + maxValue + ")";
+                case PLAIN_UNMANNED:
+                    return "无人飞机";
+                case PLAIN_MANNED:
+                    return "载人飞机";
+                case FOUR_TWO_SINGLE:
+                    return "四带二";
+                case FOUR_TWO_PAIR:
+                    return "四带俩对";
+            }
+        }
+
+        return "";
     }
 
     private String getPokerDisplayValue(int value) {

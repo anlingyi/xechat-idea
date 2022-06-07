@@ -45,6 +45,16 @@ public class PlayerNode {
         return this.pokerTotal;
     }
 
+    public String getRoleInfo() {
+        String info = "待定";
+        if (this.role == 1) {
+            info = "农民";
+        } else if (this.role == 2) {
+            info = "地主";
+        }
+        return info;
+    }
+
     @Override
     public String toString() {
         return "PlayerNode{" +
