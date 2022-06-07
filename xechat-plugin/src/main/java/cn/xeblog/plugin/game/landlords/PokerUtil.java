@@ -144,6 +144,7 @@ public class PokerUtil {
             int minLen = 99;
             int shunzi = 1;
             int maxShunzi = 0;
+            boolean resetShunzi = false;
             Set<Integer> keys = pokersMap.keySet();
             List<Poker> maxPokers = null;
             List<Poker> singlePokers = new ArrayList<>();
@@ -153,9 +154,7 @@ public class PokerUtil {
                 List<Poker> pokerList = pokersMap.get(key);
                 int pokerSize = pokerList.size();
                 int maxPokerSize = maxPokers == null ? 0 : maxPokers.size();
-                if (pokerSize >= maxPokerSize && key > value) {
-                    value = key;
-                }
+
                 if (maxPokerSize < pokerSize) {
                     maxPokers = pokerList;
                     maxLen = pokerSize;
@@ -171,6 +170,7 @@ public class PokerUtil {
                 }
             }
 
+            List<Poker> plainList = new ArrayList<>();
             List<Integer> sortedValues = keys.stream().sorted().collect(Collectors.toList());
             int len = sortedValues.size();
             for (int i = 0; i < len; i++) {
@@ -178,7 +178,9 @@ public class PokerUtil {
                 List<Poker> currentPokerList = pokersMap.get(currentValue);
                 int currentSize = currentPokerList.size();
                 if (currentSize == maxLen) {
-                    currentPokerList.forEach(poker -> poker.setSort(1));
+                    if ((maxLen != 3 || !resetShunzi) && currentValue > value) {
+                        value = currentValue;
+                    }
                 }
 
                 if (shunzi > maxShunzi) {
@@ -192,8 +194,16 @@ public class PokerUtil {
                 int nextValue = sortedValues.get(i + 1);
                 List<Poker> nextPokerList = pokersMap.get(nextValue);
                 if (currentValue < 15 && nextValue < 15 && currentValue + 1 == nextValue && nextPokerList.size() == currentSize) {
+                    if (maxLen == 3) {
+                        if (shunzi == 1) {
+                            plainList.addAll(currentPokerList);
+                        }
+                        plainList.addAll(nextPokerList);
+                    }
                     shunzi++;
+                    resetShunzi = false;
                 } else {
+                    resetShunzi = true;
                     shunzi = 1;
                     if (maxLen == 1) {
                         maxShunzi = 0;
@@ -201,7 +211,6 @@ public class PokerUtil {
                 }
             }
 
-            sorted(pokers, false);
             pokerInfo.setPokers(pokers);
             pokerInfo.setValue(value);
             if (size == 2 && maxLen == 2) {
@@ -211,10 +220,11 @@ public class PokerUtil {
                 // 三张牌
                 pokerInfo.setPokerModel(PokerModel.THREE);
             } else if (maxLen == 4) {
+                maxPokers.forEach(poker -> poker.setSort(1));
                 if (size == 4) {
                     // 炸弹
                     pokerInfo.setPokerModel(PokerModel.BOMB);
-                } else if (size == 6 && minLen == 1) {
+                } else if (size == 6) {
                     // 四带二单
                     pokerInfo.setPokerModel(PokerModel.FOUR_TWO_SINGLE);
                 } else if (size == 8 && minLen == 2) {
@@ -226,39 +236,44 @@ public class PokerUtil {
             } else if (size == 4 && maxLen == 3) {
                 // 三带一单
                 pokerInfo.setPokerModel(PokerModel.THREE_ONE_SINGLE);
+                maxPokers.forEach(poker -> poker.setSort(1));
             } else if (size == 5 && maxLen == 3 && minLen == 2) {
                 // 三带一对
                 pokerInfo.setPokerModel(PokerModel.THREE_ONE_PAIR);
+                maxPokers.forEach(poker -> poker.setSort(1));
             } else if (maxShunzi > 1) {
-                if (maxLen - minLen == 0) {
+                if (size > 7 && maxShunzi > 1 && maxLen == 3 && (minLen == 2 && pairPokers.size() == maxShunzi || maxShunzi * 4 == size)) {
+                    // 载人飞机
+                    pokerInfo.setPokerModel(PokerModel.PLAIN_MANNED);
+                    plainList.forEach(poker -> poker.setSort(1));
+                } else if (maxLen - minLen == 0) {
                     if (maxShunzi > 4 && maxLen == 1) {
                         // 单牌顺子
                         pokerInfo.setPokerModel(PokerModel.SHUN_ZI_SINGLE);
                     } else if (maxShunzi > 2 && maxLen == 2) {
                         // 对牌顺子
                         pokerInfo.setPokerModel(PokerModel.SHUN_ZI_PAIR);
-                    } else if (maxShunzi > 1 && maxLen == 3) {
+                    } else if (maxShunzi > 1 && maxLen == 3 && maxShunzi * 3 == size) {
                         // 无人飞机
                         pokerInfo.setPokerModel(PokerModel.PLAIN_UNMANNED);
                     } else {
                         return null;
                     }
-                } else if (size > 7 && maxShunzi > 1 && maxLen == 3
-                        && (singlePokers.size() == maxShunzi && pairPokers.size() == 0 || pairPokers.size() == maxShunzi)) {
-                    // 载人飞机
-                    pokerInfo.setPokerModel(PokerModel.PLAIN_MANNED);
                 } else {
                     return null;
                 }
             } else {
                 return null;
             }
+
+            sorted(pokers, false);
         } else {
             // 单牌
             pokerInfo.setPokers(pokers);
             pokerInfo.setPokerModel(PokerModel.SINGLE);
             pokerInfo.setValue(pokers.get(0).getValue());
         }
+
         return pokerInfo;
     }
 
@@ -277,12 +292,12 @@ public class PokerUtil {
 
         // 四带两单
 //        List<Poker> pokers = new ArrayList<>();
-//        pokers.add(new Poker(3, Poker.Suits.SPADE));
-//        pokers.add(new Poker(3, Poker.Suits.CLUB));
-//        pokers.add(new Poker(14, Poker.Suits.CLUB));
-//        pokers.add(new Poker(3, Poker.Suits.DIAMOND));
+//        pokers.add(new Poker(5, Poker.Suits.SPADE));
+//        pokers.add(new Poker(5, Poker.Suits.CLUB));
+//        pokers.add(new Poker(4, Poker.Suits.CLUB));
+//        pokers.add(new Poker(5, Poker.Suits.DIAMOND));
 //        pokers.add(new Poker(3, Poker.Suits.HEART));
-//        pokers.add(new Poker(15, Poker.Suits.SPADE));
+//        pokers.add(new Poker(5, Poker.Suits.HEART));
 //        testGetPokerInfo(pokers, PokerModel.FOUR_TWO_SINGLE);
 
         // 载人飞机
@@ -295,6 +310,38 @@ public class PokerUtil {
 //        pokers.add(new Poker(15, Poker.Suits.SPADE));
 //        pokers.add(new Poker(14, Poker.Suits.SPADE));
 //        pokers.add(new Poker(14, Poker.Suits.SPADE));
+//        pokers.add(new Poker(4, Poker.Suits.SPADE));
+//        pokers.add(new Poker(4, Poker.Suits.CLUB));
+//        testGetPokerInfo(pokers, PokerModel.PLAIN_MANNED);
+
+        // 载人飞机
+//        List<Poker> pokers = new ArrayList<>();
+//        pokers.add(new Poker(3, Poker.Suits.SPADE));
+//        pokers.add(new Poker(3, Poker.Suits.CLUB));
+//        pokers.add(new Poker(5, Poker.Suits.SPADE));
+//        pokers.add(new Poker(5, Poker.Suits.CLUB));
+//        pokers.add(new Poker(5, Poker.Suits.DIAMOND));
+//        pokers.add(new Poker(6, Poker.Suits.CLUB));
+//        pokers.add(new Poker(3, Poker.Suits.DIAMOND));
+//        pokers.add(new Poker(7, Poker.Suits.DIAMOND));
+//        pokers.add(new Poker(6, Poker.Suits.SPADE));
+//        pokers.add(new Poker(6, Poker.Suits.HEART));
+//        pokers.add(new Poker(7, Poker.Suits.SPADE));
+//        pokers.add(new Poker(7, Poker.Suits.CLUB));
+//        testGetPokerInfo(pokers, PokerModel.PLAIN_MANNED);
+
+        // 载人飞机
+//        List<Poker> pokers = new ArrayList<>();
+//        pokers.add(new Poker(3, Poker.Suits.SPADE));
+//        pokers.add(new Poker(3, Poker.Suits.CLUB));
+//        pokers.add(new Poker(5, Poker.Suits.SPADE));
+//        pokers.add(new Poker(5, Poker.Suits.CLUB));
+//        pokers.add(new Poker(5, Poker.Suits.DIAMOND));
+//        pokers.add(new Poker(7, Poker.Suits.CLUB));
+//        pokers.add(new Poker(3, Poker.Suits.DIAMOND));
+//        pokers.add(new Poker(4, Poker.Suits.DIAMOND));
+//        pokers.add(new Poker(7, Poker.Suits.SPADE));
+//        pokers.add(new Poker(7, Poker.Suits.HEART));
 //        pokers.add(new Poker(4, Poker.Suits.SPADE));
 //        pokers.add(new Poker(4, Poker.Suits.CLUB));
 //        testGetPokerInfo(pokers, PokerModel.PLAIN_MANNED);
