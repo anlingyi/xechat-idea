@@ -178,7 +178,7 @@ public class PokerUtil {
                 List<Poker> currentPokerList = pokersMap.get(currentValue);
                 int currentSize = currentPokerList.size();
                 if (currentSize == maxLen) {
-                    if ((maxLen != 3 || !resetShunzi) && currentValue > value) {
+                    if ((maxLen != minLen || !resetShunzi) && currentValue > value) {
                         value = currentValue;
                     }
                 }
