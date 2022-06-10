@@ -27,6 +27,10 @@ public class LandlordsGameDTO extends GameDTO {
 
     public enum MsgType {
         /**
+         * 加入机器人
+         */
+        JOIN_ROBOTS,
+        /**
          * 分牌
          */
         ALLOC_POKER,

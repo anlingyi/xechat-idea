@@ -2,9 +2,8 @@ package cn.xeblog.plugin.game.landlords;
 
 import cn.xeblog.commons.entity.game.landlords.Poker;
 import cn.xeblog.commons.entity.game.landlords.PokerInfo;
-import lombok.Getter;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * @author anlingyi
@@ -15,24 +14,27 @@ public abstract class PlayerAction {
     /**
      * 手牌
      */
-    @Getter
-    private List<Poker> pokers;
+    protected List<Poker> pokers;
 
     /**
-     * 角色，1.农民 2.地主
+     * 玩家节点
      */
-    @Getter
-    private int role;
+    protected PlayerNode playerNode;
 
-    /**
-     * 后一位玩家角色
-     */
-    private int nextRole;
+    public PlayerAction(PlayerNode playerNode) {
+        this.playerNode = playerNode;
+    }
 
-    public PlayerAction(List<Poker> pokers, int role, int nextRole) {
+    public void setPokers(List<Poker> pokers) {
         this.pokers = pokers;
-        this.role = role;
-        this.nextRole = nextRole;
+    }
+
+    public void setLastPokers(List<Poker> lastPokers) {
+        if (this.pokers == null) {
+            return;
+        }
+
+        this.pokers.addAll(lastPokers);
     }
 
     /**
@@ -46,27 +48,33 @@ public abstract class PlayerAction {
     /**
      * 出牌
      *
-     * @param role      出牌人角色 1.农民 2.地主
-     * @param pokerInfo 出牌人角色 1.农民 2.地主
+     * @param outPlayer 出牌人
+     * @param pokerInfo 出牌信息
      * @return null表示不出牌
      */
-    protected PokerInfo outPoker(int role, PokerInfo pokerInfo) {
-        PokerInfo out = processOutPoker(role, pokerInfo);
+    protected PokerInfo outPoker(PlayerNode outPlayer, PokerInfo pokerInfo) {
+        if (outPlayer != null && outPlayer == playerNode) {
+            outPlayer = null;
+            pokerInfo = null;
+        }
+
+        PokerInfo out = processOutPoker(outPlayer, pokerInfo);
         if (out == null) {
             return null;
         }
 
         this.pokers.removeAll(out.getPokers());
+
         return out;
     }
 
     /**
      * 出牌处理
      *
-     * @param role      出牌人角色 1.农民 2.地主
-     * @param pokerInfo 出牌人角色 1.农民 2.地主
+     * @param outPlayer 出牌人
+     * @param pokerInfo 出牌信息
      * @return null表示不出牌
      */
-    public abstract PokerInfo processOutPoker(int role, PokerInfo pokerInfo);
+    public abstract PokerInfo processOutPoker(PlayerNode outPlayer, PokerInfo pokerInfo);
 
 }

@@ -205,7 +205,7 @@ public class PokerUtil {
                 } else {
                     resetShunzi = true;
                     shunzi = 1;
-                    if (maxLen == 1) {
+                    if (maxLen < 3) {
                         maxShunzi = 0;
                     }
                 }
