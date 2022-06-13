@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @DoGame(Game.LANDLORDS)
 public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
 
+    private AtomicInteger restartCounter;
     private JPanel startPanel;
     private JButton gameOverButton;
     private JButton outPokerButton;
@@ -155,6 +156,12 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
 
     @Override
     protected void init() {
+        state = 0;
+        if (restartCounter == null) {
+            restartCounter = new AtomicInteger();
+        }
+        restartCounter.incrementAndGet();
+
         mainPanel.removeAll();
         mainPanel.setLayout(null);
         mainPanel.setEnabled(true);
@@ -187,7 +194,6 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     @Override
     protected void start() {
         initValue();
-
         if (gameRoom != null) {
             userList.addAll(gameRoom.getUsers().keySet());
         } else {
@@ -231,6 +237,10 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     }
 
     private void sendMsg(LandlordsGameDTO.MsgType msgType, String player, Object data) {
+        if (state == 0) {
+            return;
+        }
+
         LandlordsGameDTO dto = new LandlordsGameDTO();
         dto.setMsgType(msgType);
         dto.setPlayer(player);
@@ -243,16 +253,20 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
 
     private void controlRobotCallScore(PlayerNode playerNode, int score) {
         invoke(() -> sendMsg(LandlordsGameDTO.MsgType.CALL_SCORE, playerNode.getPlayer(),
-                aiPlayerActionMap.get(playerNode.getPlayer()).callScore(score)), 1000);
+                aiPlayerActionMap.get(playerNode.getPlayer()).callScore(score)), 1800);
     }
 
     private void controlRobotOutPoker(PlayerNode playerNode, PlayerNode outPlayer, PokerInfo outPokerInfo) {
         invoke(() -> sendMsg(LandlordsGameDTO.MsgType.OUT_POKER, playerNode.getPlayer(),
-                aiPlayerActionMap.get(playerNode.getPlayer()).outPoker(outPlayer, outPokerInfo)), 1000);
+                aiPlayerActionMap.get(playerNode.getPlayer()).outPoker(outPlayer, outPokerInfo)), 1800);
     }
 
     @Override
     public void handle(LandlordsGameDTO body) {
+        if (state == 0) {
+            return;
+        }
+
         Player player = playerMap.get(body.getPlayer());
         PlayerNode playerNode = player.getPlayerNode();
         PlayerNode nextPlayerNode = playerNode.getNextPlayer();
@@ -337,7 +351,14 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                     state = 1;
                     showTips("未确定地主！正在重新发牌...");
                     if (isHomeowner) {
-                        invoke(() -> allocPokersMsg(), 2000);
+                        int restartValue = restartCounter.get();
+                        invoke(() -> {
+                            if (restartCounter.get() != restartValue) {
+                                return;
+                            }
+
+                            allocPokersMsg();
+                        }, 2000);
                     }
                     break;
                 }
@@ -811,8 +832,12 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     private JButton getStartGameButton() {
         JButton button = new JButton("开始游戏");
         button.addActionListener(e -> {
-            isHomeowner = true;
-            start();
+            button.setEnabled(false);
+            invoke(() -> {
+                isHomeowner = true;
+                start();
+                button.setEnabled(true);
+            }, 100);
         });
         return button;
     }

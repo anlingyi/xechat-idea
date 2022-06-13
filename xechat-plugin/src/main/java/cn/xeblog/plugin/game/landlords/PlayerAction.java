@@ -29,6 +29,10 @@ public abstract class PlayerAction {
         this.pokers = pokers;
     }
 
+    public List<Poker> getPokers() {
+        return this.pokers;
+    }
+
     public void setLastPokers(List<Poker> lastPokers) {
         if (this.pokers == null) {
             return;
@@ -63,6 +67,7 @@ public abstract class PlayerAction {
             return null;
         }
 
+        out.setPokers(new ArrayList<>(out.getPokers()));
         this.pokers.removeAll(out.getPokers());
 
         return out;
