@@ -17,6 +17,11 @@ public class PlayerNode {
     private String player;
 
     /**
+     * 玩家别名
+     */
+    private String alias;
+
+    /**
      * 手牌数
      */
     private int pokerTotal;
@@ -46,11 +51,12 @@ public class PlayerNode {
     }
 
     public String getRoleInfo() {
-        String info = "待定";
+        boolean isHard = LandlordsGame.isHard();
+        String info = isHard ? "Free" : "待定";
         if (this.role == 1) {
-            info = "农民";
+            info = isHard ? "Slave" : "农民";
         } else if (this.role == 2) {
-            info = "地主";
+            info = isHard ? "Master" : "地主";
         }
         return info;
     }

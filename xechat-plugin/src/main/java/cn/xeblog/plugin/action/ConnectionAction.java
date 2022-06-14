@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.action;
 
+import cn.hutool.core.thread.GlobalThreadPool;
 import cn.xeblog.plugin.client.XEChatClient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,7 +22,7 @@ public class ConnectionAction {
     private int port;
 
     public void exec(Consumer<Boolean> consumer) {
-        new Thread(() -> XEChatClient.run(host, port, consumer)).start();
+        GlobalThreadPool.execute(() -> XEChatClient.run(host, port, consumer));
     }
 
 }

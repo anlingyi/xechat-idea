@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.game;
 
+import cn.hutool.core.thread.GlobalThreadPool;
 import cn.xeblog.commons.entity.game.GameDTO;
 import cn.xeblog.commons.entity.game.GameRoom;
 import cn.xeblog.commons.entity.User;
@@ -412,10 +413,10 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
     }
 
     protected final void invoke(Runnable runnable, long millis) {
-        new Thread(() -> {
+        GlobalThreadPool.execute(() -> {
             spinMoment(millis);
             invoke(runnable);
-        }).start();
+        });
     }
 
     protected void spinMoment(long millis) {

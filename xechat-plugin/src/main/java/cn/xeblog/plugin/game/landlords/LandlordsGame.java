@@ -12,9 +12,11 @@ import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.plugin.annotation.DoGame;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.game.AbstractGame;
+import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBScrollPane;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.swing.*;
@@ -33,14 +35,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 @DoGame(Game.LANDLORDS)
 public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
 
+    public static DebugMode debugMode;
+
     private AtomicInteger restartCounter;
     private JPanel startPanel;
     private JButton gameOverButton;
     private JButton outPokerButton;
     private JButton notOutPokerButton;
+    private JButton notCallScoreButton;
+    private JButton callScoreButton;
     private JLabel tipsLabel;
     private JPanel outPokerPanel;
     private JPanel playerTopPanel;
+    private JLabel titleLabel;
+    private JButton backButton;
+    private JPanel pokerListPanel;
 
     private Map<String, Player> playerMap;
 
@@ -120,6 +129,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         private JPanel panel;
         private JLabel tipsLabel;
         private JLabel roleLabel;
+        private JLabel nicknameLabel;
 
         public Player(PlayerNode playerNode, JPanel panel) {
             this.playerNode = playerNode;
@@ -134,6 +144,15 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         public void flushRole() {
             roleLabel.setText(playerNode.getRoleInfo() + "：" + playerNode.getPokerTotal());
             roleLabel.updateUI();
+        }
+
+        public void flushNickname() {
+            if (isHard()) {
+                nicknameLabel.setText(playerNode.getAlias());
+            } else {
+                nicknameLabel.setText(playerNode.getPlayer());
+            }
+            nicknameLabel.updateUI();
         }
     }
 
@@ -252,13 +271,27 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     }
 
     private void controlRobotCallScore(PlayerNode playerNode, int score) {
-        invoke(() -> sendMsg(LandlordsGameDTO.MsgType.CALL_SCORE, playerNode.getPlayer(),
-                aiPlayerActionMap.get(playerNode.getPlayer()).callScore(score)), 1800);
+        int restart = restartCounter.get();
+        invoke(() -> {
+            if (restart != restartCounter.get()) {
+                return;
+            }
+
+            sendMsg(LandlordsGameDTO.MsgType.CALL_SCORE, playerNode.getPlayer(),
+                    aiPlayerActionMap.get(playerNode.getPlayer()).callScore(score));
+        }, 1800);
     }
 
     private void controlRobotOutPoker(PlayerNode playerNode, PlayerNode outPlayer, PokerInfo outPokerInfo) {
-        invoke(() -> sendMsg(LandlordsGameDTO.MsgType.OUT_POKER, playerNode.getPlayer(),
-                aiPlayerActionMap.get(playerNode.getPlayer()).outPoker(outPlayer, outPokerInfo)), 1800);
+        invoke(() -> {
+            int restart = restartCounter.get();
+            if (restart != restartCounter.get()) {
+                return;
+            }
+
+            sendMsg(LandlordsGameDTO.MsgType.OUT_POKER, playerNode.getPlayer(),
+                    aiPlayerActionMap.get(playerNode.getPlayer()).outPoker(outPlayer, outPokerInfo));
+        }, 1800);
     }
 
     @Override
@@ -278,6 +311,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         }
         boolean isMe = playerNode == currentPlayer;
         boolean controlRobot = isHomeowner && aiPlayerAction != null;
+        boolean isHard = isHard();
 
         switch (body.getMsgType()) {
             case JOIN_ROBOTS:
@@ -303,7 +337,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                     controlRobot = false;
                     pokers = allocPokerList;
                     lastPokers = allocPokerDTO.getLastPokers();
-                    showTips("正在确定地主...");
+                    showTips(isHard ? "Confirming Master Machine..." : "正在确定地主...");
                 } else {
                     aiPlayerAction = aiPlayerActionMap.get(playerNode.getPlayer());
                     controlRobot = aiPlayerAction != null && isHomeowner;
@@ -320,7 +354,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                         spinMoment(100);
                         showCallScoreButton(0);
                     } else {
-                        player.showTips("优先叫地主！");
+                        player.showTips(isHard ? "Priority!" : "优先叫地主！");
                         if (controlRobot) {
                             controlRobotCallScore(playerNode, 0);
                         }
@@ -331,9 +365,9 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                 String tips;
                 int score = (int) body.getData();
                 if (score == 0) {
-                    tips = "不叫！";
+                    tips = isHard ? "Abandon!" : "不叫！";
                 } else {
-                    tips = score + "分！";
+                    tips = score + (isHard ? " Point!" : "分！");
                     if (score > maxScore) {
                         maxScore = score;
                         maxScorePlayer = player;
@@ -349,7 +383,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                 boolean isOk = receivedAndOk();
                 if (isOk && maxScorePlayer == null) {
                     state = 1;
-                    showTips("未确定地主！正在重新发牌...");
+                    showTips(isHard ? "Master Machine Not Confirmed! Once Again..." : "未确定地主！正在重新发牌...");
                     if (isHomeowner) {
                         int restartValue = restartCounter.get();
                         invoke(() -> {
@@ -369,8 +403,12 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                     PlayerNode maxScorePlayerNode = maxScorePlayer.getPlayerNode();
                     maxScorePlayerNode.setRole(2);
                     maxScorePlayerNode.setPokerTotal(playerNode.getPokerTotal() + 3);
-
-                    showTips(maxScorePlayerNode.getPlayer() + (maxScorePlayerNode == currentPlayer ? "(你)" : "") + "成为地主！");
+                    boolean masterIsMe = maxScorePlayerNode == currentPlayer;
+                    if (isHard) {
+                        showTips(maxScorePlayerNode.getAlias() + (masterIsMe ? " (me)" : "") + " is the master！");
+                    } else {
+                        showTips(maxScorePlayerNode.getPlayer() + (masterIsMe ? "(你)" : "") + "成为地主！");
+                    }
                     showPokers(lastPokers);
 
                     PlayerNode maxScorePlayerPrevPlayerNode = maxScorePlayerNode.getPrevPlayer();
@@ -397,7 +435,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                         spinMoment(100);
                         showOutPokerButton(true);
                     } else {
-                        this.maxScorePlayer.showTips("思考中...");
+                        this.maxScorePlayer.showTips(isHard ? "Debugging..." : "思考中...");
                         maxScorePlayer.flushRole();
                         aiPlayerAction = aiPlayerActionMap.get(maxScorePlayerNode.getPlayer());
                         if (isHomeowner && aiPlayerAction != null) {
@@ -409,7 +447,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                     if (nextPlayer.getPlayerNode() == currentPlayer) {
                         showCallScoreButton(maxScore);
                     } else {
-                        nextPlayer.showTips("叫分中...");
+                        nextPlayer.showTips(isHard ? "Confirm..." : "叫分中...");
                         if (controlRobot) {
                             controlRobotCallScore(nextPlayerNode, maxScore);
                         }
@@ -419,7 +457,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
             case OUT_POKER:
                 PokerInfo outPokerInfo = (PokerInfo) body.getData();
                 if (outPokerInfo == null) {
-                    String tips2 = "过！";
+                    String tips2 = isHard ? "Run!" : "过！";
                     if (isMe) {
                         showPlayerTips(tips2);
                     } else {
@@ -437,7 +475,12 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                     lastPlayer = playerNode.getPlayer();
                     lastPokerInfo = outPokerInfo;
                     boolean isOver = playerNode.minusPoker(outPokerInfo.getPokers().size()) == 0;
-                    showTips("[" + lastPlayerRole + "]" + lastPlayer + (isMe ? "(你)" : "") + "已出牌");
+                    if (isHard) {
+                        String hardTips = "[" + lastPlayerRole + "] " + playerNode.getAlias() + (isMe ? " (me)" : "") + " debug result";
+                        showTips(hardTips);
+                    } else {
+                        showTips("[" + lastPlayerRole + "]" + lastPlayer + (isMe ? "(你)" : "") + "已出牌");
+                    }
                     showPokerInfo(lastPokerInfo);
                     player.flushRole();
                     if (isOver) {
@@ -449,7 +492,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                 if (nextPlayerNode == currentPlayer) {
                     showOutPokerButton(false);
                 } else {
-                    playerMap.get(nextPlayerNode.getPlayer()).showTips("思考中...");
+                    playerMap.get(nextPlayerNode.getPlayer()).showTips(isHard ? "Debugging..." : "思考中...");
                 }
                 if (controlRobot) {
                     PlayerNode lastPlayerNode = lastPlayer == null ? null : playerMap.get(lastPlayer).getPlayerNode();
@@ -460,9 +503,10 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     }
 
     private void showGameOver(int role) {
-        String roleName = role == 1 ? "农民" : "地主";
+        boolean isHard = isHard();
+        String roleName = role == 1 ? (isHard ? "Slave" : "农民") : (isHard ? "Master" : "地主");
         state = role == currentPlayer.getRole() ? 5 : 4;
-        showTips(roleName + "胜利！");
+        showTips(roleName + (isHard ? " Victory!" : "胜利！"));
         if (gameRoom != null) {
             gameOverButton.setVisible(true);
         }
@@ -514,17 +558,31 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         playerMap.forEach((k, v) -> flushPlayerPanel(v));
 
         JPanel mainTopPanel = new JPanel();
-        JLabel title = new JLabel("斗地主！");
-        title.setFont(new Font("", 1, 14));
-        mainTopPanel.add(title);
+        String title = "斗地主！";
+        if (isHard()) {
+            title = "Synergy Debugging";
+        } else if (debugMode == DebugMode.SOFT) {
+            title = "";
+        }
+        titleLabel = new JLabel(title);
+        titleLabel.setFont(new Font("", 1, 14));
+        mainTopPanel.add(titleLabel);
 
         JPanel mainBottomPanel = new JPanel();
         if (gameRoom == null) {
-            mainBottomPanel.add(getBackButton());
+            backButton = getBackButton();
+            mainBottomPanel.add(backButton);
         }
         gameOverButton = getGameOverButton();
         gameOverButton.setVisible(false);
         mainBottomPanel.add(gameOverButton);
+
+        Box hBox = Box.createHorizontalBox();
+        hBox.add(Box.createHorizontalStrut(100));
+        JLabel debugModeLabel = new JLabel("Debug Mode: ");
+        hBox.add(debugModeLabel);
+        hBox.add(getDebugModelComboBox());
+        mainBottomPanel.add(hBox);
 
         mainPanel.add(mainTopPanel, BorderLayout.NORTH);
         mainPanel.add(panel, BorderLayout.CENTER);
@@ -534,6 +592,8 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         mainPanel.add(placeholderPanel, BorderLayout.WEST);
         mainPanel.add(placeholderPanel, BorderLayout.EAST);
         mainPanel.updateUI();
+
+        flushDebugMode();
     }
 
     private Border pokerBorder = BorderFactory.createLineBorder(new Color(0, 0, 0));
@@ -541,11 +601,13 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     private Color playerTipsColor = new Color(241, 135, 135);
 
     private void flushPlayerPanel(Player player) {
+        boolean isHard = isHard();
         PlayerNode playerNode = player.getPlayerNode();
         JPanel panel = player.getPanel();
         panel.removeAll();
 
-        JLabel nicknameLabel = new JLabel("<html>" + playerNode.getPlayer() + "</html>");
+        String nickname = isHard ? playerNode.getAlias() : playerNode.getPlayer();
+        JLabel nicknameLabel = new JLabel("<html>" + nickname + "</html>");
         JLabel roleLabel = new JLabel();
         JPanel mainPanel = new JPanel();
 
@@ -558,48 +620,15 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
 
             JPanel pokerMainPanel = new JPanel(new BorderLayout());
             pokerMainPanel.setPreferredSize(new Dimension(460, 70));
-            JPanel pokerListPanel = new JPanel();
-            if (pokers != null) {
-                pokers.forEach(poker -> {
-                    JPanel pokerPanel = getPokerPanel(poker);
-                    pokerListPanel.add(pokerPanel);
-
-                    pokerPanel.addMouseListener(new MouseAdapter() {
-                        @Override
-                        public void mouseClicked(MouseEvent e) {
-                            if (state != 3) {
-                                return;
-                            }
-
-                            boolean selected = selectedPokers.remove(poker);
-                            if (selected) {
-                                pokerPanel.setBorder(pokerBorder);
-                            } else {
-                                selectedPokers.add(poker);
-                                pokerPanel.setBorder(pokerSelectedBorder);
-                            }
-
-                            pokerInfo = PokerUtil.getPokerInfo(selectedPokers);
-                            if (pokerInfo != null) {
-                                if (!currentPlayer.getPlayer().equals(lastPlayer) && !pokerInfo.biggerThanIt(lastPokerInfo)) {
-                                    pokerInfo = null;
-                                }
-                            }
-
-                            if (outPokerButton != null) {
-                                outPokerButton.setEnabled(pokerInfo != null);
-                            }
-                        }
-                    });
-                });
-            }
+            pokerListPanel = new JPanel();
+            flushPokers();
 
             JBScrollPane pokersScroll = new JBScrollPane(pokerListPanel);
             pokersScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
             pokersScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             pokerMainPanel.add(pokersScroll);
             mainPanel.add(pokerMainPanel);
-            nicknameLabel.setText(playerNode.getPlayer());
+            nicknameLabel.setText(nickname);
             nicknameLabel.setPreferredSize(new Dimension(300, 30));
             mainPanel.add(nicknameLabel);
             mainPanel.add(roleLabel);
@@ -630,6 +659,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
             mainPanel.add(tipsLabel, BorderLayout.CENTER);
         }
 
+        player.setNicknameLabel(nicknameLabel);
         player.setRoleLabel(roleLabel);
         player.flushRole();
 
@@ -637,14 +667,59 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         panel.updateUI();
     }
 
+    private void flushPokers() {
+        if (pokers != null && pokerListPanel != null) {
+            pokerListPanel.removeAll();
+            pokers.forEach(poker -> {
+                JPanel pokerPanel = getPokerPanel(poker);
+                pokerListPanel.add(pokerPanel);
+                if (selectedPokers.contains(poker)) {
+                    pokerPanel.setBorder(pokerSelectedBorder);
+                } else {
+                    pokerPanel.setBorder(pokerBorder);
+                }
+
+                pokerPanel.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        if (state != 3) {
+                            return;
+                        }
+
+                        boolean selected = selectedPokers.remove(poker);
+                        if (selected) {
+                            pokerPanel.setBorder(pokerBorder);
+                        } else {
+                            selectedPokers.add(poker);
+                            pokerPanel.setBorder(pokerSelectedBorder);
+                        }
+
+                        pokerInfo = PokerUtil.getPokerInfo(selectedPokers);
+                        if (pokerInfo != null) {
+                            if (!currentPlayer.getPlayer().equals(lastPlayer) && !pokerInfo.biggerThanIt(lastPokerInfo)) {
+                                pokerInfo = null;
+                            }
+                        }
+
+                        if (outPokerButton != null) {
+                            outPokerButton.setEnabled(pokerInfo != null);
+                        }
+                    }
+                });
+            });
+            pokerListPanel.updateUI();
+        }
+    }
+
     private void showOutPokerButton(boolean started) {
+        boolean isHard = isHard();
         boolean lastIsMe = currentPlayer.getPlayer().equals(lastPlayer);
         if (lastIsMe) {
             lastPokerInfo = null;
         }
 
         playerTopPanel.removeAll();
-        outPokerButton = new JButton("出牌");
+        outPokerButton = new JButton(isHard ? "Debug" : "出牌");
         outPokerButton.setEnabled(pokerInfo != null && pokerInfo.biggerThanIt(lastPokerInfo));
         outPokerButton.addActionListener(e -> {
             if (pokerInfo != null) {
@@ -659,7 +734,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         });
 
         if (!started && !lastIsMe) {
-            notOutPokerButton = new JButton("过！");
+            notOutPokerButton = new JButton(isHard ? "Run!" : "过！");
             notOutPokerButton.addActionListener(e -> {
                 sendMsg(LandlordsGameDTO.MsgType.OUT_POKER, null);
             });
@@ -672,8 +747,9 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     }
 
     private void showCallScoreButton(int score) {
+        boolean isHard = isHard();
         playerTopPanel.removeAll();
-        JButton notCallScoreButton = new JButton("不叫");
+        notCallScoreButton = new JButton(isHard ? "Abandon!" : "不叫");
         notCallScoreButton.addActionListener(e -> {
             if (state != 2) {
                 return;
@@ -684,7 +760,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
 
         for (int i = score + 1; i < 4; i++) {
             int callScore = i;
-            JButton callScoreButton = new JButton(callScore + "分");
+            callScoreButton = new JButton(callScore + (isHard ? " Point" : "分"));
             callScoreButton.addActionListener(e -> {
                 if (state != 2) {
                     return;
@@ -707,9 +783,11 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     }
 
     private JPanel getPokerPanel(Poker poker) {
+        boolean isHard = isHard();
+        boolean isNotDefault = debugMode != null && debugMode != DebugMode.DEFAULT;
         JPanel pokerPanel = new JPanel();
         pokerPanel.setBorder(pokerBorder);
-        pokerPanel.setBackground(new Color(217, 214, 214));
+        pokerPanel.setBackground(isNotDefault ? null : new Color(217, 214, 214));
         pokerPanel.setPreferredSize(new Dimension(30, 55));
         pokerPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
@@ -717,12 +795,13 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         Poker.Suits suits = poker.getSuits();
         Color pokerColor;
         if (suits == Poker.Suits.SPADE || suits == Poker.Suits.CLUB || value == 16) {
-            pokerColor = new Color(0, 0, 0);
+            pokerColor = isNotDefault ? null : new Color(0, 0, 0);
         } else {
-            pokerColor = new Color(252, 78, 78);
+            pokerColor = isNotDefault ? null : new Color(252, 78, 78);
         }
 
-        JLabel pokerValue = new JLabel(" " + getPokerDisplayValue(value));
+        String displayValue = getPokerDisplayValue(value);
+        JLabel pokerValue = new JLabel(" " + (isHard ? getPokerDisplayValueForHard(value) : displayValue));
         pokerValue.setForeground(pokerColor);
         pokerValue.setPreferredSize(new Dimension(30, 12));
 
@@ -730,6 +809,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         pokerSuits.setForeground(pokerColor);
         pokerSuits.setPreferredSize(new Dimension(30, 10));
 
+        pokerPanel.setToolTipText(displayValue);
         pokerPanel.add(pokerValue);
         pokerPanel.add(pokerSuits);
         return pokerPanel;
@@ -753,36 +833,37 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     }
 
     private String getPokerDisplayModel(PokerInfo pokerInfo) {
+        boolean isHard = isHard();
         if (pokerInfo != null) {
             String minValue = getPokerDisplayValue(pokerInfo.getPokers().get(0).getValue());
             String maxValue = getPokerDisplayValue(pokerInfo.getValue());
             switch (pokerInfo.getPokerModel()) {
                 case ROCKET:
-                    return "王炸";
+                    return isHard ? "Rocket" : "王炸";
                 case BOMB:
-                    return "炸弹";
+                    return isHard ? "Bomb" : "炸弹";
                 case SINGLE:
-                    return "单张" + minValue;
+                    return isHard ? "Single" : "单张" + minValue;
                 case PAIR:
-                    return "对" + minValue;
+                    return isHard ? "Pair" : "对" + minValue;
                 case THREE:
-                    return "三张" + minValue;
+                    return isHard ? "Three" : "三张" + minValue;
                 case THREE_ONE_SINGLE:
-                    return "三带一";
+                    return isHard ? "Three Belt One" : "三带一";
                 case THREE_ONE_PAIR:
-                    return "三带一对";
+                    return isHard ? "Three Belt One Pair" : "三带一对";
                 case SHUN_ZI_SINGLE:
-                    return "单顺子(" + minValue + "~" + maxValue + ")";
+                    return isHard ? "Single Link" : "单顺子(" + minValue + "~" + maxValue + ")";
                 case SHUN_ZI_PAIR:
-                    return "双顺子(" + minValue + "~" + maxValue + ")";
+                    return isHard ? "Pair Link" : "双顺子(" + minValue + "~" + maxValue + ")";
                 case PLAIN_UNMANNED:
-                    return "无人飞机";
+                    return isHard ? "Plain Unmanned" : "无人飞机";
                 case PLAIN_MANNED:
-                    return "载人飞机";
+                    return isHard ? "Plain Manned" : "载人飞机";
                 case FOUR_TWO_SINGLE:
-                    return "四带二";
+                    return isHard ? "Four Belt Two Single" : "四带二";
                 case FOUR_TWO_PAIR:
-                    return "四带俩对";
+                    return isHard ? "Four Belt Two Pair" : "四带俩对";
             }
         }
 
@@ -810,9 +891,36 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         }
     }
 
+    private String getPokerDisplayValueForHard(int value) {
+        switch (value) {
+            case 10:
+                return "0x0";
+            case 11:
+                return "0xB";
+            case 12:
+                return "0xC";
+            case 13:
+                return "0xD";
+            case 14:
+                return "0xA";
+            case 15:
+                return "0x2";
+            case 16:
+                return "0xE";
+            case 17:
+                return "0xF";
+            default:
+                return "0x" + value;
+        }
+    }
+
     private String getPokerDisplaySuits(Poker.Suits suits) {
-        if (suits == null) {
+        if (suits == null || debugMode == DebugMode.SOFT) {
             return "";
+        }
+
+        if (isHard()) {
+            return "int";
         }
 
         switch (suits) {
@@ -843,7 +951,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     }
 
     private JButton getBackButton() {
-        JButton button = new JButton("返回游戏");
+        JButton button = new JButton(isHard() ? "Back Debug" : "返回游戏");
         button.addActionListener(e -> init());
         return button;
     }
@@ -859,6 +967,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
             PlayerNode node = new PlayerNode();
             node.setPlayer(roomUserList.get(i));
             node.setPokerTotal(17);
+            node.setAlias("Machine 0" + (i + 1));
             playerMap.put(node.getPlayer(), new Player(node, null));
 
             if (GameAction.getNickname().equals(node.getPlayer())) {
@@ -899,9 +1008,99 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         super.playerLeft(player);
         if (state > 0 && state < 4) {
             state = 4;
-            showTips("游戏结束！" + player.getUsername() + "逃跑了~");
+            if (isHard()) {
+                String msg = "Debugging is over. The " + playerMap.get(player.getUsername()).getPlayerNode().getAlias() + " has been offline";
+                showTips(msg);
+            } else {
+                showTips("游戏结束！" + player.getUsername() + "逃跑了~");
+            }
             gameOverButton.setVisible(true);
         }
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public enum DebugMode {
+        DEFAULT("Default"),
+        SOFT("Soft"),
+        HARD("Hard");
+
+        private String name;
+
+        public static DebugMode getMode(String name) {
+            for (DebugMode mode : values()) {
+                if (mode.getName().equals(name)) {
+                    return mode;
+                }
+            }
+
+            return null;
+        }
+    }
+
+    private ComboBox getDebugModelComboBox() {
+        ComboBox comboBox = new ComboBox();
+        for (DebugMode mode : DebugMode.values()) {
+            comboBox.addItem(mode.getName());
+            if (debugMode == mode) {
+                comboBox.setSelectedItem(mode.getName());
+            }
+        }
+        comboBox.addItemListener(e -> {
+            debugMode = DebugMode.getMode(comboBox.getSelectedItem().toString());
+            flushDebugMode();
+        });
+        return comboBox;
+    }
+
+    private void flushDebugMode() {
+        String title = "斗地主！";
+        String backButtonText = "返回游戏";
+        String gameOverButtonText = "游戏结束";
+        String notOutPokerButtonText = "过！";
+        String outPokerButtonText = "出牌";
+
+        if (isHard()) {
+            title = "Synergy Debugging";
+            backButtonText = "Back Debug";
+            gameOverButtonText = "Debug Over";
+            notOutPokerButtonText = "Run!";
+            outPokerButtonText = "Debug";
+        }
+        if (debugMode == DebugMode.SOFT) {
+            title = "";
+        }
+
+        if (backButton != null) {
+            backButton.setText(backButtonText);
+            backButton.updateUI();
+        }
+        if (notOutPokerButton != null) {
+            notOutPokerButton.setText(notOutPokerButtonText);
+            notOutPokerButton.updateUI();
+        }
+        if (outPokerButton != null) {
+            outPokerButton.setText(outPokerButtonText);
+            outPokerButton.updateUI();
+        }
+        titleLabel.setText(title);
+        titleLabel.updateUI();
+        gameOverButton.setText(gameOverButtonText);
+        gameOverButton.updateUI();
+
+        playerMap.forEach((k, v) -> {
+            v.flushRole();
+            v.flushNickname();
+        });
+        flushPokers();
+
+        if (lastPokerInfo != null) {
+            showPokerInfo(lastPokerInfo);
+        }
+    }
+
+    public static boolean isHard() {
+        return debugMode == DebugMode.HARD;
     }
 
 }
