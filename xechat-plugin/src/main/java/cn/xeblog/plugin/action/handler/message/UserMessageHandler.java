@@ -1,6 +1,7 @@
 package cn.xeblog.plugin.action.handler.message;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.thread.GlobalThreadPool;
 import cn.xeblog.commons.entity.UserMsgDTO;
 import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.plugin.action.ConsoleAction;
@@ -27,7 +28,7 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
 
     @Override
     protected void process(Response<UserMsgDTO> response) {
-        new Thread(() -> {
+        GlobalThreadPool.execute(() -> {
             User user = response.getUser();
             UserMsgDTO body = response.getBody();
             String filePath = null;
@@ -59,7 +60,7 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
                     ConsoleAction.showSimpleMsg((String) body.getContent());
                 }
             });
-        }).start();
+        });
     }
 
 }

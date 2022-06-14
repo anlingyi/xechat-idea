@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.game.gobang;
 
+import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xeblog.commons.entity.User;
@@ -381,7 +382,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
     private void aiPutChess() {
         boolean isDebug = gameMode == GameMode.DEBUG;
-        new Thread(() -> {
+        GlobalThreadPool.execute(() -> {
             if (setChess(aiService.getPoint(chessData, lastPoint == null ? new Point(-1, -1, type) : lastPoint))) {
                 if (isDebug) {
                     showTips("调试模式");
@@ -399,7 +400,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
                     changePlayer();
                 }
             }
-        }).start();
+        });
     }
 
     private JButton getRegretButton() {

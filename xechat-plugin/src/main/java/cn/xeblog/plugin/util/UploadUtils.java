@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.util;
 
+import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.util.IdUtil;
 import cn.xeblog.commons.entity.UserMsgDTO;
 import cn.xeblog.commons.enums.Action;
@@ -70,7 +71,7 @@ public class UploadUtils {
         UPLOADING = true;
         ConsoleAction.showSimpleMsg("图片上传中...");
 
-        new Thread(() -> {
+        GlobalThreadPool.execute(() -> {
             try {
                 ByteBuf byteBuf = Unpooled.buffer();
                 byteBuf.writeInt(fileName.length());
@@ -83,6 +84,6 @@ public class UploadUtils {
             } finally {
                 UPLOADING = false;
             }
-        }).start();
+        });
     }
 }
