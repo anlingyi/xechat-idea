@@ -5,11 +5,6 @@ import cn.xeblog.plugin.enums.Command;
 import cn.xeblog.plugin.enums.Style;
 import cn.xeblog.plugin.mode.ModeContext;
 import com.intellij.ide.BrowserUtil;
-import com.intellij.ide.actions.OpenFileAction;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
-
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.*;
@@ -66,25 +61,10 @@ public class ConsoleAction {
         gotoConsoleLow();
     }
 
-    public static void renderImage(String filePath) {
-        JLabel imgLabel = new JLabel("查看图片");
-        imgLabel.setAlignmentY(0.85f);
-        imgLabel.setToolTipText("点击查看图片");
-        imgLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        imgLabel.setForeground(StyleConstants.getForeground(Style.DEFAULT.get()));
-        imgLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                ApplicationManager.getApplication().invokeLater(() -> {
-                    Project[] projects = ProjectManager.getInstance().getOpenProjects();
-                    OpenFileAction.openFile(filePath, projects[projects.length - 1]);
-                });
-            }
-        });
-
+    public static void renderImageLabel(JLabel label) {
         synchronized (console) {
             renderText("[");
-            renderComponent(imgLabel);
+            renderComponent(label);
             renderText("]\n");
         }
     }
