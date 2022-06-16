@@ -5,11 +5,6 @@ import cn.xeblog.plugin.enums.Command;
 import cn.xeblog.plugin.enums.Style;
 import cn.xeblog.plugin.mode.ModeContext;
 import com.intellij.ide.BrowserUtil;
-import com.intellij.ide.actions.OpenFileAction;
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
-
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.*;
@@ -66,25 +61,10 @@ public class ConsoleAction {
         gotoConsoleLow();
     }
 
-    public static void renderImage(String filePath) {
-        JLabel imgLabel = new JLabel("查看图片");
-        imgLabel.setAlignmentY(0.85f);
-        imgLabel.setToolTipText("点击查看图片");
-        imgLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        imgLabel.setForeground(StyleConstants.getForeground(Style.DEFAULT.get()));
-        imgLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                ApplicationManager.getApplication().invokeLater(() -> {
-                    Project[] projects = ProjectManager.getInstance().getOpenProjects();
-                    OpenFileAction.openFile(filePath, projects[projects.length - 1]);
-                });
-            }
-        });
-
+    public static void renderImageLabel(JLabel label) {
         synchronized (console) {
             renderText("[");
-            renderComponent(imgLabel);
+            renderComponent(label);
             renderText("]\n");
         }
     }
@@ -143,6 +123,7 @@ public class ConsoleAction {
 
     public static void setConsole(JTextPane console) {
         ConsoleAction.console = console;
+        console.setEditorKit(new WarpEditorKit());
     }
 
     public static void setPanel(JPanel panel) {
@@ -162,6 +143,59 @@ public class ConsoleAction {
             position = console.getDocument().getLength();
         }
         console.setCaretPosition(position);
+    }
+
+    public static class WarpEditorKit extends StyledEditorKit {
+
+        private ViewFactory defaultFactory = new WarpColumnFactory();
+
+        @Override
+        public ViewFactory getViewFactory() {
+            return defaultFactory;
+        }
+
+        private class WarpColumnFactory implements ViewFactory {
+
+            public View create(Element elem) {
+                String kind = elem.getName();
+                if (kind != null) {
+                    switch (kind) {
+                        case AbstractDocument.ContentElementName:
+                            return new WarpLabelView(elem);
+                        case AbstractDocument.ParagraphElementName:
+                            return new ParagraphView(elem);
+                        case AbstractDocument.SectionElementName:
+                            return new BoxView(elem, View.Y_AXIS);
+                        case StyleConstants.ComponentElementName:
+                            return new ComponentView(elem);
+                        case StyleConstants.IconElementName:
+                            return new IconView(elem);
+                    }
+                }
+
+                return new LabelView(elem);
+            }
+        }
+
+        private class WarpLabelView extends LabelView {
+
+            public WarpLabelView(Element elem) {
+                super(elem);
+            }
+
+            @Override
+            public float getMinimumSpan(int axis) {
+                switch (axis) {
+                    case View.X_AXIS:
+                        return 0;
+                    case View.Y_AXIS:
+                        return super.getMinimumSpan(axis);
+                    default:
+                        throw new IllegalArgumentException("Invalid axis: " + axis);
+                }
+            }
+        }
+
     }
 
 }

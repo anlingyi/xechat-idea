@@ -1,12 +1,13 @@
 package cn.xeblog.commons.entity;
 
 import cn.xeblog.commons.enums.MessageType;
-import cn.xeblog.commons.util.DateUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * @author anlingyi
@@ -28,7 +29,7 @@ public class Response<T> implements Serializable {
         this.user = user;
         this.body = body;
         this.type = type;
-        this.time = DateUtils.getTime();
+        this.time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM/dd HH:mm"));
     }
 
 }

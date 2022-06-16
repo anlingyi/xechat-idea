@@ -17,6 +17,11 @@ public class SetStatusCommandHandler extends AbstractCommandHandler {
 
     @Override
     public void process(String[] args) {
+        if (DataCache.getCurrentUser().getStatus() == UserStatus.PLAYING) {
+            ConsoleAction.showSimpleMsg("当前正在游戏中...不能设置状态！");
+            return;
+        }
+
         if (args.length < 1) {
             ConsoleAction.showSimpleMsg("状态值不能为空！");
             return;
@@ -25,7 +30,7 @@ public class SetStatusCommandHandler extends AbstractCommandHandler {
         int status = Integer.parseInt(args[0]);
         UserStatus userStatus = getUserStatus(status);
         if (userStatus == null) {
-            ConsoleAction.showSimpleMsg("状态值不存在");
+            ConsoleAction.showSimpleMsg("状态值不存在！");
             return;
         }
 

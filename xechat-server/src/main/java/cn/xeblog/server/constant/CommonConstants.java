@@ -9,6 +9,6 @@ public interface CommonConstants {
     /**
      * 插件版本
      */
-    String PLUGIN_VERSION = "1.5.6-beta";
+    String PLUGIN_VERSION = "1.5.6-beta2";
 
 }
