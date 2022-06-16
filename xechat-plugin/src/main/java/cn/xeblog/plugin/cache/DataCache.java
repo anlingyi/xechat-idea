@@ -59,4 +59,13 @@ public class DataCache {
         return userMap.get(username);
     }
 
+    /**
+     * 获取当前用户信息
+     *
+     * @return
+     */
+    public static User getCurrentUser() {
+        return getUser(username);
+    }
+
 }
