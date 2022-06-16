@@ -123,6 +123,7 @@ public class ConsoleAction {
 
     public static void setConsole(JTextPane console) {
         ConsoleAction.console = console;
+        console.setEditorKit(new WarpEditorKit());
     }
 
     public static void setPanel(JPanel panel) {
@@ -142,6 +143,59 @@ public class ConsoleAction {
             position = console.getDocument().getLength();
         }
         console.setCaretPosition(position);
+    }
+
+    public static class WarpEditorKit extends StyledEditorKit {
+
+        private ViewFactory defaultFactory = new WarpColumnFactory();
+
+        @Override
+        public ViewFactory getViewFactory() {
+            return defaultFactory;
+        }
+
+        private class WarpColumnFactory implements ViewFactory {
+
+            public View create(Element elem) {
+                String kind = elem.getName();
+                if (kind != null) {
+                    switch (kind) {
+                        case AbstractDocument.ContentElementName:
+                            return new WarpLabelView(elem);
+                        case AbstractDocument.ParagraphElementName:
+                            return new ParagraphView(elem);
+                        case AbstractDocument.SectionElementName:
+                            return new BoxView(elem, View.Y_AXIS);
+                        case StyleConstants.ComponentElementName:
+                            return new ComponentView(elem);
+                        case StyleConstants.IconElementName:
+                            return new IconView(elem);
+                    }
+                }
+
+                return new LabelView(elem);
+            }
+        }
+
+        private class WarpLabelView extends LabelView {
+
+            public WarpLabelView(Element elem) {
+                super(elem);
+            }
+
+            @Override
+            public float getMinimumSpan(int axis) {
+                switch (axis) {
+                    case View.X_AXIS:
+                        return 0;
+                    case View.Y_AXIS:
+                        return super.getMinimumSpan(axis);
+                    default:
+                        throw new IllegalArgumentException("Invalid axis: " + axis);
+                }
+            }
+        }
+
     }
 
 }
