@@ -19,7 +19,7 @@
         <dependency>
             <groupId>cn.xeblog</groupId>
             <artifactId>xechat-commons</artifactId>
-            <version>1.5.5-beta</version>
+            <version>1.5.6-beta2</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
