@@ -271,26 +271,23 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     }
 
     private void controlRobotCallScore(PlayerNode playerNode, int score) {
+        invokeRobot(() -> sendMsg(LandlordsGameDTO.MsgType.CALL_SCORE, playerNode.getPlayer(),
+                aiPlayerActionMap.get(playerNode.getPlayer()).callScore(score)));
+    }
+
+    private void controlRobotOutPoker(PlayerNode playerNode, PlayerNode outPlayer, PokerInfo outPokerInfo) {
+        invokeRobot(() -> sendMsg(LandlordsGameDTO.MsgType.OUT_POKER, playerNode.getPlayer(),
+                aiPlayerActionMap.get(playerNode.getPlayer()).outPoker(outPlayer, outPokerInfo)));
+    }
+
+    private void invokeRobot(Runnable runnable) {
         int restart = restartCounter.get();
         invoke(() -> {
             if (restart != restartCounter.get()) {
                 return;
             }
 
-            sendMsg(LandlordsGameDTO.MsgType.CALL_SCORE, playerNode.getPlayer(),
-                    aiPlayerActionMap.get(playerNode.getPlayer()).callScore(score));
-        }, 1800);
-    }
-
-    private void controlRobotOutPoker(PlayerNode playerNode, PlayerNode outPlayer, PokerInfo outPokerInfo) {
-        invoke(() -> {
-            int restart = restartCounter.get();
-            if (restart != restartCounter.get()) {
-                return;
-            }
-
-            sendMsg(LandlordsGameDTO.MsgType.OUT_POKER, playerNode.getPlayer(),
-                    aiPlayerActionMap.get(playerNode.getPlayer()).outPoker(outPlayer, outPokerInfo));
+            runnable.run();
         }, 1800);
     }
 
