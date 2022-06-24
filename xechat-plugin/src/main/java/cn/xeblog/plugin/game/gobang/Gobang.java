@@ -192,7 +192,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
         switch (status) {
             case 1:
                 if (!isDebug) {
-                    showTips("游戏结束：" + username + "这个菜鸡赢了！");
+                    showTips("游戏结束：" + username + "这个小趴菜赢了！");
                 }
                 break;
             case 2:
