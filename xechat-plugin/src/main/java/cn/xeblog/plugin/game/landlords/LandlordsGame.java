@@ -41,6 +41,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     private JPanel startPanel;
     private JButton gameOverButton;
     private JButton outPokerButton;
+    private JButton resetButton;
     private JButton notOutPokerButton;
     private JButton notCallScoreButton;
     private JButton callScoreButton;
@@ -271,26 +272,23 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     }
 
     private void controlRobotCallScore(PlayerNode playerNode, int score) {
+        invokeRobot(() -> sendMsg(LandlordsGameDTO.MsgType.CALL_SCORE, playerNode.getPlayer(),
+                aiPlayerActionMap.get(playerNode.getPlayer()).callScore(score)));
+    }
+
+    private void controlRobotOutPoker(PlayerNode playerNode, PlayerNode outPlayer, PokerInfo outPokerInfo) {
+        invokeRobot(() -> sendMsg(LandlordsGameDTO.MsgType.OUT_POKER, playerNode.getPlayer(),
+                aiPlayerActionMap.get(playerNode.getPlayer()).outPoker(outPlayer, outPokerInfo)));
+    }
+
+    private void invokeRobot(Runnable runnable) {
         int restart = restartCounter.get();
         invoke(() -> {
             if (restart != restartCounter.get()) {
                 return;
             }
 
-            sendMsg(LandlordsGameDTO.MsgType.CALL_SCORE, playerNode.getPlayer(),
-                    aiPlayerActionMap.get(playerNode.getPlayer()).callScore(score));
-        }, 1800);
-    }
-
-    private void controlRobotOutPoker(PlayerNode playerNode, PlayerNode outPlayer, PokerInfo outPokerInfo) {
-        invoke(() -> {
-            int restart = restartCounter.get();
-            if (restart != restartCounter.get()) {
-                return;
-            }
-
-            sendMsg(LandlordsGameDTO.MsgType.OUT_POKER, playerNode.getPlayer(),
-                    aiPlayerActionMap.get(playerNode.getPlayer()).outPoker(outPlayer, outPokerInfo));
+            runnable.run();
         }, 1800);
     }
 
@@ -695,14 +693,8 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                         }
 
                         pokerInfo = PokerUtil.getPokerInfo(selectedPokers);
-                        if (pokerInfo != null) {
-                            if (!currentPlayer.getPlayer().equals(lastPlayer) && !pokerInfo.biggerThanIt(lastPokerInfo)) {
-                                pokerInfo = null;
-                            }
-                        }
-
-                        if (outPokerButton != null) {
-                            outPokerButton.setEnabled(pokerInfo != null);
+                        if (pokerInfo != null && outPokerButton != null) {
+                            outPokerButton.setEnabled(currentPlayer.getPlayer().equals(lastPlayer) || pokerInfo.biggerThanIt(lastPokerInfo));
                         }
                     }
                 });
@@ -719,6 +711,29 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         }
 
         playerTopPanel.removeAll();
+
+        resetButton = new JButton(isHard ? "Reset" : "重置");
+        resetButton.addActionListener(e -> {
+            if (selectedPokers.isEmpty()) {
+                return;
+            }
+
+            selectedPokers.clear();
+            pokerInfo = null;
+            flushPokers();
+            outPokerButton.setEnabled(false);
+        });
+        playerTopPanel.add(resetButton);
+
+        if (!started && !lastIsMe) {
+            notOutPokerButton = new JButton(isHard ? "Run!" : "过！");
+            notOutPokerButton.addActionListener(e -> {
+                sendMsg(LandlordsGameDTO.MsgType.OUT_POKER, null);
+            });
+
+            playerTopPanel.add(notOutPokerButton);
+        }
+
         outPokerButton = new JButton(isHard ? "Debug" : "出牌");
         outPokerButton.setEnabled(pokerInfo != null && pokerInfo.biggerThanIt(lastPokerInfo));
         outPokerButton.addActionListener(e -> {
@@ -732,17 +747,8 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                 pokerInfo = null;
             }
         });
-
-        if (!started && !lastIsMe) {
-            notOutPokerButton = new JButton(isHard ? "Run!" : "过！");
-            notOutPokerButton.addActionListener(e -> {
-                sendMsg(LandlordsGameDTO.MsgType.OUT_POKER, null);
-            });
-
-            playerTopPanel.add(notOutPokerButton);
-        }
-
         playerTopPanel.add(outPokerButton);
+
         playerTopPanel.updateUI();
     }
 
@@ -1059,6 +1065,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         String gameOverButtonText = "游戏结束";
         String notOutPokerButtonText = "过！";
         String outPokerButtonText = "出牌";
+        String resetButtonText = "重置";
 
         if (isHard()) {
             title = "Synergy Debugging";
@@ -1066,6 +1073,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
             gameOverButtonText = "Debug Over";
             notOutPokerButtonText = "Run!";
             outPokerButtonText = "Debug";
+            resetButtonText = "Reset";
         }
         if (debugMode == DebugMode.SOFT) {
             title = "";
@@ -1083,6 +1091,11 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
             outPokerButton.setText(outPokerButtonText);
             outPokerButton.updateUI();
         }
+        if (resetButton != null) {
+            resetButton.setText(resetButtonText);
+            resetButton.updateUI();
+        }
+
         titleLabel.setText(title);
         titleLabel.updateUI();
         gameOverButton.setText(gameOverButtonText);

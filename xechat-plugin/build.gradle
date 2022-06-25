@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'cn.xeblog'
-version '1.5.6-beta2'
+version '1.5.7-beta'
 
 sourceCompatibility = 11
 targetCompatibility = 11
@@ -21,7 +21,7 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    compile ('cn.xeblog:xechat-commons:1.5.6-beta2')
+    compile ('cn.xeblog:xechat-commons:1.5.7-beta')
     compileOnly 'org.projectlombok:lombok:1.18.12'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
     testCompileOnly 'org.projectlombok:lombok:1.18.12'

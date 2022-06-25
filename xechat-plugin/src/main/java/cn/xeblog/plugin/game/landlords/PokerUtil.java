@@ -194,7 +194,7 @@ public class PokerUtil {
                 int nextValue = sortedValues.get(i + 1);
                 List<Poker> nextPokerList = pokersMap.get(nextValue);
                 if (currentValue < 15 && nextValue < 15 && currentValue + 1 == nextValue && nextPokerList.size() == currentSize) {
-                    if (maxLen == 3) {
+                    if (currentSize == 3) {
                         if (shunzi == 1) {
                             plainList.addAll(currentPokerList);
                         }
@@ -343,6 +343,18 @@ public class PokerUtil {
 //        pokers.add(new Poker(7, Poker.Suits.SPADE));
 //        pokers.add(new Poker(7, Poker.Suits.HEART));
 //        pokers.add(new Poker(4, Poker.Suits.SPADE));
+//        pokers.add(new Poker(4, Poker.Suits.CLUB));
+//        testGetPokerInfo(pokers, PokerModel.PLAIN_MANNED);
+
+        // 载人飞机
+//        List<Poker> pokers = new ArrayList<>();
+//        pokers.add(new Poker(5, Poker.Suits.SPADE));
+//        pokers.add(new Poker(5, Poker.Suits.CLUB));
+//        pokers.add(new Poker(5, Poker.Suits.DIAMOND));
+//        pokers.add(new Poker(6, Poker.Suits.CLUB));
+//        pokers.add(new Poker(6, Poker.Suits.SPADE));
+//        pokers.add(new Poker(6, Poker.Suits.HEART));
+//        pokers.add(new Poker(3, Poker.Suits.SPADE));
 //        pokers.add(new Poker(4, Poker.Suits.CLUB));
 //        testGetPokerInfo(pokers, PokerModel.PLAIN_MANNED);
 
