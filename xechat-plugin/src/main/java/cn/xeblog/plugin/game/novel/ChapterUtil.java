@@ -1,12 +1,11 @@
 package cn.xeblog.plugin.game.novel;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,61 +14,52 @@ import java.util.List;
  */
 @Slf4j
 public class ChapterUtil {
-    private static final int PAGE_SIZE = 120;
+    private static final int ROW = 8;
+    private static final int COLUMNS = 27;
 
     // 小说文件路径
     private final String file;
     // 文件编码
     private final Charset charset;
-    // 当前页起始索引
-    private int pageStartIndex;
-    // 当前页结束索引
-    private int pageEndIndex;
-    // 当前章节内容
-    private String content;
+    // 当前页索引
+    private int index;
+    // 当前章节分页内容
+    private List<String> contentPage;
 
     public ChapterUtil(String file, Charset charset, long startPointer, long endPointer) {
         this.file = file;
         this.charset = charset;
-        this.content = readText(startPointer, endPointer);
-        this.pageStartIndex = 0;
-        this.pageEndIndex = Math.min(this.content.length(), PAGE_SIZE);
+        this.index = 0;
+        this.contentPage = pagination(startPointer, endPointer);
     }
 
     public String currentPage() {
-        String pageContent = content.substring(pageStartIndex, pageEndIndex);
-        return handleHeader(pageContent);
+        return contentPage.get(index);
     }
 
     public String nextPage() {
-        if (pageEndIndex == content.length()) {
+        if (++index >= contentPage.size()) {
             return "";
         }
-        pageStartIndex = pageEndIndex;
-        pageEndIndex = Math.min(content.length(), pageEndIndex + PAGE_SIZE);
         return currentPage();
     }
 
     public String lastPage() {
-        if (pageStartIndex == 0) {
+        if (--index < 0) {
             return "";
         }
-        pageStartIndex = Math.max(0, pageStartIndex - PAGE_SIZE);
-        pageEndIndex = Math.min(pageStartIndex + PAGE_SIZE, this.content.length());
         return currentPage();
     }
 
     public String nextChapter(long startPointer, long endPointer) {
-        this.content = readText(startPointer, endPointer);
-        this.pageStartIndex = 0;
-        this.pageEndIndex = Math.min(this.content.length(), PAGE_SIZE);
+        this.contentPage = pagination(startPointer, endPointer);
+        this.index = 0;
         return currentPage();
     }
 
     public String lastChapter(long startPointer, long endPointer) {
-        this.content = readText(startPointer, endPointer);
-        this.pageStartIndex = Math.max(0, this.content.length() - PAGE_SIZE);
-        this.pageEndIndex = this.content.length();
+        this.contentPage = pagination(startPointer, endPointer);
+        this.index = this.contentPage.size() - 1;
         return currentPage();
     }
 
@@ -94,11 +84,36 @@ public class ChapterUtil {
         return sb.toString();
     }
 
-    private String handleHeader(String pageContent) {
-        char c = pageContent.charAt(0);
-        if (c == '\n') {
-            pageContent = pageContent.substring(1);
+    private List<String> pagination(long startPointer, long endPointer) {
+        String content = readText(startPointer, endPointer);
+        List<String> contentPage = new ArrayList<>();
+
+        StringBuilder pageContent = new StringBuilder();
+        int row = 0;
+        int col = 0;
+        for (int i = 0; i < content.length(); i++) {
+            char c = content.charAt(i);
+            boolean newlineChar = (c == '\n');
+            // 忽略开头第一个就是换行的字符
+            if (newlineChar && col == 0) {
+                continue;
+            }
+            pageContent.append(c);
+            col++;
+
+            boolean newline = (col == COLUMNS || newlineChar);
+            if (newline) {
+                col = 0;
+                if (row++ == ROW) {
+                    contentPage.add(pageContent.toString());
+                    pageContent.setLength(0);
+                    row = 0;
+                }
+            }
         }
-        return pageContent;
+        if (pageContent.length() > 0) {
+            contentPage.add(pageContent.toString());
+        }
+        return contentPage;
     }
 }
