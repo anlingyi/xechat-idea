@@ -1,5 +1,6 @@
 package cn.xeblog.server.handler;
 
+import cn.hutool.core.thread.GlobalThreadPool;
 import cn.xeblog.commons.entity.Request;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.server.factory.ActionHandlerFactory;
@@ -25,7 +26,7 @@ public class RequestHandler {
             return;
         }
 
-        ActionHandlerFactory.INSTANCE.produce(request.getAction()).handle(ctx, request.getBody());
+        GlobalThreadPool.execute(() -> ActionHandlerFactory.INSTANCE.produce(request.getAction()).handle(ctx, request.getBody()));
     }
 
 }
