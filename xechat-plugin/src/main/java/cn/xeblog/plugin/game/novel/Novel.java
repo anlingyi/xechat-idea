@@ -3,12 +3,9 @@ package cn.xeblog.plugin.game.novel;
 import cn.xeblog.commons.entity.game.novel.NovelDTO;
 import cn.xeblog.commons.enums.Game;
 import cn.xeblog.plugin.annotation.DoGame;
-import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.game.AbstractGame;
 import cn.xeblog.plugin.util.CharsetUtils;
-import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.JBColor;
-import com.intellij.ui.components.JBBox;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +35,7 @@ public class Novel extends AbstractGame<NovelDTO> {
     // 章节标题
     private JLabel title;
     // 小说正文
-    private JTextArea textJta;
+    private JTextPane textJta;
     // 小说文件路径
     private String novelFilePath;
     // 小说文件编码
@@ -189,25 +186,25 @@ public class Novel extends AbstractGame<NovelDTO> {
     private void initReadPanel() {
         mainPanel.removeAll();
         mainPanel.setLayout(null);
-        mainPanel.setMinimumSize(new Dimension(370, 300));
+        mainPanel.setMinimumSize(new Dimension(370, 220));
 
-        JPanel textPanel = new JPanel();
-        textPanel.setBounds(10, 10, 350, 300);
+        JPanel textPanel = new JPanel(new BorderLayout());
+        textPanel.setBounds(10, 10, 350, 220);
         mainPanel.add(textPanel);
 
         title = new JLabel(currentChapter.getTitle());
-        textPanel.add(title);
+        title.setHorizontalAlignment(SwingConstants.CENTER);
+        textPanel.add(title, BorderLayout.NORTH);
 
-        textJta  =new JTextArea(8, 50);
+        textJta = new AutoNewlineTextPane();
         textJta.setEditable(false);
-        textJta.setLineWrap(true);
+        textJta.setFont(new Font("", Font.PLAIN, 12));
         textJta.setText(chapterUtil.currentPage());
 
         JBScrollPane textJsp = new JBScrollPane(textJta);
-        Dimension size = textJta.getPreferredSize();
-        textJsp.setBounds(0, 0, size.width, size.height);
-        textPanel.add(textJsp);
+        textPanel.add(textJsp, BorderLayout.CENTER);
 
+        JPanel optPanel = new JPanel();
         JButton lastChapterJb = new JButton("上一页");
         JButton nextChapterJb = new JButton("下一页");
 
@@ -225,7 +222,7 @@ public class Novel extends AbstractGame<NovelDTO> {
             textJta.updateUI();
             nextChapterJb.setEnabled(true);
         });
-        textPanel.add(lastChapterJb);
+        optPanel.add(lastChapterJb);
 
         nextChapterJb.addActionListener(e -> {
             String text = chapterUtil.nextPage();
@@ -241,7 +238,7 @@ public class Novel extends AbstractGame<NovelDTO> {
             textJta.updateUI();
             lastChapterJb.setEnabled(true);
         });
-        textPanel.add(nextChapterJb);
+        optPanel.add(nextChapterJb);
 
         // 键盘翻页
         textJta.addKeyListener(new KeyListener() {
@@ -274,11 +271,13 @@ public class Novel extends AbstractGame<NovelDTO> {
 
         JButton backJb = new JButton("返回");
         backJb.addActionListener(e -> showDirectoryPanel());
-        textPanel.add(backJb);
+        optPanel.add(backJb);
 
         JButton exitJb = getExitButton();
         exitJb.setText("退出");
-        textPanel.add(exitJb);
+        optPanel.add(exitJb);
+
+        textPanel.add(optPanel, BorderLayout.SOUTH);
     }
 
     private JButton getOpenFileButton() {
