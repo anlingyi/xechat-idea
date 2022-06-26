@@ -32,6 +32,8 @@ public class MainWindow {
     private JPanel contentPanel;
     private JScrollPane consoleScroll;
 
+    private static long lastSendTime;
+
     private MainWindow() {
         init();
     }
@@ -110,6 +112,13 @@ public class MainWindow {
                 Command.handle(content);
             } else {
                 if (DataCache.isOnline) {
+                    long sendTime = System.currentTimeMillis();
+                    if (lastSendTime + 800 > sendTime) {
+                        ConsoleAction.showSimpleMsg("休息一下哦~");
+                        return;
+                    }
+
+                    lastSendTime = sendTime;
                     MessageAction.send(new UserMsgDTO(content), Action.CHAT);
                 } else {
                     ConsoleAction.showLoginMsg();
