@@ -278,6 +278,7 @@ public class Novel extends AbstractGame<NovelDTO> {
         optPanel.add(exitJb);
 
         textPanel.add(optPanel, BorderLayout.SOUTH);
+        mainPanel.updateUI();
     }
 
     private JButton getOpenFileButton() {
