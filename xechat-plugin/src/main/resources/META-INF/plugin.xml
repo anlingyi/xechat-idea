@@ -32,4 +32,10 @@
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </projectListeners>
 
+    <application-components>
+        <component>
+            <implementation-class>cn.xeblog.plugin.persistence.PersistenceService</implementation-class>
+        </component>
+    </application-components>
+
 </idea-plugin>
