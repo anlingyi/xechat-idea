@@ -4,10 +4,13 @@ import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.util.IdUtil;
 import cn.xeblog.commons.entity.UserMsgDTO;
 import cn.xeblog.commons.enums.Action;
+import cn.xeblog.commons.util.ThreadUtils;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.MessageAction;
+import cn.xeblog.plugin.cache.DataCache;
 import com.intellij.util.ui.ImageUtil;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import org.apache.commons.io.IOUtils;
 
@@ -24,7 +27,7 @@ public class UploadUtils {
 
     private static boolean UPLOADING;
     private static final String ACCEPT_IMAGE_TYPE = "jpg,jpeg,gif,png";
-    private static final int MAX_SIZE = 10 << 20;
+    private static final int MAX_SIZE = 2 << 20;
 
     public static void uploadImageFile(File file) {
         String fileType = file.getName().substring(file.getName().lastIndexOf(".") + 1);
@@ -73,11 +76,22 @@ public class UploadUtils {
 
         GlobalThreadPool.execute(() -> {
             try {
-                ByteBuf byteBuf = Unpooled.buffer();
-                byteBuf.writeInt(fileName.length());
-                byteBuf.writeBytes(fileName.getBytes());
-                byteBuf.writeBytes(bytes);
-                MessageAction.send(new UserMsgDTO(byteBuf.array(), UserMsgDTO.MsgType.IMAGE), Action.CHAT);
+                int offset = 16 << 10;
+                int index = 0;
+                int len = bytes.length;
+                while (index < len && DataCache.isOnline) {
+                    ByteBuf byteBuf = Unpooled.directBuffer();
+                    byteBuf.writeInt(fileName.length());
+                    byteBuf.writeBytes(fileName.getBytes());
+                    byteBuf.writeInt(len);
+                    byteBuf.writeInt(index);
+                    byteBuf.writeBytes(bytes, index, Math.min(offset, len - index));
+                    byte[] sendBytes = ByteBufUtil.getBytes(byteBuf);
+                    byteBuf.release();
+                    index += offset;
+                    MessageAction.send(new UserMsgDTO(sendBytes, UserMsgDTO.MsgType.IMAGE), Action.CHAT);
+                    ThreadUtils.spinMoment(120);
+                }
             } catch (Exception e) {
                 ConsoleAction.showSimpleMsg("图片上传失败！");
                 e.printStackTrace();

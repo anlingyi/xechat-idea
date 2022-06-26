@@ -26,11 +26,16 @@ public class ChannelAction {
     private static final ChannelGroup GROUP = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     public static void send(Response resp) {
+        GROUP.writeAndFlush(resp);
         if (resp.getType() == MessageType.SYSTEM || resp.getType() == MessageType.USER) {
+            if (resp.getType() == MessageType.USER) {
+                UserMsgDTO body = (UserMsgDTO) resp.getBody();
+                if (body.getMsgType() == UserMsgDTO.MsgType.IMAGE) {
+                    return;
+                }
+            }
             ObjectFactory.getObject(AbstractResponseHistoryService.class).addHistory(resp);
         }
-
-        GROUP.writeAndFlush(resp);
     }
 
     public static void send(ChannelHandlerContext ctx, Object body, MessageType messageType) {

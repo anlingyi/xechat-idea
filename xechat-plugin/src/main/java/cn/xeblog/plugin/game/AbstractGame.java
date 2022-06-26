@@ -6,6 +6,7 @@ import cn.xeblog.commons.entity.game.GameRoom;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.UserStatus;
+import cn.xeblog.commons.util.ThreadUtils;
 import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.cache.DataCache;
@@ -420,9 +421,7 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
     }
 
     protected void spinMoment(long millis) {
-        long endTime = System.currentTimeMillis() + millis;
-        while (endTime > System.currentTimeMillis()) {
-        }
+        ThreadUtils.spinMoment(millis);
     }
 
 }

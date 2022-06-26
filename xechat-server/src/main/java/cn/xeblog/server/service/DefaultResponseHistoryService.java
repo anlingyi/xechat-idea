@@ -14,7 +14,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class DefaultResponseHistoryService extends AbstractResponseHistoryService {
 
     private final ExecutorService threadPool = new ThreadPoolExecutor(1, 2, 60,
-            TimeUnit.SECONDS, new LinkedBlockingQueue<>(500), new ThreadPoolExecutor.CallerRunsPolicy());
+            TimeUnit.SECONDS, new LinkedBlockingQueue<>(1024), new ThreadPoolExecutor.CallerRunsPolicy());
 
     private final int size;
 

@@ -27,6 +27,10 @@ public class ConsoleAction {
 
     private static boolean isNewLine;
 
+    public static void updateUI() {
+        SwingUtilities.invokeLater(() -> console.updateUI());
+    }
+
     public static void renderText(List<TextRender> list) {
         for (TextRender textRender : list) {
             renderText(textRender.getText(), textRender.getStyle());
@@ -62,11 +66,11 @@ public class ConsoleAction {
     }
 
     public static void renderImageLabel(JLabel label) {
-        synchronized (console) {
+        atomicExec(() -> {
             renderText("[");
             renderComponent(label);
             renderText("]\n");
-        }
+        });
     }
 
     public static void renderUrl(String title, String url) {
@@ -103,14 +107,12 @@ public class ConsoleAction {
     }
 
     public static void gotoConsoleLow() {
-        synchronized (consoleScroll) {
-            JScrollBar verticalScrollBar = consoleScroll.getVerticalScrollBar();
-            if (verticalScrollBar.getValue() + 20 < verticalScrollBar.getMaximum() - verticalScrollBar.getHeight()) {
-                return;
-            }
-
-            updateCaretPosition(-1);
+        JScrollBar verticalScrollBar = consoleScroll.getVerticalScrollBar();
+        if (verticalScrollBar.getValue() + 20 < verticalScrollBar.getMaximum() - verticalScrollBar.getHeight()) {
+            return;
         }
+
+        updateCaretPosition(-1);
     }
 
     public static void showErrorMsg() {
@@ -139,10 +141,14 @@ public class ConsoleAction {
     }
 
     private static void updateCaretPosition(int position) {
-        if (position == -1) {
-            position = console.getDocument().getLength();
-        }
-        console.setCaretPosition(position);
+        int copyPosition = position;
+        atomicExec(() -> {
+            int pos = copyPosition;
+            if (pos == -1) {
+                pos = console.getDocument().getLength();
+            }
+            console.setCaretPosition(pos);
+        });
     }
 
     public static class WarpEditorKit extends StyledEditorKit {
@@ -196,6 +202,12 @@ public class ConsoleAction {
             }
         }
 
+    }
+
+    public static void atomicExec(Runnable runnable) {
+        synchronized (console) {
+            runnable.run();
+        }
     }
 
 }

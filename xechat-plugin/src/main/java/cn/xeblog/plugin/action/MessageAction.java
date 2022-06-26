@@ -14,7 +14,9 @@ public class MessageAction {
 
     public static void send(Request request) {
         Channel channel = DataCache.ctx.channel();
-        channel.writeAndFlush(request);
+        if (channel.isActive()) {
+            channel.writeAndFlush(request);
+        }
     }
 
     public static void send(Object body, Action action) {
