@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 @State(name = Commons.KEY_PREFIX + "data", storages = {@Storage(Commons.KEY_PREFIX + "data.xml")})
 public class PersistenceService implements PersistentStateComponent<PersistenceData> {
 
-    private static final PersistenceData data = new PersistenceData();
+    private static PersistenceData data = new PersistenceData();
 
     @Override
     public @Nullable PersistenceData getState() {
@@ -25,7 +25,8 @@ public class PersistenceService implements PersistentStateComponent<PersistenceD
 
     @Override
     public void loadState(@NotNull PersistenceData state) {
-        DataCache.username = state.getUsername();
+        data = state;
+        DataCache.username = data.getUsername();
     }
 
 }
