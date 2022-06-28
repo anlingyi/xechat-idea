@@ -1,5 +1,8 @@
 package cn.xeblog.plugin.ui;
 
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.ReUtil;
 import cn.xeblog.commons.entity.UserMsgDTO;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.plugin.action.ConsoleAction;
@@ -17,6 +20,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -119,7 +123,24 @@ public class MainWindow {
                     }
 
                     lastSendTime = sendTime;
-                    MessageAction.send(new UserMsgDTO(content), Action.CHAT);
+                    String[] toUsers = null;
+                    List<String> toUserList = ReUtil.findAll("(@)([^\\s]+)([\\s]*)", content, 2);
+                    if (CollectionUtil.isNotEmpty(toUserList)) {
+                        List<String> removeList = new ArrayList<>();
+                        for (String toUser : toUserList) {
+                            if (DataCache.getUser(toUser) == null) {
+                                removeList.add(toUser);
+                            }
+                        }
+                        if (!removeList.isEmpty()) {
+                            toUserList.removeAll(removeList);
+                        }
+                        if (!toUserList.isEmpty()) {
+                            toUserList.add(DataCache.username);
+                            toUsers = ArrayUtil.toArray(toUserList, String.class);
+                        }
+                    }
+                    MessageAction.send(new UserMsgDTO(content, toUsers), Action.CHAT);
                 } else {
                     ConsoleAction.showLoginMsg();
                 }

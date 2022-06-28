@@ -35,6 +35,7 @@ public class LoginCommandHandler extends AbstractCommandHandler {
         if (len > 0) {
             username = args[0];
         }
+        username = StrUtil.trim(username);
 
         if (StringUtils.isBlank(username)) {
             ConsoleAction.showSimpleMsg("用户名不能为空！");

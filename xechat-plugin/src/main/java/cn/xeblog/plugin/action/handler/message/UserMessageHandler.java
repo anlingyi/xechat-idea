@@ -142,7 +142,9 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
             ConsoleAction.atomicExec(() -> {
                 ConsoleAction.renderText(String.format("[%s] %s(%s)：", response.getTime(), user.getUsername(),
                         user.getStatus().alias()), Style.USER_NAME);
-                ConsoleAction.showSimpleMsg((String) body.getContent());
+                Style style = body.hasUser(DataCache.username) ? Style.LIGHT : Style.DEFAULT;
+                String msg = (String) body.getContent();
+                ConsoleAction.renderText(msg + "\n", style);
             });
         }
     }
