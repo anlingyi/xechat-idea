@@ -126,6 +126,9 @@ public class ConsoleAction {
     public static void setConsole(JTextPane console) {
         ConsoleAction.console = console;
         console.setEditorKit(new WarpEditorKit());
+        SimpleAttributeSet simpleAttributeSet = new SimpleAttributeSet();
+        StyleConstants.setLineSpacing(simpleAttributeSet, 0.2f);
+        console.setParagraphAttributes(simpleAttributeSet, false);
     }
 
     public static void setPanel(JPanel panel) {
