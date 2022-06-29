@@ -46,7 +46,7 @@ public class Novel extends AbstractGame<NovelDTO> {
     private Chapter currentChapter;
     private ChapterUtil chapterUtil;
     // 默认章节匹配正则
-    private static final String DEFAULT_CHAPTER_PATTERN = "^.?第(.{1,5})[章部集卷].{0,24}";
+    private static final String DEFAULT_CHAPTER_PATTERN = "^.?第(.{1,5})[章部集卷节篇回].{0,24}";
 
     @Override
     protected void init() {
@@ -194,12 +194,14 @@ public class Novel extends AbstractGame<NovelDTO> {
 
         title = new JLabel(currentChapter.getTitle());
         title.setHorizontalAlignment(SwingConstants.CENTER);
+        title.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
         textPanel.add(title, BorderLayout.NORTH);
 
         textJta = new AutoNewlineTextPane();
         textJta.setEditable(false);
         textJta.setFont(new Font("", Font.PLAIN, 12));
         textJta.setText(chapterUtil.currentPage());
+        textJta.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         JBScrollPane textJsp = new JBScrollPane(textJta);
         textPanel.add(textJsp, BorderLayout.CENTER);
