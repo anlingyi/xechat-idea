@@ -700,8 +700,8 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                         }
 
                         pokerInfo = PokerUtil.getPokerInfo(selectedPokers);
-                        if (pokerInfo != null && outPokerButton != null) {
-                            outPokerButton.setEnabled(currentPlayer.getPlayer().equals(lastPlayer) || pokerInfo.biggerThanIt(lastPokerInfo));
+                        if (outPokerButton != null) {
+                            outPokerButton.setEnabled(pokerInfo != null && pokerInfo.biggerThanIt(lastPokerInfo));
                         }
                     }
                 });
