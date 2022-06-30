@@ -18,7 +18,7 @@
 
 [了解更多...](https://xeblog.cn/?tag=xechat-idea)
 
-![](https://oss.xeblog.cn/prod/9502360a6dd04d1fa55f5d906e9404c5.png)
+![](https://oss.xeblog.cn/prod/d5aa3267f25044f8897e7fccb9d24494.jpg)
 
 ![](https://oss.xeblog.cn/prod/87397d4da728467e912450f94e41b2ef.jpg)
 
