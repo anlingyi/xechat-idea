@@ -1,4 +1,6 @@
-package cn.xeblog.plugin.util;
+package cn.xeblog.commons.util;
+
+import cn.hutool.core.util.ArrayUtil;
 
 /**
  * @author anlingyi
@@ -7,6 +9,10 @@ package cn.xeblog.plugin.util;
 public class ParamsUtils {
 
     public static String getValue(String[] args, String key) {
+        if (ArrayUtil.isEmpty(args)) {
+            return null;
+        }
+
         String value = null;
         boolean flag = false;
         for (String arg : args) {
@@ -20,6 +26,10 @@ public class ParamsUtils {
     }
 
     public static boolean hasKey(String[] args, String key) {
+        if (ArrayUtil.isEmpty(args)) {
+            return false;
+        }
+
         for (String arg : args) {
             if (arg.equalsIgnoreCase(key)) {
                 return true;
