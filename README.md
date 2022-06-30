@@ -58,6 +58,11 @@
 * JDK11
 * Gradle 6.x
 
+### 项目开发
+
+* [实现一个自定义命令！](https://xeblog.cn/articles/79)
+* [实现一个联机对战游戏！](https://xeblog.cn/articles/95)
+
 ## 运行 & 部署
 
 > 提醒：公共模块需优先打包
