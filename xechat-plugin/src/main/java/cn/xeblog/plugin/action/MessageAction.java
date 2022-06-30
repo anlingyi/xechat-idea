@@ -14,8 +14,14 @@ public class MessageAction {
 
     public static void send(Request request) {
         Channel channel = DataCache.ctx.channel();
-        if (channel.isActive()) {
-            channel.writeAndFlush(request);
+        if (channel != null && channel.isActive()) {
+            channel.writeAndFlush(request).addListener(l -> {
+                if (!l.isSuccess() && request.getAction() == Action.CHAT) {
+                    ConsoleAction.showSimpleMsg("消息发送失败啦~");
+                }
+            });
+        } else {
+            ConsoleAction.showSimpleMsg("似乎已经和服务器失联了？");
         }
     }
 

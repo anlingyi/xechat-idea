@@ -52,24 +52,23 @@ public class XEChatClient {
             port = PORT;
         }
 
-        boolean flag = false;
         EventLoopGroup group = new NioEventLoopGroup();
         try {
             Bootstrap bootstrap = new Bootstrap();
             bootstrap.group(group)
                     .channel(NioSocketChannel.class)
                     .option(ChannelOption.TCP_NODELAY, true)
+                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
                     .handler(new DefaultChannelInitializer(sslContext));
-            ChannelFuture channelFuture = bootstrap.connect(host, port).sync();
+            ChannelFuture channelFuture = bootstrap.connect(host, port).addListener(l -> {
+                if (consumer != null) {
+                    consumer.accept(l.isSuccess());
+                }
+            }).sync();
             channelFuture.channel().closeFuture().sync();
-            flag = true;
         } catch (Exception e) {
-            flag = false;
             ConsoleAction.showSimpleMsg("连接服务器失败！");
         } finally {
-            if (consumer != null) {
-                consumer.accept(flag);
-            }
             group.shutdownGracefully();
         }
     }
