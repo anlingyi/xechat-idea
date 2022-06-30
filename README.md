@@ -1,6 +1,6 @@
 # XEChat-Idea
 
-> 基于Netty的IDEA即时聊天插件
+> 基于Netty的IDEA即时聊天插件：让你能够在IDEA里实现聊天、下棋、斗地主！
 
 ## 项目介绍
 
@@ -8,6 +8,13 @@
 
 * 即时聊天
 * 游戏对战
+* 待探索...
+
+目前已实现：
+
+* 五子棋（支持2人联机、人机对战，内置"人工制杖"）
+* 斗地主（支持2~3人联机、人机对战）
+* 阅读（作者 @[MINIPuffer](https://github.com/MINIPuffer) ，感谢PR😊）
 
 [了解更多...](https://xeblog.cn/?tag=xechat-idea)
 
@@ -50,7 +57,6 @@
 
 * JDK11
 * Gradle 6.x
-* IDEA 2021.2.x
 
 ## 运行 & 部署
 
@@ -86,11 +92,22 @@ mvn package
 java -jar target/xechat-server-xxx.jar
 ```
 
+启动参数：
+
+* **设置端口**：`-p {端口号}`
+* **设置敏感词文件**：`-swfile {文件路径}`
+
+参考示例：
+
+```
+java -jar target/xechat-server-xxx.jar -p 1024 -swfile /Users/anlingyi/local/test/words.txt
+```
+
 ### IDEA插件端
 
 #### 修改IDEA版本
 
-修改 `build.gradle` 配置文件，将 `IDEA` 版本号改为你本地正在使用的版本
+修改 `build.gradle` 配置文件，将 `IDEA` 版本号改为你想使用的版本
 
 ```
 intellij {
