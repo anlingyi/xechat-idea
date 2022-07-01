@@ -4,7 +4,7 @@ import cn.xeblog.commons.enums.Action;
 import cn.xeblog.plugin.builder.RequestBuilder;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.commons.entity.Request;
-import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 
 /**
  * @author anlingyi
@@ -13,9 +13,9 @@ import io.netty.channel.Channel;
 public class MessageAction {
 
     public static void send(Request request) {
-        Channel channel = DataCache.ctx.channel();
-        if (channel != null && channel.isActive()) {
-            channel.writeAndFlush(request).addListener(l -> {
+        ChannelHandlerContext ctx = DataCache.ctx;
+        if (ctx != null && ctx.channel().isActive()) {
+            ctx.writeAndFlush(request).addListener(l -> {
                 if (!l.isSuccess() && request.getAction() == Action.CHAT) {
                     ConsoleAction.showSimpleMsg("消息发送失败啦~");
                 }
