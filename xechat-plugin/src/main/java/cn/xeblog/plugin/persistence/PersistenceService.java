@@ -20,6 +20,7 @@ public class PersistenceService implements PersistentStateComponent<PersistenceD
     @Override
     public @Nullable PersistenceData getState() {
         data.setUsername(DataCache.username);
+        data.setMsgNotify(DataCache.msgNotify);
         return data;
     }
 
@@ -27,6 +28,11 @@ public class PersistenceService implements PersistentStateComponent<PersistenceD
     public void loadState(@NotNull PersistenceData state) {
         data = state;
         DataCache.username = data.getUsername();
+        int msgNotify = data.getMsgNotify();
+        if (msgNotify == 0) {
+            msgNotify = 1;
+        }
+        DataCache.msgNotify = msgNotify;
     }
 
 }

@@ -10,6 +10,7 @@ import cn.xeblog.commons.entity.User;
 import cn.xeblog.plugin.annotation.DoMessage;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.enums.Style;
+import cn.xeblog.plugin.util.NotifyUtils;
 import com.intellij.ide.actions.OpenFileAction;
 import com.intellij.openapi.application.ApplicationManager;
 import io.netty.buffer.ByteBuf;
@@ -142,8 +143,15 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
             ConsoleAction.atomicExec(() -> {
                 ConsoleAction.renderText(String.format("[%s] %s(%s)：", response.getTime(), user.getUsername(),
                         user.getStatus().alias()), Style.USER_NAME);
-                Style style = body.hasUser(DataCache.username) ? Style.LIGHT : Style.DEFAULT;
+                boolean notified = body.hasUser(DataCache.username);
+                Style style = Style.DEFAULT;
                 String msg = (String) body.getContent();
+                if (notified) {
+                    style = Style.LIGHT;
+                    if (!user.getUsername().equals(DataCache.username)) {
+                        NotifyUtils.info(user.getUsername(), msg);
+                    }
+                }
                 ConsoleAction.renderText(msg + "\n", style);
             });
         }

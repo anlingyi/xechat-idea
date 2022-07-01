@@ -24,6 +24,7 @@ public enum Command {
     SHOW_MODE("showMode", "查看模式选项"),
     CLEAN("clean", "清屏"),
     ALIVE("alive", "活着，0.关闭｜1.开启"),
+    NOTIFY("notify", "消息通知，1.正常通知 | 2.隐晦通知 | 3.关闭通知"),
     HELP("help", "帮助");
 
     private String command;

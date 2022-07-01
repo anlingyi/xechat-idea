@@ -56,6 +56,11 @@ public class DataCache {
     public static Project project;
 
     /**
+     * 消息通知 1.正常通知 2.隐晦通知 3.关闭通知
+     */
+    public static int msgNotify;
+
+    /**
      * 获取用户信息
      *
      * @param username 用户名
