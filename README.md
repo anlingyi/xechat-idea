@@ -108,6 +108,8 @@ java -jar target/xechat-server-xxx.jar
 java -jar target/xechat-server-xxx.jar -p 1024 -swfile /Users/anlingyi/local/test/words.txt
 ```
 
+[敏感词相关配置参考](https://xeblog.cn/articles/99)
+
 ### IDEA插件端
 
 #### 修改IDEA版本
