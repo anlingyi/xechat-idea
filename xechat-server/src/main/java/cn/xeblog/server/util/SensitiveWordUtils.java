@@ -52,7 +52,10 @@ public class SensitiveWordUtils {
         try (BufferedReader reader = new BufferedReader(new FileReader(sensitiveWordFilePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                keyWords.add(line.trim());
+                line = invalidClear(line);
+                if (StrUtil.isNotBlank(line)) {
+                    keyWords.add(line);
+                }
             }
         } catch (Exception e) {
             log.error("读取敏感词库出现异常！Error -> {}", e);
