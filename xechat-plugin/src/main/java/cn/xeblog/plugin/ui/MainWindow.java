@@ -1,5 +1,9 @@
 package cn.xeblog.plugin.ui;
 
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.ReUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.xeblog.commons.entity.UserMsgDTO;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.plugin.action.ConsoleAction;
@@ -7,6 +11,8 @@ import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.enums.Command;
 import cn.xeblog.plugin.util.UploadUtils;
+import com.intellij.ui.components.JBList;
+import com.intellij.ui.components.JBScrollPane;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
@@ -16,7 +22,11 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -31,8 +41,11 @@ public class MainWindow {
     private JPanel rightPanel;
     private JPanel contentPanel;
     private JScrollPane consoleScroll;
+    private JPanel leftTopPanel;
 
     private static long lastSendTime;
+
+    private JBList jbList = null;
 
     private MainWindow() {
         init();
@@ -52,6 +65,12 @@ public class MainWindow {
                     // 阻止默认事件
                     e.consume();
                     sendMsg();
+                }
+                if (e.getKeyCode() == 38 || e.getKeyCode() == 40) {
+                    if (leftTopPanel.isVisible() && jbList != null) {
+                        e.consume();
+                        jbList.requestFocus();
+                    }
                 }
             }
 
@@ -79,6 +98,114 @@ public class MainWindow {
                     } catch (Exception exception) {
                         exception.printStackTrace();
                     }
+                } else {
+                    boolean isAt = false;
+                    List<String> dataList = null;
+                    String content = contentArea.getText();
+                    int caretPosition = contentArea.getCaretPosition();
+                    int atIndex = -1;
+                    String commandPrefix = Command.COMMAND_PREFIX;
+                    if (content.startsWith(commandPrefix)) {
+                        List<String> allList = new ArrayList<>();
+                        for (Command command : Command.values()) {
+                            allList.add(command.getCommand() + " (" + command.getDesc() + ")");
+                        }
+
+                        String command = content.substring(1).trim();
+                        if (StrUtil.isBlank(command)) {
+                            dataList = allList;
+                        } else {
+                            dataList = new ArrayList<>();
+                            for (String cmd : allList) {
+                                if (cmd.toLowerCase().contains(command.toLowerCase())) {
+                                    dataList.add(cmd);
+                                }
+                            }
+                        }
+                    } else {
+                        if (DataCache.isOnline) {
+                            isAt = true;
+                            String atContent = content.substring(0, caretPosition);
+                            atIndex = atContent.lastIndexOf("@");
+                            if (atIndex > -1) {
+                                String name = content.substring(atIndex + 1, caretPosition);
+                                List<String> allUserList = new ArrayList<>(DataCache.userMap.keySet());
+
+                                if (atIndex + 1 == caretPosition) {
+                                    dataList = allUserList;
+                                }
+
+                                if (StrUtil.isNotBlank(name)) {
+                                    dataList = new ArrayList<>();
+                                    for (String user : allUserList) {
+                                        if (user.contains(name)) {
+                                            dataList.add(user);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    leftTopPanel.setVisible(false);
+                    leftTopPanel.removeAll();
+
+                    if (CollectionUtil.isNotEmpty(dataList)) {
+                        boolean copyIsAt = isAt;
+                        int copyAtIndex = atIndex;
+
+                        Runnable runnable = () -> {
+                            String value = jbList.getSelectedValue().toString();
+                            if (copyIsAt) {
+                                contentArea.replaceRange(value + " ", copyAtIndex + 1, caretPosition);
+                            } else {
+                                contentArea.setText(value.substring(0, value.indexOf(" ")));
+                            }
+
+                            contentArea.requestFocus();
+                            leftTopPanel.setVisible(false);
+                            leftTopPanel.removeAll();
+                        };
+
+                        jbList = new JBList();
+                        jbList.setListData(dataList.toArray());
+                        jbList.addKeyListener(new KeyAdapter() {
+                            @Override
+                            public void keyPressed(KeyEvent e) {
+                                if (KeyEvent.VK_ENTER == e.getKeyCode()) {
+                                    runnable.run();
+                                }
+                            }
+                        });
+
+                        jbList.addMouseListener(new MouseAdapter() {
+                            @Override
+                            public void mouseClicked(MouseEvent e) {
+                                if (e.getClickCount() == 2) {
+                                    runnable.run();
+                                }
+                            }
+                        });
+
+                        JBScrollPane scrollPane = new JBScrollPane(jbList);
+                        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+                        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+                        leftTopPanel.setMinimumSize(new Dimension(0, 100));
+                        leftTopPanel.add(scrollPane);
+                        leftTopPanel.setVisible(true);
+
+                        if (e.getKeyCode() == KeyEvent.VK_TAB) {
+                            String value = dataList.get(0);
+                            if (copyIsAt) {
+                                contentArea.replaceRange(value + " ", copyAtIndex + 1, caretPosition);
+                            } else {
+                                contentArea.replaceRange(value.substring(0, value.indexOf(" ")), 0, caretPosition);
+                            }
+                        }
+                    }
+
+                    leftTopPanel.updateUI();
                 }
             }
         });
@@ -119,7 +246,24 @@ public class MainWindow {
                     }
 
                     lastSendTime = sendTime;
-                    MessageAction.send(new UserMsgDTO(content), Action.CHAT);
+                    String[] toUsers = null;
+                    List<String> toUserList = ReUtil.findAll("(@)([^\\s]+)([\\s]*)", content, 2);
+                    if (CollectionUtil.isNotEmpty(toUserList)) {
+                        List<String> removeList = new ArrayList<>();
+                        for (String toUser : toUserList) {
+                            if (DataCache.getUser(toUser) == null) {
+                                removeList.add(toUser);
+                            }
+                        }
+                        if (!removeList.isEmpty()) {
+                            toUserList.removeAll(removeList);
+                        }
+                        if (!toUserList.isEmpty()) {
+                            toUserList.add(DataCache.username);
+                            toUsers = ArrayUtil.toArray(new HashSet<>(toUserList), String.class);
+                        }
+                    }
+                    MessageAction.send(new UserMsgDTO(content, toUsers), Action.CHAT);
                 } else {
                     ConsoleAction.showLoginMsg();
                 }

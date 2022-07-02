@@ -8,11 +8,11 @@ import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.commons.entity.Response;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.plugin.annotation.DoMessage;
+import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.enums.Style;
+import cn.xeblog.plugin.util.NotifyUtils;
 import com.intellij.ide.actions.OpenFileAction;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -127,8 +127,7 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
                         @Override
                         public void mouseClicked(MouseEvent e) {
                             ApplicationManager.getApplication().invokeLater(() -> {
-                                Project[] projects = ProjectManager.getInstance().getOpenProjects();
-                                OpenFileAction.openFile(filePath, projects[projects.length - 1]);
+                                OpenFileAction.openFile(filePath, DataCache.project);
                             });
                         }
                     });
@@ -144,7 +143,16 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
             ConsoleAction.atomicExec(() -> {
                 ConsoleAction.renderText(String.format("[%s] %s(%s)：", response.getTime(), user.getUsername(),
                         user.getStatus().alias()), Style.USER_NAME);
-                ConsoleAction.showSimpleMsg((String) body.getContent());
+                boolean notified = body.hasUser(DataCache.username);
+                Style style = Style.DEFAULT;
+                String msg = (String) body.getContent();
+                if (notified) {
+                    style = Style.LIGHT;
+                    if (!user.getUsername().equals(DataCache.username)) {
+                        NotifyUtils.info(user.getUsername(), msg);
+                    }
+                }
+                ConsoleAction.renderText(msg + "\n", style);
             });
         }
     }

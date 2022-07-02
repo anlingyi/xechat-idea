@@ -3,6 +3,7 @@ package cn.xeblog.plugin.cache;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.enums.UserStatus;
 import cn.xeblog.plugin.action.ConnectionAction;
+import com.intellij.openapi.project.Project;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.util.Map;
@@ -48,6 +49,16 @@ public class DataCache {
      * 用户状态设置缓存
      */
     public static UserStatus userStatus;
+
+    /**
+     * 当前项目
+     */
+    public static Project project;
+
+    /**
+     * 消息通知 1.正常通知 2.隐晦通知 3.关闭通知
+     */
+    public static int msgNotify;
 
     /**
      * 获取用户信息

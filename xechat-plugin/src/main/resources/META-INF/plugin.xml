@@ -21,6 +21,9 @@
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="XEChat" anchor="bottom" secondary="true" doNotActivateOnStart="true"
                     factoryClass="cn.xeblog.plugin.factory.MainWindowFactory" icon="/images/logo.png"/>
+        <notificationGroup id="cn.xeblog.xechat.notify"
+                           displayType="BALLOON"
+                           key="xechat-idea"/>
     </extensions>
 
     <actions>
@@ -31,5 +34,11 @@
         <listener class="cn.xeblog.plugin.listener.ProjectEventListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </projectListeners>
+
+    <application-components>
+        <component>
+            <implementation-class>cn.xeblog.plugin.persistence.PersistenceService</implementation-class>
+        </component>
+    </application-components>
 
 </idea-plugin>

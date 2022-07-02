@@ -1,6 +1,7 @@
 package cn.xeblog.plugin.game.landlords;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.entity.game.landlords.AllocPokerDTO;
@@ -36,6 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
 
     public static DebugMode debugMode;
+    public static WindowMode windowMode;
 
     private AtomicInteger restartCounter;
     private JPanel startPanel;
@@ -51,6 +53,9 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     private JLabel titleLabel;
     private JButton backButton;
     private JPanel pokerListPanel;
+    private JPanel showPokerPanel;
+    private JPanel playerMainPanel;
+    private JPanel pokerMainPanel;
 
     private Map<String, Player> playerMap;
 
@@ -532,7 +537,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         textPanel.add(tipsLabel);
         centerPanel.add(textPanel);
 
-        JPanel showPokerPanel = new JPanel(new BorderLayout());
+        showPokerPanel = new JPanel(new BorderLayout());
         showPokerPanel.setPreferredSize(new Dimension(200, 70));
         outPokerPanel = new JPanel();
         JBScrollPane pokersScroll = new JBScrollPane(outPokerPanel);
@@ -576,9 +581,10 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         mainBottomPanel.add(gameOverButton);
 
         Box hBox = Box.createHorizontalBox();
-        hBox.add(Box.createHorizontalStrut(100));
-        JLabel debugModeLabel = new JLabel("Debug Mode: ");
-        hBox.add(debugModeLabel);
+        hBox.add(new JLabel("Window: "));
+        hBox.add(getWindowModeComboBox());
+        hBox.add(Box.createHorizontalStrut(5));
+        hBox.add(new JLabel("Debug Mode: "));
         hBox.add(getDebugModelComboBox());
         mainBottomPanel.add(hBox);
 
@@ -607,36 +613,36 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         String nickname = isHard ? playerNode.getAlias() : playerNode.getPlayer();
         JLabel nicknameLabel = new JLabel("<html>" + nickname + "</html>");
         JLabel roleLabel = new JLabel();
-        JPanel mainPanel = new JPanel();
 
         if (playerNode == currentPlayer) {
-            mainPanel.setPreferredSize(new Dimension(460, 150));
-
+            playerMainPanel = new JPanel();
             playerTopPanel = new JPanel();
-            playerTopPanel.setPreferredSize(new Dimension(460, 40));
-            panel.add(playerTopPanel);
-
-            JPanel pokerMainPanel = new JPanel(new BorderLayout());
-            pokerMainPanel.setPreferredSize(new Dimension(460, 70));
+            pokerMainPanel = new JPanel(new BorderLayout());
             pokerListPanel = new JPanel();
+
+            panel.add(playerTopPanel);
+            panel.add(playerMainPanel);
+
+            flushWindowMode();
             flushPokers();
 
             JBScrollPane pokersScroll = new JBScrollPane(pokerListPanel);
             pokersScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
             pokersScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
             pokerMainPanel.add(pokersScroll);
-            mainPanel.add(pokerMainPanel);
+            playerMainPanel.add(pokerMainPanel);
             nicknameLabel.setText(nickname);
             nicknameLabel.setPreferredSize(new Dimension(300, 30));
-            mainPanel.add(nicknameLabel);
-            mainPanel.add(roleLabel);
+            playerMainPanel.add(nicknameLabel);
+            playerMainPanel.add(roleLabel);
         } else {
-            mainPanel.setLayout(new BorderLayout());
-            mainPanel.setPreferredSize(new Dimension(120, 100));
-            mainPanel.setBorder(BorderFactory.createEtchedBorder());
+            JPanel otherPlayerPanel = new JPanel();
+            otherPlayerPanel.setLayout(new BorderLayout());
+            otherPlayerPanel.setPreferredSize(new Dimension(120, 100));
+            otherPlayerPanel.setBorder(BorderFactory.createEtchedBorder());
             nicknameLabel.setHorizontalAlignment(SwingConstants.CENTER);
             nicknameLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 0, 5));
-            mainPanel.add(nicknameLabel, BorderLayout.NORTH);
+            otherPlayerPanel.add(nicknameLabel, BorderLayout.NORTH);
             int alignment;
             Border border;
             if (currentPlayer.getNextPlayer() == playerNode) {
@@ -648,20 +654,21 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
             }
             roleLabel.setBorder(border);
             roleLabel.setHorizontalAlignment(alignment);
-            mainPanel.add(roleLabel, BorderLayout.SOUTH);
+            otherPlayerPanel.add(roleLabel, BorderLayout.SOUTH);
 
             JLabel tipsLabel = new JLabel("");
             tipsLabel.setForeground(playerTipsColor);
             tipsLabel.setHorizontalAlignment(SwingConstants.CENTER);
             player.setTipsLabel(tipsLabel);
-            mainPanel.add(tipsLabel, BorderLayout.CENTER);
+            otherPlayerPanel.add(tipsLabel, BorderLayout.CENTER);
+
+            panel.add(otherPlayerPanel);
         }
 
         player.setNicknameLabel(nicknameLabel);
         player.setRoleLabel(roleLabel);
         player.flushRole();
 
-        panel.add(mainPanel);
         panel.updateUI();
     }
 
@@ -693,8 +700,8 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                         }
 
                         pokerInfo = PokerUtil.getPokerInfo(selectedPokers);
-                        if (pokerInfo != null && outPokerButton != null) {
-                            outPokerButton.setEnabled(currentPlayer.getPlayer().equals(lastPlayer) || pokerInfo.biggerThanIt(lastPokerInfo));
+                        if (outPokerButton != null) {
+                            outPokerButton.setEnabled(pokerInfo != null && pokerInfo.biggerThanIt(lastPokerInfo));
                         }
                     }
                 });
@@ -1044,6 +1051,25 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         }
     }
 
+    @Getter
+    @AllArgsConstructor
+    public enum WindowMode {
+        DEFAULT("Default"),
+        ADAPTIVE("Adaptive");
+
+        private String name;
+
+        public static WindowMode getMode(String name) {
+            for (WindowMode mode : values()) {
+                if (mode.getName().equals(name)) {
+                    return mode;
+                }
+            }
+
+            return null;
+        }
+    }
+
     private ComboBox getDebugModelComboBox() {
         ComboBox comboBox = new ComboBox();
         for (DebugMode mode : DebugMode.values()) {
@@ -1069,7 +1095,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
 
         if (isHard()) {
             title = "Synergy Debugging";
-            backButtonText = "Back Debug";
+            backButtonText = "Back";
             gameOverButtonText = "Debug Over";
             notOutPokerButtonText = "Run!";
             outPokerButtonText = "Debug";
@@ -1077,6 +1103,8 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         }
         if (debugMode == DebugMode.SOFT) {
             title = "";
+            backButtonText = "返回";
+            gameOverButtonText = "结束";
         }
 
         if (backButton != null) {
@@ -1110,6 +1138,43 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         if (lastPokerInfo != null) {
             showPokerInfo(lastPokerInfo);
         }
+    }
+
+    private ComboBox getWindowModeComboBox() {
+        ComboBox comboBox = new ComboBox();
+        for (WindowMode mode : WindowMode.values()) {
+            comboBox.addItem(mode.getName());
+            if (windowMode == mode) {
+                comboBox.setSelectedItem(mode.getName());
+            }
+        }
+        comboBox.addItemListener(e -> {
+            windowMode = WindowMode.getMode(comboBox.getSelectedItem().toString());
+            flushWindowMode();
+        });
+        return comboBox;
+    }
+
+    private void flushWindowMode() {
+        int width = 490;
+        int topWidth = 200;
+        if (windowMode == WindowMode.ADAPTIVE) {
+            int pokerSize = CollectionUtil.size(pokers);
+            pokerSize = Math.max(currentPlayer.getRole() == 2 ? 20 : 17, pokerSize);
+            width = pokerSize * 36;
+            if (pokerSize == 20) {
+                topWidth = 300;
+            }
+        }
+
+        mainPanel.setMinimumSize(new Dimension(width, 350));
+        tipsLabel.setPreferredSize(new Dimension(topWidth, 40));
+        showPokerPanel.setPreferredSize(new Dimension(topWidth, 70));
+        playerMainPanel.setPreferredSize(new Dimension(width, 150));
+        playerTopPanel.setPreferredSize(new Dimension(width, 40));
+        pokerMainPanel.setPreferredSize(new Dimension(width - 10, 70));
+
+        mainPanel.updateUI();
     }
 
     public static boolean isHard() {

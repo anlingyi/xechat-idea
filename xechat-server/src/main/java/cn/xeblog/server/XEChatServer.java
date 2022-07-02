@@ -1,6 +1,8 @@
 package cn.xeblog.server;
 
+import cn.xeblog.commons.util.ParamsUtils;
 import cn.xeblog.server.handler.DefaultChannelInitializer;
+import cn.xeblog.server.util.SensitiveWordUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
@@ -48,7 +50,7 @@ public class XEChatServer {
     }
 
     public void run() {
-        EventLoopGroup bossGroup = new NioEventLoopGroup();
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workGroup = new NioEventLoopGroup();
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();
@@ -72,10 +74,14 @@ public class XEChatServer {
 
     public static void main(String[] args) {
         int port = 1024;
-        if(args != null && args.length > 1) {
-            if(args[0].equalsIgnoreCase("-p") || args[0].equalsIgnoreCase("-port")) {
-                port = Integer.valueOf(args[1]);
-            }
+
+        String configPort = ParamsUtils.getValue(args, "-p");
+        if (configPort != null) {
+            port = Integer.valueOf(args[1]);
+        }
+        String sensitiveWordFilePath = ParamsUtils.getValue(args, "-swfile");
+        if (sensitiveWordFilePath != null) {
+            SensitiveWordUtils.setSensitiveWordFilePath(sensitiveWordFilePath);
         }
 
         new XEChatServer(port).run();

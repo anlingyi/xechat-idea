@@ -7,7 +7,9 @@ import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.annotation.DoCommand;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.enums.Command;
-import cn.xeblog.plugin.util.ParamsUtils;
+import cn.xeblog.commons.util.ParamsUtils;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -18,6 +20,35 @@ import org.apache.commons.lang3.StringUtils;
 public class LoginCommandHandler extends AbstractCommandHandler {
 
     private static boolean CONNECTING;
+
+    @Getter
+    @AllArgsConstructor
+    private enum Config {
+        /**
+         * 服务器地址
+         */
+        HOST("-h"),
+        /**
+         * 端口
+         */
+        PORT("-p"),
+        /**
+         * 清除缓存的服务器配置信息
+         */
+        CLEAN("-c");
+
+        private String key;
+
+        public static Config getConfig(String name) {
+            for (Config value : values()) {
+                if (value.getKey().equals(name)) {
+                    return value;
+                }
+            }
+
+            return null;
+        }
+    }
 
     @Override
     public void process(String[] args) {
@@ -33,8 +64,12 @@ public class LoginCommandHandler extends AbstractCommandHandler {
         int len = args.length;
         String username = DataCache.username;
         if (len > 0) {
-            username = args[0];
+            String name = args[0];
+            if (Config.getConfig(name) == null) {
+                username = name;
+            }
         }
+        username = StrUtil.trim(username);
 
         if (StringUtils.isBlank(username)) {
             ConsoleAction.showSimpleMsg("用户名不能为空！");
@@ -45,7 +80,7 @@ public class LoginCommandHandler extends AbstractCommandHandler {
             return;
         }
 
-        if (ParamsUtils.hasKey(args, "-c")) {
+        if (ParamsUtils.hasKey(args, Config.CLEAN.getKey())) {
             DataCache.connectionAction = null;
         }
 
@@ -54,8 +89,8 @@ public class LoginCommandHandler extends AbstractCommandHandler {
             BeanUtil.copyProperties(DataCache.connectionAction, conn);
         }
 
-        String host = ParamsUtils.getValue(args, "-h");
-        String port = ParamsUtils.getValue(args, "-p");
+        String host = ParamsUtils.getValue(args, Config.HOST.getKey());
+        String port = ParamsUtils.getValue(args, Config.PORT.getKey());
         if (StrUtil.isNotBlank(host)) {
             conn.setHost(host);
         }

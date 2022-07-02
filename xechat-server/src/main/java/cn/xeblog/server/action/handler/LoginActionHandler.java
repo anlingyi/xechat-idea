@@ -16,6 +16,7 @@ import cn.xeblog.commons.entity.User;
 import cn.xeblog.server.constant.CommonConstants;
 import cn.xeblog.server.factory.ObjectFactory;
 import cn.xeblog.server.service.AbstractResponseHistoryService;
+import cn.xeblog.server.util.SensitiveWordUtils;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.util.List;
@@ -60,6 +61,12 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
             return;
         }
 
+        if (SensitiveWordUtils.hasSensitiveWord(username)) {
+            ctx.writeAndFlush(ResponseBuilder.system("昵称含有违规字符，请修改后重试！"));
+            ctx.close();
+            return;
+        }
+
         String id = ChannelAction.getId(ctx);
         User user = new User(id, username, body.getStatus(), ctx.channel());
         UserCache.add(id, user);
@@ -68,6 +75,7 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
         if (isReconnect) {
             user.send(ResponseBuilder.system("重新连接服务器成功！"));
         }
+        user.send(ResponseBuilder.system("修身洁行，言必由绳墨。"));
         List<Response> historyMsgList = ObjectFactory.getObject(AbstractResponseHistoryService.class).getHistory(15);
         ChannelAction.send(ResponseBuilder.system(user.getUsername() + "进入了鱼塘！"));
         if (CollectionUtil.isNotEmpty(historyMsgList)) {
