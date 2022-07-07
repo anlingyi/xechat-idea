@@ -1,6 +1,6 @@
 # XEChat-Idea
 
-> 基于Netty的IDEA即时聊天插件：让你能够在IDEA里实现聊天、下棋、斗地主！
+> 基于Netty的IDEA即时聊天插件：让你能够在IDEA里实现聊天、下棋、斗地主！(理论上支持JetBrains全系列开发工具🙂)
 
 - [目录](#xechat-idea)
     - [项目介绍](#项目介绍)
