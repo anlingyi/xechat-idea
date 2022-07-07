@@ -171,3 +171,55 @@ http://plugins.xeblog.cn
 ![image.png](https://oss.xeblog.cn/prod/bb9ee5821ca84cca935f9ccab0040643.png)
 
 如有条件，还请自行部署服务端。
+
+## Docker部署
+
+### 镜像打包
+
+```dockerfile
+FROM openjdk:8-jre-slim
+MAINTAINER "安凌毅 https://xeblog.cn"
+
+ENV JAVA_OPTS=""
+ENV PARAMS="-p 1024"
+ENV TZ="Asia/Shanghai"
+
+EXPOSE 1024
+
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ADD server.jar /home/xechat/server.jar
+
+WORKDIR /home/xechat/
+
+CMD java -jar JrebelBrains.jar -p $OPTIONS
+ENTRYPOINT ["sh","-c","java -jar $JAVA_OPTS server.jar $PARAMS"]
+```
+
+### 运行
+
+> 不想自己打包可下载第三方镜像。[https://hub.docker.com/r/nn200433/xechat](https://hub.docker.com/r/nn200433/xechat)
+
+```bash
+# 下载镜像，一定要指定版本
+docker pull nn200433/xechat:1.5.8-beta
+
+# 运行
+docker run -itd -p 1024:1024 --restart=always --name=xechat nn200433/xechat:1.5.8-beta
+````
+
+docker-compose.yml 方式：
+
+```bash
+version: '3'
+services:
+  xechat:
+    image: nn200433/xechat:1.5.8-beta
+    container_name: xechat
+    restart: always
+    ports:
+      - 1024:1024
+    volumes: 
+      - /home/xechat/logs:/home/xechat/logs
+```
+
+*插件编译请参考上方文档*
