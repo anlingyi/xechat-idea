@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
+ * 游戏信息
+ *
  * @author anlingyi
  * @date 2020/8/17
  */
