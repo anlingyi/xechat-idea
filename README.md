@@ -79,8 +79,9 @@
 
 ### 项目开发
 
-* [实现一个自定义命令！](https://xeblog.cn/articles/79)
-* [实现一个联机对战游戏！](https://xeblog.cn/articles/95)
+* [实现一个自定义命令](https://xeblog.cn/articles/79)
+* [实现一个自定义消息](https://xeblog.cn/articles/100)
+* [实现一个联机对战游戏](https://xeblog.cn/articles/95)
 
 ## 运行 & 部署
 
