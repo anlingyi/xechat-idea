@@ -16,7 +16,7 @@ public enum Command {
     LOGIN("login", "登录，login {昵称} [-h {服务端ip，可选}] [-p {服务端端口，可选}]"),
     LOGOUT("exit", "退出"),
     SHOW_STATUS("showStatus", "查看可用状态值"),
-    SET_STATUS("setStatus", "设置当前状态"),
+    SET_STATUS("setStatus", "设置当前状态，setStatus {状态值}"),
     SHOW_GAME("showGame", "游戏列表"),
     PLAY("play", "游戏功能，play {游戏编号}"),
     JOIN("join", "加入游戏 | 拒绝邀请：此命令后加任意字符"),
