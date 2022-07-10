@@ -71,7 +71,7 @@ public class MainWindow {
                     sendMsg();
                 }
 
-                if (e.getKeyCode() == KeyEvent.VK_TAB && jbList != null) {
+                if (e.getKeyCode() == KeyEvent.VK_TAB && leftTopPanel.isVisible()) {
                     e.consume();
                 }
 
