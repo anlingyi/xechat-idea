@@ -1,5 +1,7 @@
 # XEChat-Idea
 
+> Version 1.5.9-beta
+
 > 基于Netty的IDEA即时聊天插件：让你能够在IDEA里实现聊天、下棋、斗地主！(理论上支持JetBrains全系列开发工具🙂)
 
 - [目录](#xechat-idea)
@@ -34,7 +36,7 @@
 * 五子棋（支持2人联机、人机对战，内置"人工制杖"）
 * 斗地主（支持2~3人联机、人机对战）
 * 阅读（作者 @[MINIPuffer](https://github.com/MINIPuffer) ，感谢PR😊）
-* 7天天气查询（基于[和风天气](https://dev.qweather.com/)，作者 @[猎隼丶止戈](https://github.com/nn200433)）
+* 天气查询（基于[和风天气](https://dev.qweather.com/)，作者 @[猎隼丶止戈](https://github.com/nn200433) ，感谢PR😊）
 
 [了解更多...](https://xeblog.cn/?tag=xechat-idea)
 
@@ -224,10 +226,10 @@ ENTRYPOINT ["sh","-c","java -jar $JAVA_OPTS server.jar $PARAMS"]
 
 ```bash
 # 下载镜像，一定要指定版本
-docker pull nn200433/xechat:1.5.8-beta
+docker pull nn200433/xechat:{Version}
 
 # 运行
-docker run -itd -p 1024:1024 --restart=always --name=xechat nn200433/xechat:1.5.8-beta
+docker run -itd -p 1024:1024 --restart=always --name=xechat nn200433/xechat:{Version}
 ````
 
 docker-compose.yml 方式：
@@ -236,7 +238,7 @@ docker-compose.yml 方式：
 version: '3'
 services:
   xechat:
-    image: nn200433/xechat:1.5.8-beta
+    image: nn200433/xechat:{Version}
     container_name: xechat
     restart: always
     ports:
