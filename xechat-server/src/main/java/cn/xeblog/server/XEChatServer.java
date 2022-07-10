@@ -1,5 +1,8 @@
 package cn.xeblog.server;
 
+import cn.hutool.core.lang.Singleton;
+import cn.nn200433.weather.service.WeatherConfigService;
+import cn.nn200433.weather.service.impl.HeFengWeatherConfigServiceImpl;
 import cn.xeblog.commons.util.ParamsUtils;
 import cn.xeblog.server.handler.DefaultChannelInitializer;
 import cn.xeblog.server.util.SensitiveWordUtils;
@@ -82,6 +85,12 @@ public class XEChatServer {
         String sensitiveWordFilePath = ParamsUtils.getValue(args, "-swfile");
         if (sensitiveWordFilePath != null) {
             SensitiveWordUtils.setSensitiveWordFilePath(sensitiveWordFilePath);
+        }
+        String weatherKey = ParamsUtils.getValue(args, "-weather");
+        if (weatherKey != null) {
+            // 实例化并单例存储
+            WeatherConfigService weatherConfigService = new HeFengWeatherConfigServiceImpl(weatherKey);
+            Singleton.put(weatherConfigService);
         }
 
         new XEChatServer(port).run();

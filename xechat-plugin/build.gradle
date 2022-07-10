@@ -14,7 +14,8 @@ buildSearchableOptions.enabled = false
 repositories {
     mavenLocal()
     maven {
-        url 'https://maven.aliyun.com/nexus/content/groups/public/'
+//        url 'https://maven.aliyun.com/nexus/content/groups/public/'
+        url 'D:\\maven\\Repository'
     }
     mavenCentral()
 }
@@ -30,9 +31,12 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version '2021.2'
+    version '2022.1'
     intellij.updateSinceUntilBuild false
 }
 patchPluginXml {
     sinceBuild(191)
+}
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
 }
