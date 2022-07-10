@@ -28,11 +28,7 @@ public class PersistenceService implements PersistentStateComponent<PersistenceD
     public void loadState(@NotNull PersistenceData state) {
         data = state;
         DataCache.username = data.getUsername();
-        int msgNotify = data.getMsgNotify();
-        if (msgNotify == 0) {
-            msgNotify = 1;
-        }
-        DataCache.msgNotify = msgNotify;
+        DataCache.msgNotify = data.getMsgNotify();
     }
 
 }
