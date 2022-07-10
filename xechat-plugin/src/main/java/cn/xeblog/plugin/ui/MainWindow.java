@@ -10,6 +10,7 @@ import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.enums.Command;
+import cn.xeblog.plugin.util.CommandHistoryUtils;
 import cn.xeblog.plugin.util.UploadUtils;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
@@ -25,8 +26,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
 
 /**
@@ -47,6 +47,8 @@ public class MainWindow {
 
     private JBList jbList = null;
 
+    private boolean isProactive;
+
     private MainWindow() {
         init();
     }
@@ -61,16 +63,37 @@ public class MainWindow {
         contentArea.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
+                String content = contentArea.getText();
+
                 if (KeyEvent.VK_ENTER == e.getKeyCode()) {
                     // 阻止默认事件
                     e.consume();
                     sendMsg();
                 }
+
+                if (e.getKeyCode() == KeyEvent.VK_TAB && jbList != null) {
+                    e.consume();
+                }
+
                 if (e.getKeyCode() == 38 || e.getKeyCode() == 40) {
-                    if (leftTopPanel.isVisible() && jbList != null) {
-                        e.consume();
+                    e.consume();
+                    if (isProactive && leftTopPanel.isVisible() && jbList != null) {
                         jbList.requestFocus();
+                    } else if (StrUtil.isBlank(content) || content.startsWith(Command.COMMAND_PREFIX)) {
+                        String cmd = null;
+                        if (e.getKeyCode() == 38) {
+                            cmd = CommandHistoryUtils.getPrevCommand();
+                        } else if (e.getKeyCode() == 40) {
+                            cmd = CommandHistoryUtils.getNextCommand();
+                        }
+
+                        if (StrUtil.isNotBlank(cmd)) {
+                            isProactive = false;
+                            contentArea.setText(cmd);
+                        }
                     }
+                } else {
+                    isProactive = true;
                 }
             }
 
@@ -106,21 +129,22 @@ public class MainWindow {
                     int atIndex = -1;
                     String commandPrefix = Command.COMMAND_PREFIX;
                     if (content.startsWith(commandPrefix)) {
-                        List<String> allList = new ArrayList<>();
+                        Map<String, String> commandMap = new LinkedHashMap<>();
                         for (Command command : Command.values()) {
-                            allList.add(command.getCommand() + " (" + command.getDesc() + ")");
+                            commandMap.put(command.getCommand(), command.getCommand() + " (" + command.getDesc() + ")");
                         }
 
-                        String command = content.substring(1).trim();
+                        String command = content;
                         if (StrUtil.isBlank(command)) {
-                            dataList = allList;
+                            dataList = new ArrayList<>(commandMap.values());
                         } else {
-                            dataList = new ArrayList<>();
-                            for (String cmd : allList) {
-                                if (cmd.toLowerCase().contains(command.toLowerCase())) {
-                                    dataList.add(cmd);
+                            final List<String> matchList = new ArrayList<>();
+                            commandMap.forEach((k, v) -> {
+                                if (k.toLowerCase().contains(command.toLowerCase()) || command.startsWith(k)) {
+                                    matchList.add(v);
                                 }
-                            }
+                            });
+                            dataList = matchList;
                         }
                     } else {
                         if (DataCache.isOnline) {
@@ -138,7 +162,7 @@ public class MainWindow {
                                 if (StrUtil.isNotBlank(name)) {
                                     dataList = new ArrayList<>();
                                     for (String user : allUserList) {
-                                        if (user.contains(name)) {
+                                        if (user.toLowerCase().contains(name.toLowerCase())) {
                                             dataList.add(user);
                                         }
                                     }

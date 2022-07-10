@@ -2,6 +2,7 @@ package cn.xeblog.plugin.enums;
 
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.factory.CommandHandlerFactory;
+import cn.xeblog.plugin.util.CommandHistoryUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -47,6 +48,7 @@ public enum Command {
                         System.arraycopy(strs, 1, args, 0, args.length);
                     }
 
+                    CommandHistoryUtils.addCommand(command);
                     cmd.exec(args);
                     return;
                 }
