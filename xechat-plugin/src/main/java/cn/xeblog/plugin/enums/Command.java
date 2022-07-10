@@ -12,7 +12,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Command {
-    LOGIN("login", "登录，login {昵称} [-h {服务端ip}] [-p {服务端端口}]"),
+    LOGIN("login", "登录，login {昵称} [-h {服务端ip，可选}] [-p {服务端端口，可选}]"),
     LOGOUT("exit", "退出"),
     SHOW_STATUS("showStatus", "查看可用状态值"),
     SET_STATUS("setStatus", "设置当前状态"),
