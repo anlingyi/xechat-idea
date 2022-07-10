@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.util;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.thread.GlobalThreadPool;
 
 import java.util.ArrayList;
@@ -20,12 +21,14 @@ public class CommandHistoryUtils {
     public static void addCommand(String command) {
         GlobalThreadPool.execute(() -> {
             nextIndex = 0;
-            if (historyList.get(historyList.size() - 1).equals(command)) {
+            int size = CollectionUtil.size(historyList);
+            int lastIndex = size - 1;
+            if (lastIndex > -1 && historyList.get(lastIndex).equals(command)) {
                 return;
             }
 
             historyList.add(command);
-            if (historyList.size() > MAX_SIZE) {
+            if (size > MAX_SIZE) {
                 historyList.remove(0);
             }
         });
@@ -42,10 +45,15 @@ public class CommandHistoryUtils {
     }
 
     public static String getCurrentCommand() {
-        if (nextIndex < 0) {
-            nextIndex = historyList.size() - 1;
+        int size = CollectionUtil.size(historyList);
+        if (size == 0) {
+            return "";
         }
-        if (nextIndex >= historyList.size()) {
+
+        if (nextIndex < 0) {
+            nextIndex = size - 1;
+        }
+        if (nextIndex >= size) {
             nextIndex = 0;
         }
 
