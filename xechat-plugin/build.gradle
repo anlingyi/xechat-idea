@@ -14,15 +14,14 @@ buildSearchableOptions.enabled = false
 repositories {
     mavenLocal()
     maven {
-//        url 'https://maven.aliyun.com/nexus/content/groups/public/'
-        url 'D:\\maven\\Repository'
+        url 'https://maven.aliyun.com/nexus/content/groups/public/'
     }
     mavenCentral()
 }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    compile ('cn.xeblog:xechat-commons:1.5.8-beta')
+    compile('cn.xeblog:xechat-commons:1.5.8-beta')
     compileOnly 'org.projectlombok:lombok:1.18.12'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
     testCompileOnly 'org.projectlombok:lombok:1.18.12'
@@ -31,12 +30,9 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version '2022.1'
+    version '2021.2'
     intellij.updateSinceUntilBuild false
 }
 patchPluginXml {
     sinceBuild(191)
-}
-tasks.withType(JavaCompile) {
-    options.encoding = "UTF-8"
 }
