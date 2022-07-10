@@ -1,6 +1,25 @@
 # XEChat-Idea
 
-> 基于Netty的IDEA即时聊天插件：让你能够在IDEA里实现聊天、下棋、斗地主！
+> 基于Netty的IDEA即时聊天插件：让你能够在IDEA里实现聊天、下棋、斗地主！(理论上支持JetBrains全系列开发工具🙂)
+
+- [目录](#xechat-idea)
+    - [项目介绍](#项目介绍)
+        - [项目结构](#项目结构)
+        - [项目环境](#项目环境)
+        - [项目开发](#项目开发)
+    - [运行 & 部署](#运行-部署)
+        - [服务端](#服务端)
+            - [运行](#运行)
+            - [部署](#部署)
+        - [IDEA插件端](#idea插件端)
+            - [修改IDEA版本](#修改idea版本)
+            - [本地运行](#本地运行)
+            - [插件部署](#插件部署)
+    - [安装体验](#安装体验)
+    - [Docker部署](#docker部署)
+        - [镜像打包](#镜像打包)
+        - [运行](#运行-1)
+    - [学习交流](#学习交流)
 
 ## 项目介绍
 
@@ -15,6 +34,7 @@
 * 五子棋（支持2人联机、人机对战，内置"人工制杖"）
 * 斗地主（支持2~3人联机、人机对战）
 * 阅读（作者 @[MINIPuffer](https://github.com/MINIPuffer) ，感谢PR😊）
+* 7天天气查询（基于[和风天气](https://dev.qweather.com/)，作者 @[猎隼丶止戈](https://github.com/nn200433)）
 
 [了解更多...](https://xeblog.cn/?tag=xechat-idea)
 
@@ -60,8 +80,9 @@
 
 ### 项目开发
 
-* [实现一个自定义命令！](https://xeblog.cn/articles/79)
-* [实现一个联机对战游戏！](https://xeblog.cn/articles/95)
+* [实现一个自定义命令](https://xeblog.cn/articles/79)
+* [实现一个自定义消息](https://xeblog.cn/articles/100)
+* [实现一个联机对战游戏](https://xeblog.cn/articles/95)
 
 ## 运行 & 部署
 
@@ -101,6 +122,7 @@ java -jar target/xechat-server-xxx.jar
 
 * **设置端口**：`-p {端口号}`
 * **设置敏感词文件**：`-swfile {文件路径}`
+* **设置和风天气 api key**：`-weather {和风api key}`
 
 参考示例：
 
@@ -171,3 +193,66 @@ http://plugins.xeblog.cn
 ![image.png](https://oss.xeblog.cn/prod/bb9ee5821ca84cca935f9ccab0040643.png)
 
 如有条件，还请自行部署服务端。
+
+## Docker部署
+
+> 感谢 [@猎隼丶止戈](https://github.com/nn200433) 对此部分做的贡献 😊
+
+### 镜像打包
+
+```dockerfile
+FROM openjdk:8-jre-slim
+MAINTAINER "安凌毅 https://xeblog.cn"
+
+ENV JAVA_OPTS=""
+ENV PARAMS="-p 1024"
+ENV TZ="Asia/Shanghai"
+
+EXPOSE 1024
+
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ADD server.jar /home/xechat/server.jar
+
+WORKDIR /home/xechat/
+
+ENTRYPOINT ["sh","-c","java -jar $JAVA_OPTS server.jar $PARAMS"]
+```
+
+### 运行
+
+> 不想自己打包可下载第三方镜像。[https://hub.docker.com/r/nn200433/xechat](https://hub.docker.com/r/nn200433/xechat)
+
+```bash
+# 下载镜像，一定要指定版本
+docker pull nn200433/xechat:1.5.8-beta
+
+# 运行
+docker run -itd -p 1024:1024 --restart=always --name=xechat nn200433/xechat:1.5.8-beta
+````
+
+docker-compose.yml 方式：
+
+```bash
+version: '3'
+services:
+  xechat:
+    image: nn200433/xechat:1.5.8-beta
+    container_name: xechat
+    restart: always
+    ports:
+      - 1024:1025
+    environment: 
+      - PARAMS=-p 1025 -weather <和风天气 api key>
+    volumes: 
+      - /home/xechat/logs:/home/xechat/logs
+```
+
+*插件编译请参考上方文档*
+
+## 学习交流
+
+> 感谢 @鹿儿岛 提供的QQ交流群 😊
+
+如果大家对这个项目感兴趣，欢迎加入我们的交流群🎉
+
+* QQ群：754126966
