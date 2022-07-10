@@ -65,7 +65,7 @@ public class WeatherCommandHandler extends AbstractCommandHandler {
 
         WeatherDTO weather = new WeatherDTO(WeatherType.build(day), location);
         MessageAction.send(weather, Action.WEATHER);
-        // ConsoleAction.showSimpleMsg("正在获取天气信息，请耐心等待...");
+        ConsoleAction.showSimpleMsg("正在获取天气信息，请耐心等待...");
     }
 
 }

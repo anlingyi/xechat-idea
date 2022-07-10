@@ -21,6 +21,7 @@ import cn.xeblog.server.service.WeatherService;
 import cn.xeblog.server.service.impl.HeFengCityServiceImpl;
 import cn.xeblog.server.service.impl.HeFengWeatherServiceImpl;
 import io.netty.channel.ChannelHandlerContext;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
@@ -30,12 +31,16 @@ import java.util.List;
  * @author nn200433
  * @date 2022/07/10
  */
+@Slf4j
 @DoAction(Action.WEATHER)
 public class WeatherActionHandler implements ActionHandler<WeatherDTO> {
 
     @Override
     public void handle(ChannelHandlerContext ctx, WeatherDTO body) {
         User user = ChannelAction.getUser(ctx);
+        if (user == null) {
+            return;
+        }
 
         WeatherService weatherService = Singleton.get(HeFengWeatherServiceImpl.class);
         CityService cityService = Singleton.get(HeFengCityServiceImpl.class);
@@ -59,9 +64,8 @@ public class WeatherActionHandler implements ActionHandler<WeatherDTO> {
                 weatherNow = weatherService.getWeatherNow(cityInfo.getLocationId());
             }
         } catch (Exception e) {
-            if (null != user) {
-                user.send(ResponseBuilder.build(null, "请设置和风天气api key", MessageType.SYSTEM));
-            }
+            log.error("出现异常：", e);
+            user.send(ResponseBuilder.build(null, "天气查询异常，请联系管理员！", MessageType.SYSTEM));
             return;
         }
 
@@ -77,18 +81,15 @@ public class WeatherActionHandler implements ActionHandler<WeatherDTO> {
             futureWeatherList.forEach(weather -> {
                 String textWeather = weather.getTextDay() + "转" + weather.getTextNight();
                 if (StrUtil.equals(weather.getTextDay(), weather.getTextNight())) {
-                    textWeather =  weather.getTextDay();
+                    textWeather = weather.getTextDay();
                 }
                 consoleTable.addBody(weather.getFxDate(), textWeather,
-                        weather.getTempMin() + "℃ ~ " +  weather.getTempMax() + "℃");
+                        weather.getTempMin() + "℃ ~ " + weather.getTempMax() + "℃");
             });
         }
 
-        if (null != user) {
-            final String msg = StrUtil.CRLF + cityInfo.getLocationName() + " 天气预报" + StrUtil.CRLF + consoleTable;
-            user.send(ResponseBuilder.build(null, msg, MessageType.SYSTEM));
-        }
-
+        final String msg = StrUtil.CRLF + cityInfo.getLocationName() + " 天气预报" + StrUtil.CRLF + consoleTable;
+        user.send(ResponseBuilder.build(null, msg, MessageType.SYSTEM));
     }
 
 }
