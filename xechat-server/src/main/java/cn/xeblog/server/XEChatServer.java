@@ -1,10 +1,10 @@
 package cn.xeblog.server;
 
 import cn.hutool.core.lang.Singleton;
-import cn.nn200433.weather.service.WeatherConfigService;
-import cn.nn200433.weather.service.impl.HeFengWeatherConfigServiceImpl;
 import cn.xeblog.commons.util.ParamsUtils;
 import cn.xeblog.server.handler.DefaultChannelInitializer;
+import cn.xeblog.server.service.WeatherConfigService;
+import cn.xeblog.server.service.impl.HeFengWeatherConfigServiceImpl;
 import cn.xeblog.server.util.SensitiveWordUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;

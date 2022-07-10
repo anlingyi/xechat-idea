@@ -1,16 +1,18 @@
-package cn.nn200433.weather.entity;
+package cn.xeblog.server.entity;
 
-import cn.xeblog.commons.entity.weather.CurrentWeather;
+import cn.xeblog.commons.entity.weather.FutureWeather;
 import lombok.Data;
 
+import java.util.List;
+
 /**
- * 实况天气 响应实体类
+ * 未来天气 响应实体类
  *
  * @author nn200433
  * @date 2022-04-19 03:44:56
  */
 @Data
-public class RespWeatherNow {
+public class RespWeatherFuture {
 
     /**
      * API状态码
@@ -30,6 +32,6 @@ public class RespWeatherNow {
     /**
      * 数据
      */
-    private CurrentWeather now;
+    private List<FutureWeather> daily;
 
 }

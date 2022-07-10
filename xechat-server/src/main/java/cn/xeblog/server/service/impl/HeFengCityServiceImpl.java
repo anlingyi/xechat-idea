@@ -1,12 +1,12 @@
-package cn.nn200433.weather.service.impl;
+package cn.xeblog.server.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.TypeReference;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import cn.nn200433.weather.service.CityService;
 import cn.xeblog.commons.entity.weather.CityInfo;
+import cn.xeblog.server.service.CityService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;

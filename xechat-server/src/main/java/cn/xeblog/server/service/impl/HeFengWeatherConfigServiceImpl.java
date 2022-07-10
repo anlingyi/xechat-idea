@@ -1,8 +1,8 @@
-package cn.nn200433.weather.service.impl;
+package cn.xeblog.server.service.impl;
 
-import cn.nn200433.weather.service.WeatherConfigService;
 import cn.xeblog.commons.constants.HeFengWeatherConstants;
 import cn.xeblog.commons.entity.weather.WeatherConfig;
+import cn.xeblog.server.service.WeatherConfigService;
 
 /**
  * 和风天气配置服务实现

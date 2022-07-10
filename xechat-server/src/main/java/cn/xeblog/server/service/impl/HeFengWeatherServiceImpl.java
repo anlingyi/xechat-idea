@@ -1,4 +1,4 @@
-package cn.nn200433.weather.service.impl;
+package cn.xeblog.server.service.impl;
 
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
@@ -9,16 +9,16 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.http.Method;
 import cn.hutool.json.JSONUtil;
-import cn.nn200433.weather.entity.RespWeatherFuture;
-import cn.nn200433.weather.entity.RespWeatherNow;
-import cn.nn200433.weather.service.WeatherConfigService;
-import cn.nn200433.weather.service.WeatherService;
 import cn.xeblog.commons.constants.HeFengWeatherConstants;
 import cn.xeblog.commons.entity.weather.CurrentWeather;
 import cn.xeblog.commons.entity.weather.FutureWeather;
 import cn.xeblog.commons.entity.weather.WeatherConfig;
 import cn.xeblog.commons.enums.Lang;
 import cn.xeblog.commons.enums.Unit;
+import cn.xeblog.server.entity.RespWeatherFuture;
+import cn.xeblog.server.entity.RespWeatherNow;
+import cn.xeblog.server.service.WeatherConfigService;
+import cn.xeblog.server.service.WeatherService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;

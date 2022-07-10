@@ -1,4 +1,4 @@
-package cn.nn200433.weather.service;
+package cn.xeblog.server.service;
 
 
 import cn.xeblog.commons.entity.weather.CityInfo;
