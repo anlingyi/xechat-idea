@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'cn.xeblog'
-version '1.5.8-beta'
+version '1.5.9-beta'
 
 sourceCompatibility = 11
 targetCompatibility = 11
@@ -20,7 +20,7 @@ repositories {
 }
 
 ext {
-    xechatCommonsVersion = '1.5.8-beta'
+    xechatCommonsVersion = '1.5.9-beta'
     lombokVersion = '1.18.24'
 }
 
