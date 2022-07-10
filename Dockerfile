@@ -12,6 +12,4 @@ ADD server.jar /home/xechat/server.jar
 
 WORKDIR /home/xechat/
 
-CMD java -jar JrebelBrains.jar -p $OPTIONS
 ENTRYPOINT ["sh","-c","java -jar $JAVA_OPTS server.jar $PARAMS"]
-

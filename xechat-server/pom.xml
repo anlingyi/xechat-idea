@@ -6,26 +6,37 @@
 
     <groupId>cn.xeblog</groupId>
     <artifactId>xechat-server</artifactId>
-    <version>1.5.8-beta</version>
+    <version>1.5.9-beta</version>
     <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
+        <hutool.version>5.8.4</hutool.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>cn.xeblog</groupId>
             <artifactId>xechat-commons</artifactId>
-            <version>1.5.8-beta</version>
+            <version>1.5.9-beta</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.12</version>
+            <version>1.18.24</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-http</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-json</artifactId>
+            <version>${hutool.version}</version>
         </dependency>
     </dependencies>
 

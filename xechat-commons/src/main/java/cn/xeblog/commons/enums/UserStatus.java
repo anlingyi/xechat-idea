@@ -1,6 +1,8 @@
 package cn.xeblog.commons.enums;
 
 /**
+ * 用户状态
+ *
  * @author anlingyi
  * @date 2020/6/1
  */

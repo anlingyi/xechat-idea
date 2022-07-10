@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * 抽象单例工厂
+ *
  * @author anlingyi
  * @date 2021/8/21 6:19 下午
  */

@@ -39,6 +39,7 @@ public class NotifyCommandHandler extends AbstractCommandHandler {
 
     private String getNotifyTypeInfo(int type) {
         switch (type) {
+            case 0:
             case 1:
                 return "正常通知";
             case 2:
