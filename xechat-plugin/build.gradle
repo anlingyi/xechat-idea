@@ -19,13 +19,18 @@ repositories {
     mavenCentral()
 }
 
+ext {
+    xechatCommonsVersion = '1.5.8-beta'
+    lombokVersion = '1.18.24'
+}
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    compile('cn.xeblog:xechat-commons:1.5.8-beta')
-    compileOnly 'org.projectlombok:lombok:1.18.12'
-    annotationProcessor 'org.projectlombok:lombok:1.18.12'
-    testCompileOnly 'org.projectlombok:lombok:1.18.12'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
+    compile "cn.xeblog:xechat-commons:$rootProject.xechatCommonsVersion"
+    compileOnly "org.projectlombok:lombok:$rootProject.lombokVersion"
+    annotationProcessor "org.projectlombok:lombok:$rootProject.lombokVersion"
+    testCompileOnly "org.projectlombok:lombok:$rootProject.lombokVersion"
+    testAnnotationProcessor "org.projectlombok:lombok:$rootProject.lombokVersion"
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
