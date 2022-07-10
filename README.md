@@ -215,7 +215,6 @@ ADD server.jar /home/xechat/server.jar
 
 WORKDIR /home/xechat/
 
-CMD java -jar JrebelBrains.jar -p $OPTIONS
 ENTRYPOINT ["sh","-c","java -jar $JAVA_OPTS server.jar $PARAMS"]
 ```
 
@@ -241,7 +240,9 @@ services:
     container_name: xechat
     restart: always
     ports:
-      - 1024:1024
+      - 1024:1025
+    environment: 
+      - PARAMS=-p 1025 -weather <和风天气 api key>
     volumes: 
       - /home/xechat/logs:/home/xechat/logs
 ```
