@@ -129,10 +129,11 @@ java -jar target/xechat-server-xxx.jar
 参考示例：
 
 ```
-java -jar target/xechat-server-xxx.jar -p 1024 -swfile /Users/anlingyi/local/test/words.txt -weather {和风api key}
+java -jar target/xechat-server-xxx.jar -p 1024 -swfile /Users/anlingyi/local/test/words.txt -weather {和风天气api key}
 ```
 
 [敏感词相关配置参考](https://xeblog.cn/articles/99)
+
 [和风天气相关配置参考](https://xeblog.cn/articles/101)
 
 ### IDEA插件端
