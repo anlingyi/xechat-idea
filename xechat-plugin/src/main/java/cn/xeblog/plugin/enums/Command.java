@@ -13,7 +13,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Command {
-    LOGIN("login", "登录，login {昵称} [-h {服务端ip，可选}] [-p {服务端端口，可选}]"),
+    LOGIN("login", "登录，login {昵称} [-h {服务端ip，可选}] [-p {服务端端口，可选}] [-c {可选，清理缓存}]"),
     LOGOUT("exit", "退出"),
     SHOW_STATUS("showStatus", "查看可用状态值"),
     SET_STATUS("setStatus", "设置当前状态，setStatus {状态值}"),
@@ -27,6 +27,7 @@ public enum Command {
     ALIVE("alive", "活着，0.关闭｜1.开启"),
     NOTIFY("notify", "消息通知，1.正常通知 | 2.隐晦通知 | 3.关闭通知"),
     WEATHER("weather", "天气查询，weather {地名，如：北京市} [-d {0：当前，默认 | 3：未来3天 | 7：未来7天}]"),
+    SHOW_SERVER("showServer", "鱼塘列表，#showServer [-c {可选，清理缓存}]"),
     HELP("help", "帮助");
 
     private String command;
