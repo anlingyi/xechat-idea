@@ -140,7 +140,7 @@ java -jar target/xechat-server-xxx.jar -p 1024 -swfile /Users/anlingyi/local/tes
 
 #### 修改IDEA版本
 
-修改 `build.gradle` 配置文件，将 `IDEA` 版本号改为你想使用的版本
+修改 `build.gradle` 配置文件，将 `IDEA` 版本号改为你想使用的版本（仅限开发调试阶段）
 
 ```
 intellij {

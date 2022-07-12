@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="60 seconds">
     <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
-    <property name="ROOT_LOG_PATH" value="/home/xechat/logs"/>
+    <property name="ROOT_LOG_PATH" value="/var/log/xechat-server"/>
     <property name="FILE_NAME" value="xechat-server"/>
     <!-- 控制台输出 -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
