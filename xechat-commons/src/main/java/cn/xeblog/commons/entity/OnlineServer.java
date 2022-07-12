@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 /**
  * 鱼塘服务器
  *
@@ -13,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class OnlineSever {
+public class OnlineServer {
 
     /**
      * 鱼塘名字
@@ -30,4 +32,16 @@ public class OnlineSever {
      */
     private Integer port;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OnlineServer that = (OnlineServer) o;
+        return Objects.equals(ip, that.ip) && Objects.equals(port, that.port);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ip, port);
+    }
 }

@@ -1,11 +1,13 @@
 package cn.xeblog.plugin.cache;
 
+import cn.xeblog.commons.entity.OnlineServer;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.enums.UserStatus;
 import cn.xeblog.plugin.action.ConnectionAction;
 import com.intellij.openapi.project.Project;
 import io.netty.channel.ChannelHandlerContext;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -59,6 +61,11 @@ public class DataCache {
      * 消息通知 1.正常通知 2.隐晦通知 3.关闭通知
      */
     public static int msgNotify;
+
+    /**
+     * 服务端列表
+     */
+    public static List<OnlineServer> serverList;
 
     /**
      * 获取用户信息

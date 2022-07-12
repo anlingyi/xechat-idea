@@ -3,12 +3,14 @@ package cn.xeblog.plugin.action.handler.command;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.ConsoleTable;
-import cn.hutool.core.util.StrUtil;
-import cn.xeblog.commons.entity.OnlineSever;
+import cn.hutool.core.thread.GlobalThreadPool;
+import cn.xeblog.commons.entity.OnlineServer;
 import cn.xeblog.commons.util.ParamsUtils;
 import cn.xeblog.commons.util.ServerUtils;
+import cn.xeblog.plugin.action.ConnectionAction;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.annotation.DoCommand;
+import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.enums.Command;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,8 +23,6 @@ import java.util.List;
  */
 @DoCommand(Command.SHOW_SERVER)
 public class ShowServerCommandHandler extends AbstractCommandHandler {
-
-    private static List<OnlineSever> SERVER = null;
 
     @Getter
     @AllArgsConstructor
@@ -37,29 +37,50 @@ public class ShowServerCommandHandler extends AbstractCommandHandler {
 
     @Override
     public void process(String[] args) {
-        List<OnlineSever> serverList = null;
-
         // 存在-c参数，清除缓存
         if (ParamsUtils.hasKey(args, Config.CLEAN.getKey())) {
-            SERVER = null;
+            DataCache.serverList = null;
         }
 
-        if (CollUtil.isEmpty(SERVER)) {
+        if (CollUtil.isEmpty(DataCache.serverList)) {
             // 查询服务列表,并缓存
-            serverList = ServerUtils.getServerList();
-            SERVER = serverList;
+            ConsoleAction.showSimpleMsg("正在更新鱼塘列表...");
+            GlobalThreadPool.execute(() -> {
+                try {
+                    DataCache.serverList = ServerUtils.getServerList();
+                    showServerList();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    ConsoleAction.showSimpleMsg("鱼塘列表更新异常!");
+                }
+            });
         } else {
-            // 使用缓存数据
-            serverList = SERVER;
+            showServerList();
         }
-        
+    }
+
+    private void showServerList() {
+        List<OnlineServer> serverList = DataCache.serverList;
+        if (CollUtil.isEmpty(serverList)) {
+            ConsoleAction.showSimpleMsg("没有鱼塘！");
+            return;
+        }
+
+        OnlineServer currentServer = null;
+        ConnectionAction connection = DataCache.connectionAction;
+        if (DataCache.isOnline && connection != null) {
+            currentServer = new OnlineServer();
+            currentServer.setIp(connection.getHost());
+            currentServer.setPort(connection.getPort());
+        }
+
         ConsoleTable consoleTable = new ConsoleTable();
         consoleTable.setSBCMode(Boolean.FALSE);
-        consoleTable.addHeader("#", "鱼塘", "命令");
+        consoleTable.addHeader("编号", "鱼塘", "状态");
         for (int i = 0; i < serverList.size(); i++) {
-            OnlineSever server = serverList.get(i);
-            consoleTable.addBody(Convert.toStr(i + 1), server.getName(),
-                    StrUtil.format("#login {名字} -h {} -p {}", server.getIp(), server.getPort()));
+            OnlineServer server = serverList.get(i);
+            boolean isCurrentServer = server.equals(currentServer);
+            consoleTable.addBody(Convert.toStr(i), server.getName(), isCurrentServer ? "已连接" : "未连接");
         }
         ConsoleAction.showSimpleMsg(consoleTable.toString());
     }
