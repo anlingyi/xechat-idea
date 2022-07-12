@@ -40,7 +40,7 @@
 
 [了解更多...](https://xeblog.cn/?tag=xechat-idea)
 
-![](https://oss.xeblog.cn/prod/d5aa3267f25044f8897e7fccb9d24494.jpg)
+![](https://oss.xeblog.cn/prod/33a4f79174f2470da66fc7e7f0a36fad.png)
 
 ![](https://oss.xeblog.cn/prod/87397d4da728467e912450f94e41b2ef.jpg)
 
@@ -129,10 +129,12 @@ java -jar target/xechat-server-xxx.jar
 参考示例：
 
 ```
-java -jar target/xechat-server-xxx.jar -p 1024 -swfile /Users/anlingyi/local/test/words.txt
+java -jar target/xechat-server-xxx.jar -p 1024 -swfile /Users/anlingyi/local/test/words.txt -weather {和风天气api key}
 ```
 
 [敏感词相关配置参考](https://xeblog.cn/articles/99)
+
+[和风天气相关配置参考](https://xeblog.cn/articles/101)
 
 ### IDEA插件端
 
