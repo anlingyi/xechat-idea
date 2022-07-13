@@ -1,0 +1,21 @@
+########## server配置 ##########
+[SERVER]
+# 端口
+port = 1024
+
+########## 敏感词配置 ##########
+[SENSITIVE_WORD]
+# 词库文件路径
+file = ${SW_FILE}
+
+########## 天气查询配置 ##########
+[WEATHER]
+# 和风天气 api key
+key = ${WEATHER_KEY}
+
+########## 翻译配置 ##########
+[TRANSLATION]
+# 百度翻译 app id
+appId = ${BD_APP_ID}
+# 百度翻译 app key
+appKey = ${BD_APP_KEY}

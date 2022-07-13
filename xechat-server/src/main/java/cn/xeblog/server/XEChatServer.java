@@ -1,10 +1,13 @@
 package cn.xeblog.server;
 
 import cn.hutool.core.lang.Singleton;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.setting.Setting;
 import cn.xeblog.commons.util.ParamsUtils;
+import cn.xeblog.server.constant.ConfigConstants;
 import cn.xeblog.server.handler.DefaultChannelInitializer;
-import cn.xeblog.server.service.WeatherConfigService;
 import cn.xeblog.server.service.impl.HeFengWeatherConfigServiceImpl;
+import cn.xeblog.server.util.BaiDuFy;
 import cn.xeblog.server.util.SensitiveWordUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -20,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author anlingyi
@@ -76,23 +80,33 @@ public class XEChatServer {
     }
 
     public static void main(String[] args) {
-        int port = 1024;
+        final Setting setting = new Setting(StrUtil.blankToDefault(ParamsUtils.getValue(args, "-path"),
+                "config.setting"), StandardCharsets.UTF_8, Boolean.TRUE);
+        final Setting serverConfig = setting.getSetting(ConfigConstants.SERVER);
+        final Setting sensitiveWordConfig = setting.getSetting(ConfigConstants.SENSITIVE_WORD);
+        final Setting weatherConfig = setting.getSetting(ConfigConstants.WEATHER);
+        final Setting translationConfig = setting.getSetting(ConfigConstants.TRANSLATION);
 
-        String configPort = ParamsUtils.getValue(args, "-p");
-        if (configPort != null) {
-            port = Integer.valueOf(args[1]);
-        }
-        String sensitiveWordFilePath = ParamsUtils.getValue(args, "-swfile");
-        if (sensitiveWordFilePath != null) {
+        String sensitiveWordFilePath = sensitiveWordConfig.get(ConfigConstants.SENSITIVE_WORD_FILE);
+        if (StrUtil.isNotBlank(sensitiveWordFilePath) && !StrUtil.equals("${SW_FILE}", sensitiveWordFilePath)) {
             SensitiveWordUtils.setSensitiveWordFilePath(sensitiveWordFilePath);
         }
-        String weatherKey = ParamsUtils.getValue(args, "-weather");
-        if (weatherKey != null) {
+
+        String weatherKey = weatherConfig.get(ConfigConstants.WEATHER_KEY);
+        if (StrUtil.isNotBlank(weatherKey) && !StrUtil.equals("${WEATHER_KEY}", weatherKey)) {
             // 实例化并单例存储
-            WeatherConfigService weatherConfigService = new HeFengWeatherConfigServiceImpl(weatherKey);
-            Singleton.put(weatherConfigService);
+            Singleton.put(new HeFengWeatherConfigServiceImpl(weatherKey));
         }
 
-        new XEChatServer(port).run();
+        String translationAppId = translationConfig.get(ConfigConstants.TRANSLATION_APP_ID);
+        String translationAppKey = translationConfig.get(ConfigConstants.TRANSLATION_APP_KEY);
+        if (StrUtil.isAllNotBlank(translationAppId, translationAppKey)
+                && !StrUtil.equals("${BD_APP_ID}", translationAppId)
+                && !StrUtil.equals("${BD_APP_KEY}", translationAppKey)) {
+            // 实例化并单例存储
+            Singleton.put(new BaiDuFy(translationAppId, translationAppKey));
+        }
+
+        new XEChatServer(serverConfig.getInt(ConfigConstants.SERVER_PORT)).run();
     }
 }
