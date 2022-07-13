@@ -240,15 +240,18 @@ docker-compose.yml 方式：
 version: '3'
 services:
   xechat:
-    image: nn200433/xechat:{Version}
+    image: nn200433/xechat:{version}
     container_name: xechat
     restart: always
     ports:
       - 1024:1025
     environment: 
-      - PARAMS=-p 1025 -weather <和风天气 api key>
+      - BD_APP_ID=2019xxxxx289668
+      - BD_APP_KEY=VIaBxxxxxExVw8S
+      - WEATHER_KEY=0b5xxx250xx4d
     volumes: 
-      - /home/xechat/logs:/home/xechat/logs
+      - /home/xechat/logs:/var/log/xechat-server
+      - /home/xechat/data/config/config.setting:/home/xechat/config.setting
 ```
 
 *插件编译请参考上方文档*

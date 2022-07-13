@@ -8,7 +8,7 @@ EXPOSE 1024
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 ADD xechat-server/target/xechat-server-*.jar /home/xechat/server.jar
-ADD xechat-server/target/config.setting /home/xechat/config.setting
+ADD xechat-server/target/classes/config.setting /home/xechat/config.setting
 
 WORKDIR /home/xechat/
 
