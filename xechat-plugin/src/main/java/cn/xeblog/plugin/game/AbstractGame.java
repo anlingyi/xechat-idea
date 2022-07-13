@@ -250,6 +250,10 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
     }
 
     private void flushOnlineUsers() {
+        if (gameRoom == null) {
+            return;
+        }
+
         Map<String, User> onlineUserMap = DataCache.userMap;
         List<User> userList = new ArrayList<>(onlineUserMap.values());
         userList.sort((u1, u2) -> {
@@ -295,6 +299,10 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
     }
 
     private void flushGameRoomUsers() {
+        if (gameRoom == null) {
+            return;
+        }
+
         int nums = gameRoom.getNums();
         List<GameRoom.Player> userList = new ArrayList<>(gameRoom.getUsers().values());
         int currentNums = userList.size();
