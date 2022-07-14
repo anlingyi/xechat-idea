@@ -24,6 +24,8 @@ public class HelpCommandHandler extends AbstractCommandHandler {
             textRenderList.add(new TextRender("· " + command.getCommand(), Style.BOLD));
             textRenderList.add(new TextRender("：" + command.getDesc() + "\n", Style.DEFAULT));
         }
+        textRenderList.add(new TextRender(" > Tips: ", Style.BOLD));
+        textRenderList.add(new TextRender("\"{ }\"表示输入参数占位符，\"[ ]\"内的参数为可选参数，所有参数均以空格分隔。\n", Style.DEFAULT));
         textRenderList.add(new TextRender("\n Version " + IdeaUtils.getPluginVersion() + "\n", Style.BOLD));
         ConsoleAction.atomicExec(() -> {
             ConsoleAction.showSimpleMsg(" 命令列表 & 触发命令前缀 " + Command.COMMAND_PREFIX);
