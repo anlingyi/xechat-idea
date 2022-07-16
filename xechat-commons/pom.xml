@@ -6,7 +6,7 @@
 
     <groupId>cn.xeblog</groupId>
     <artifactId>xechat-commons</artifactId>
-    <version>1.5.9-beta</version>
+    <version>1.6.0-beta</version>
     <build>
         <plugins>
             <plugin>
@@ -24,6 +24,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
+        <hutool.version>5.8.4</hutool.version>
     </properties>
 
     <dependencies>
@@ -66,7 +67,17 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-core</artifactId>
-            <version>5.8.4</version>
+            <version>${hutool.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-http</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-json</artifactId>
+            <version>${hutool.version}</version>
         </dependency>
     </dependencies>
 

@@ -735,6 +735,10 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         if (!started && !lastIsMe) {
             notOutPokerButton = new JButton(isHard ? "Run!" : "过！");
             notOutPokerButton.addActionListener(e -> {
+                if (state != 3) {
+                    return;
+                }
+
                 sendMsg(LandlordsGameDTO.MsgType.OUT_POKER, null);
             });
 
@@ -744,6 +748,10 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         outPokerButton = new JButton(isHard ? "Debug" : "出牌");
         outPokerButton.setEnabled(pokerInfo != null && pokerInfo.biggerThanIt(lastPokerInfo));
         outPokerButton.addActionListener(e -> {
+            if (state != 3) {
+                return;
+            }
+
             if (pokerInfo != null) {
                 PokerInfo copy = BeanUtil.copyProperties(pokerInfo, PokerInfo.class);
                 outPokerButton.setEnabled(false);
@@ -767,6 +775,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
             if (state != 2) {
                 return;
             }
+
             sendMsg(LandlordsGameDTO.MsgType.CALL_SCORE, 0);
         });
         playerTopPanel.add(notCallScoreButton);

@@ -42,6 +42,13 @@ public enum Style {
             super.init();
             StyleConstants.setForeground(style, new Color(241, 135, 135));
         }
+    },
+    BOLD {
+        @Override
+        protected void init() {
+            super.init();
+            StyleConstants.setBold(style, true);
+        }
     };
 
     protected MutableAttributeSet style;
