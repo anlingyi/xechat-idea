@@ -1,4 +1,4 @@
-package cn.xeblog.plugin.game.novel;
+package cn.xeblog.commons.entity.game.novel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
