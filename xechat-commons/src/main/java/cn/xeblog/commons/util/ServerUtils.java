@@ -18,14 +18,9 @@ import java.util.List;
 public class ServerUtils {
 
     /**
-     * github代理网址
-     */
-    private static final String GIT_HUB_PROXY_URL = "https://ghproxy.futils.com/";
-
-    /**
      * 服务器url列表
      */
-    private static final String SERVER_LIST_URL = GIT_HUB_PROXY_URL + "https://raw.githubusercontent.com/anlingyi/xechat-idea/dev/server_list.json";
+    private static final String SERVER_LIST_URL = "https://gitee.com/anlingyi/xechat-idea/raw/main/server_list.json";
 
     /**
      * 获取服务器列表
