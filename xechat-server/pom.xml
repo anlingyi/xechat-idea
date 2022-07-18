@@ -13,9 +13,17 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
+        <ip2region.version>2.6.4</ip2region.version>
     </properties>
 
     <dependencies>
+        <!-- 离线地址库 -->
+        <dependency>
+            <groupId>org.lionsoul</groupId>
+            <artifactId>ip2region</artifactId>
+            <version>${ip2region.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>cn.xeblog</groupId>
             <artifactId>xechat-commons</artifactId>
