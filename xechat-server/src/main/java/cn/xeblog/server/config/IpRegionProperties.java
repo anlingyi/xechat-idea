@@ -1,5 +1,6 @@
 package cn.xeblog.server.config;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +12,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@Builder
 public class IpRegionProperties {
 
     /**
@@ -18,18 +20,7 @@ public class IpRegionProperties {
      * <p>
      * 下载IP地址库 https://gitee.com/lionsoul/ip2region/tree/master/data
      */
-    private String ip2regionDbPath = "D:\\idea_hengfeng\\xechat-idea\\xechat-server\\src\\main\\resources\\db\\ip2region.xdb";
-
-    /**
-     * ip2region算法
-     *
-     * <pre>
-     * binary：基于二分查找，基于ip2region.db文件，不需要载入内存，单次查询在0.x毫秒级别。
-     * memory：整个数据库全部载入内存，单次查询都在0.1x毫秒内，C语言的客户端单次查询在0.00x毫秒级别
-     * btree：基于btree算法，基于ip2region.db文件，不需要载入内存，单词查询在0.x毫秒级别，比binary算法更快。
-     * </pre>
-     */
-    private String ip2regionAlgorithm;
+    private String ip2regionDbPath;
 
     /**
      * 纯真数据库路径

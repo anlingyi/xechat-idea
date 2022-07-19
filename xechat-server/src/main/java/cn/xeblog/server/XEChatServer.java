@@ -4,10 +4,13 @@ import cn.hutool.core.lang.Singleton;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.setting.Setting;
 import cn.xeblog.commons.util.ParamsUtils;
+import cn.xeblog.server.config.IpRegionProperties;
 import cn.xeblog.server.constant.ConfigConstants;
 import cn.xeblog.server.handler.DefaultChannelInitializer;
 import cn.xeblog.server.service.impl.HeFengWeatherConfigServiceImpl;
+import cn.xeblog.server.service.impl.Ip2RegionServiceImpl;
 import cn.xeblog.server.util.BaiDuFy;
+import cn.xeblog.server.util.IpUtil;
 import cn.xeblog.server.util.SensitiveWordUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -86,6 +89,7 @@ public class XEChatServer {
         final Setting sensitiveWordConfig = setting.getSetting(ConfigConstants.SENSITIVE_WORD);
         final Setting weatherConfig = setting.getSetting(ConfigConstants.WEATHER);
         final Setting translationConfig = setting.getSetting(ConfigConstants.TRANSLATION);
+        final Setting ipConfig = setting.getSetting(ConfigConstants.IP);
 
         String sensitiveWordFilePath = sensitiveWordConfig.get(ConfigConstants.SENSITIVE_WORD_FILE);
         if (StrUtil.isNotBlank(sensitiveWordFilePath) && !StrUtil.equals("${SW_FILE}", sensitiveWordFilePath)) {
@@ -105,6 +109,12 @@ public class XEChatServer {
                 && !StrUtil.equals("${BD_APP_KEY}", translationAppKey)) {
             // 实例化并单例存储
             Singleton.put(new BaiDuFy(translationAppId, translationAppKey));
+        }
+
+        String ip2regionPath = ipConfig.get(ConfigConstants.IP2REGION_PATH);
+        if (StrUtil.isNotBlank(ip2regionPath) && !StrUtil.equals("${IP2REGION_PATH}", ip2regionPath)) {
+            final Ip2RegionServiceImpl ip2RegionService = new Ip2RegionServiceImpl(IpRegionProperties.builder().ip2regionDbPath(ip2regionPath).build());
+            final IpUtil ipUtil = new IpUtil(ip2RegionService);
         }
 
         new XEChatServer(serverConfig.getInt(ConfigConstants.SERVER_PORT)).run();

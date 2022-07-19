@@ -2,11 +2,11 @@ package cn.xeblog.plugin.action.handler.message;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.thread.GlobalThreadPool;
+import cn.xeblog.commons.entity.Response;
+import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.entity.UserMsgDTO;
 import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.plugin.action.ConsoleAction;
-import cn.xeblog.commons.entity.Response;
-import cn.xeblog.commons.entity.User;
 import cn.xeblog.plugin.annotation.DoMessage;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.enums.Style;
@@ -99,8 +99,10 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
                 imgLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 imgLabel.setForeground(StyleConstants.getForeground(Style.DEFAULT.get()));
                 ConsoleAction.atomicExec(() -> {
-                    ConsoleAction.renderText(String.format("[%s] %s(%s)：", response.getTime(), user.getUsername(),
-                            user.getStatus().alias()), Style.USER_NAME);
+                    ConsoleAction.renderText(
+                            String.format("[%s][%s] %s (%s)：", response.getTime(), user.getProvince(), user.getUsername(),
+                                    user.getStatus().getName()),
+                            Style.USER_NAME);
                     ConsoleAction.renderImageLabel(imgLabel);
                 });
             }
@@ -141,8 +143,10 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
             }
         } else {
             ConsoleAction.atomicExec(() -> {
-                ConsoleAction.renderText(String.format("[%s] %s(%s)：", response.getTime(), user.getUsername(),
-                        user.getStatus().alias()), Style.USER_NAME);
+                ConsoleAction.renderText(
+                        String.format("[%s][%s] %s (%s)：", response.getTime(), user.getProvince(), user.getUsername(),
+                                user.getStatus().getName()),
+                        Style.USER_NAME);
                 boolean notified = body.hasUser(DataCache.username);
                 Style style = Style.DEFAULT;
                 String msg = (String) body.getContent();

@@ -64,4 +64,18 @@ public interface ConfigConstants {
 
     // endregion
 
+    // region ============================== ip查询 配置 ==============================
+
+    /**
+     * 分组 - IP配置
+     */
+    public static final String IP = "IP";
+
+    /**
+     * 离线ip查询库地址
+     */
+    public static final String IP2REGION_PATH = "ip2Region_path";
+
+    // endregion
+
 }

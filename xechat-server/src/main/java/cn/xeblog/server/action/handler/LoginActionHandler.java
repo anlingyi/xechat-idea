@@ -14,13 +14,15 @@ import cn.xeblog.server.annotation.DoAction;
 import cn.xeblog.server.builder.ResponseBuilder;
 import cn.xeblog.server.cache.UserCache;
 import cn.xeblog.server.constant.CommonConstants;
+import cn.xeblog.server.constant.IpConstants;
+import cn.xeblog.server.entity.IpRegion;
 import cn.xeblog.server.factory.ObjectFactory;
 import cn.xeblog.server.service.AbstractResponseHistoryService;
+import cn.xeblog.server.util.IpUtil;
 import cn.xeblog.server.util.SensitiveWordUtils;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.InetSocketAddress;
 import java.util.List;
 
 /**
@@ -78,28 +80,10 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
         }
 
         String id = ChannelAction.getId(ctx);
-        InetSocketAddress ipSocket = (InetSocketAddress) ctx.channel().remoteAddress();
-        String hostAddress = ipSocket.getAddress().getHostAddress();
-
-        // todo 记录用户省份
-        log.info("---> 客户端ip地址 = {}", hostAddress);
-        /*
-        Ip2RegionServiceImpl ip2RegionService = new Ip2RegionServiceImpl(new IpRegionProperties());
-        log.debug(ip2RegionService.getRegion("127.0.0.1").getProvince());
-        log.debug(ip2RegionService.getRegion("61.228.116.102").getProvince());
-        log.debug(ip2RegionService.getRegion("117.29.36.158").getProvince());
-        log.debug(ip2RegionService.getRegion("43.228.128.0").getProvince());
-        log.debug(ip2RegionService.getRegion("219.148.162.31").getProvince());
-        log.debug(ip2RegionService.getRegion("24.37.245.42").getProvince());
-        log.debug(ip2RegionService.getRegion("189.201.191.67").getProvince());
-        log.debug(ip2RegionService.getRegion("192.168.0.81").getProvince());
-        log.debug(ip2RegionService.getRegion("172.16.30.53").getProvince());
-        log.debug(ip2RegionService.getRegion("117.29.36.187").getProvince());
-        log.debug(ip2RegionService.getRegion("45.139.179.206").getProvince());
-        log.debug(ip2RegionService.getRegion("218.17.162.99").getProvince());
-        */
-
-        User user = new User(id, username, body.getStatus(), null, null, ctx.channel());
+        final String ip = IpUtil.getIpByCtx(ctx);
+        final IpRegion ipRegion = IpUtil.getRegionByIp(ip);
+        final String shortProvince = IpConstants.SHORT_PROVINCE.get(ipRegion.getProvince());
+        User user = new User(id, username, body.getStatus(), ip, shortProvince, ctx.channel());
         UserCache.add(id, user);
 
         ChannelAction.sendOnlineUsers();

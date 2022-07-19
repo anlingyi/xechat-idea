@@ -249,6 +249,8 @@ services:
       - BD_APP_ID=2019xxxxx289668
       - BD_APP_KEY=VIaBxxxxxExVw8S
       - WEATHER_KEY=0b5xxx250xx4d
+      # 离线ip地址库，下载地址：https://gitee.com/lionsoul/ip2region/tree/master/data
+      - IP2REGION_PATH=/home/xechat/data/db/ip2region.xdb
     volumes: 
       - /home/xechat/logs:/var/log/xechat-server
       - /home/xechat/data/config/config.setting:/home/xechat/config.setting

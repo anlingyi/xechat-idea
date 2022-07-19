@@ -66,7 +66,7 @@ public class Ip2RegionServiceImpl extends AbstractIpRegionService implements IpR
                     .build();
 
             if (StrUtil.equals(ipRegion.getCountry(), UN_KNOW_AREA)) {
-                return IpRegion.builder().ip(ip).country(IpConstants.IP_INTRANET_DEFAULT_REGION).build();
+                return IpRegion.builder().ip(ip).country(IpConstants.IP_UN_KNOW_DEFAULT_REGION).build();
             }
             return ipRegion;
         } catch (Exception e) {
