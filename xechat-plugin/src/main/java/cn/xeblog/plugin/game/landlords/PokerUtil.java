@@ -109,16 +109,18 @@ public class PokerUtil {
     /**
      * 获取出牌信息
      *
-     * @param pokers
+     * @param list
      * @return
      */
-    public static PokerInfo getPokerInfo(List<Poker> pokers) {
-        if (CollectionUtil.isEmpty(pokers)) {
+    public static PokerInfo getPokerInfo(List<Poker> list) {
+        if (CollectionUtil.isEmpty(list)) {
             return null;
         }
 
+        List<Poker> pokers = new ArrayList<>(list);
         int size = pokers.size();
         PokerInfo pokerInfo = new PokerInfo();
+
         if (size > 1) {
             if (size == 2) {
                 if (pokers.get(0).getValue() + pokers.get(1).getValue() == 33) {
@@ -145,6 +147,7 @@ public class PokerUtil {
             int shunzi = 1;
             int maxShunzi = 0;
             boolean resetShunzi = false;
+            boolean resetShunziMark = false;
             Set<Integer> keys = pokersMap.keySet();
             List<Poker> maxPokers = null;
             List<Poker> singlePokers = new ArrayList<>();
@@ -204,6 +207,7 @@ public class PokerUtil {
                     resetShunzi = false;
                 } else {
                     resetShunzi = true;
+                    resetShunziMark = true;
                     shunzi = 1;
                     if (maxLen < 3) {
                         maxShunzi = 0;
@@ -247,10 +251,10 @@ public class PokerUtil {
                     pokerInfo.setPokerModel(PokerModel.PLAIN_MANNED);
                     plainList.forEach(poker -> poker.setSort(1));
                 } else if (maxLen - minLen == 0) {
-                    if (maxShunzi > 4 && maxLen == 1) {
+                    if (!resetShunziMark && maxShunzi > 4 && maxLen == 1) {
                         // 单牌顺子
                         pokerInfo.setPokerModel(PokerModel.SHUN_ZI_SINGLE);
-                    } else if (maxShunzi > 2 && maxLen == 2) {
+                    } else if (!resetShunziMark && maxShunzi > 2 && maxLen == 2) {
                         // 对牌顺子
                         pokerInfo.setPokerModel(PokerModel.SHUN_ZI_PAIR);
                     } else if (maxShunzi > 1 && maxLen == 3 && maxShunzi * 3 == size) {
@@ -279,170 +283,195 @@ public class PokerUtil {
 
     public static void main(String[] args) {
         // 四带两对
-//        List<Poker> pokers = new ArrayList<>();
-//        pokers.add(new Poker(15, Poker.Suits.HEART));
-//        pokers.add(new Poker(3, Poker.Suits.SPADE));
-//        pokers.add(new Poker(3, Poker.Suits.CLUB));
-//        pokers.add(new Poker(14, Poker.Suits.CLUB));
-//        pokers.add(new Poker(14, Poker.Suits.SPADE));
-//        pokers.add(new Poker(3, Poker.Suits.DIAMOND));
-//        pokers.add(new Poker(3, Poker.Suits.HEART));
-//        pokers.add(new Poker(15, Poker.Suits.SPADE));
-//        testGetPokerInfo(pokers, PokerModel.FOUR_TWO_PAIR);
+        List<Poker> pokers = new ArrayList<>();
+        pokers.add(new Poker(15, Poker.Suits.HEART));
+        pokers.add(new Poker(3, Poker.Suits.SPADE));
+        pokers.add(new Poker(3, Poker.Suits.CLUB));
+        pokers.add(new Poker(14, Poker.Suits.CLUB));
+        pokers.add(new Poker(14, Poker.Suits.SPADE));
+        pokers.add(new Poker(3, Poker.Suits.DIAMOND));
+        pokers.add(new Poker(3, Poker.Suits.HEART));
+        pokers.add(new Poker(15, Poker.Suits.SPADE));
+        testGetPokerInfo(pokers, PokerModel.FOUR_TWO_PAIR);
 
         // 四带两单
-//        List<Poker> pokers = new ArrayList<>();
-//        pokers.add(new Poker(5, Poker.Suits.SPADE));
-//        pokers.add(new Poker(5, Poker.Suits.CLUB));
-//        pokers.add(new Poker(4, Poker.Suits.CLUB));
-//        pokers.add(new Poker(5, Poker.Suits.DIAMOND));
-//        pokers.add(new Poker(3, Poker.Suits.HEART));
-//        pokers.add(new Poker(5, Poker.Suits.HEART));
-//        testGetPokerInfo(pokers, PokerModel.FOUR_TWO_SINGLE);
+        List<Poker> pokers2 = new ArrayList<>();
+        pokers2.add(new Poker(5, Poker.Suits.SPADE));
+        pokers2.add(new Poker(5, Poker.Suits.CLUB));
+        pokers2.add(new Poker(4, Poker.Suits.CLUB));
+        pokers2.add(new Poker(5, Poker.Suits.DIAMOND));
+        pokers2.add(new Poker(3, Poker.Suits.HEART));
+        pokers2.add(new Poker(5, Poker.Suits.HEART));
+        testGetPokerInfo(pokers2, PokerModel.FOUR_TWO_SINGLE);
 
         // 载人飞机
-//        List<Poker> pokers = new ArrayList<>();
-//        pokers.add(new Poker(3, Poker.Suits.SPADE));
-//        pokers.add(new Poker(3, Poker.Suits.CLUB));
-//        pokers.add(new Poker(15, Poker.Suits.CLUB));
-//        pokers.add(new Poker(3, Poker.Suits.DIAMOND));
-//        pokers.add(new Poker(4, Poker.Suits.DIAMOND));
-//        pokers.add(new Poker(15, Poker.Suits.SPADE));
-//        pokers.add(new Poker(14, Poker.Suits.SPADE));
-//        pokers.add(new Poker(14, Poker.Suits.SPADE));
-//        pokers.add(new Poker(4, Poker.Suits.SPADE));
-//        pokers.add(new Poker(4, Poker.Suits.CLUB));
-//        testGetPokerInfo(pokers, PokerModel.PLAIN_MANNED);
+        List<Poker> pokers3 = new ArrayList<>();
+        pokers3.add(new Poker(3, Poker.Suits.SPADE));
+        pokers3.add(new Poker(3, Poker.Suits.CLUB));
+        pokers3.add(new Poker(15, Poker.Suits.CLUB));
+        pokers3.add(new Poker(3, Poker.Suits.DIAMOND));
+        pokers3.add(new Poker(4, Poker.Suits.DIAMOND));
+        pokers3.add(new Poker(15, Poker.Suits.SPADE));
+        pokers3.add(new Poker(14, Poker.Suits.SPADE));
+        pokers3.add(new Poker(14, Poker.Suits.SPADE));
+        pokers3.add(new Poker(4, Poker.Suits.SPADE));
+        pokers3.add(new Poker(4, Poker.Suits.CLUB));
+        testGetPokerInfo(pokers3, PokerModel.PLAIN_MANNED);
 
         // 载人飞机
-//        List<Poker> pokers = new ArrayList<>();
-//        pokers.add(new Poker(3, Poker.Suits.SPADE));
-//        pokers.add(new Poker(3, Poker.Suits.CLUB));
-//        pokers.add(new Poker(5, Poker.Suits.SPADE));
-//        pokers.add(new Poker(5, Poker.Suits.CLUB));
-//        pokers.add(new Poker(5, Poker.Suits.DIAMOND));
-//        pokers.add(new Poker(6, Poker.Suits.CLUB));
-//        pokers.add(new Poker(3, Poker.Suits.DIAMOND));
-//        pokers.add(new Poker(7, Poker.Suits.DIAMOND));
-//        pokers.add(new Poker(6, Poker.Suits.SPADE));
-//        pokers.add(new Poker(6, Poker.Suits.HEART));
-//        pokers.add(new Poker(7, Poker.Suits.SPADE));
-//        pokers.add(new Poker(7, Poker.Suits.CLUB));
-//        testGetPokerInfo(pokers, PokerModel.PLAIN_MANNED);
+        List<Poker> pokers4 = new ArrayList<>();
+        pokers4.add(new Poker(3, Poker.Suits.SPADE));
+        pokers4.add(new Poker(3, Poker.Suits.CLUB));
+        pokers4.add(new Poker(5, Poker.Suits.SPADE));
+        pokers4.add(new Poker(5, Poker.Suits.CLUB));
+        pokers4.add(new Poker(5, Poker.Suits.DIAMOND));
+        pokers4.add(new Poker(6, Poker.Suits.CLUB));
+        pokers4.add(new Poker(3, Poker.Suits.DIAMOND));
+        pokers4.add(new Poker(7, Poker.Suits.DIAMOND));
+        pokers4.add(new Poker(6, Poker.Suits.SPADE));
+        pokers4.add(new Poker(6, Poker.Suits.HEART));
+        pokers4.add(new Poker(7, Poker.Suits.SPADE));
+        pokers4.add(new Poker(7, Poker.Suits.CLUB));
+        testGetPokerInfo(pokers4, PokerModel.PLAIN_MANNED);
 
         // 载人飞机
-//        List<Poker> pokers = new ArrayList<>();
-//        pokers.add(new Poker(3, Poker.Suits.SPADE));
-//        pokers.add(new Poker(3, Poker.Suits.CLUB));
-//        pokers.add(new Poker(5, Poker.Suits.SPADE));
-//        pokers.add(new Poker(5, Poker.Suits.CLUB));
-//        pokers.add(new Poker(5, Poker.Suits.DIAMOND));
-//        pokers.add(new Poker(7, Poker.Suits.CLUB));
-//        pokers.add(new Poker(3, Poker.Suits.DIAMOND));
-//        pokers.add(new Poker(4, Poker.Suits.DIAMOND));
-//        pokers.add(new Poker(7, Poker.Suits.SPADE));
-//        pokers.add(new Poker(7, Poker.Suits.HEART));
-//        pokers.add(new Poker(4, Poker.Suits.SPADE));
-//        pokers.add(new Poker(4, Poker.Suits.CLUB));
-//        testGetPokerInfo(pokers, PokerModel.PLAIN_MANNED);
+        List<Poker> pokers5 = new ArrayList<>();
+        pokers5.add(new Poker(3, Poker.Suits.SPADE));
+        pokers5.add(new Poker(3, Poker.Suits.CLUB));
+        pokers5.add(new Poker(5, Poker.Suits.SPADE));
+        pokers5.add(new Poker(5, Poker.Suits.CLUB));
+        pokers5.add(new Poker(5, Poker.Suits.DIAMOND));
+        pokers5.add(new Poker(7, Poker.Suits.CLUB));
+        pokers5.add(new Poker(3, Poker.Suits.DIAMOND));
+        pokers5.add(new Poker(4, Poker.Suits.DIAMOND));
+        pokers5.add(new Poker(7, Poker.Suits.SPADE));
+        pokers5.add(new Poker(7, Poker.Suits.HEART));
+        pokers5.add(new Poker(4, Poker.Suits.SPADE));
+        pokers5.add(new Poker(4, Poker.Suits.CLUB));
+        testGetPokerInfo(pokers5, PokerModel.PLAIN_MANNED);
 
         // 载人飞机
-//        List<Poker> pokers = new ArrayList<>();
-//        pokers.add(new Poker(5, Poker.Suits.SPADE));
-//        pokers.add(new Poker(5, Poker.Suits.CLUB));
-//        pokers.add(new Poker(5, Poker.Suits.DIAMOND));
-//        pokers.add(new Poker(6, Poker.Suits.CLUB));
-//        pokers.add(new Poker(6, Poker.Suits.SPADE));
-//        pokers.add(new Poker(6, Poker.Suits.HEART));
-//        pokers.add(new Poker(3, Poker.Suits.SPADE));
-//        pokers.add(new Poker(4, Poker.Suits.CLUB));
-//        testGetPokerInfo(pokers, PokerModel.PLAIN_MANNED);
+        List<Poker> pokers6 = new ArrayList<>();
+        pokers6.add(new Poker(5, Poker.Suits.SPADE));
+        pokers6.add(new Poker(5, Poker.Suits.CLUB));
+        pokers6.add(new Poker(5, Poker.Suits.DIAMOND));
+        pokers6.add(new Poker(6, Poker.Suits.CLUB));
+        pokers6.add(new Poker(6, Poker.Suits.SPADE));
+        pokers6.add(new Poker(6, Poker.Suits.HEART));
+        pokers6.add(new Poker(3, Poker.Suits.SPADE));
+        pokers6.add(new Poker(4, Poker.Suits.CLUB));
+        testGetPokerInfo(pokers6, PokerModel.PLAIN_MANNED);
 
         // 无人飞机
-//        List<Poker> pokers = new ArrayList<>();
-//        pokers.add(new Poker(3, Poker.Suits.SPADE));
-//        pokers.add(new Poker(3, Poker.Suits.CLUB));
-//        pokers.add(new Poker(3, Poker.Suits.DIAMOND));
-//        pokers.add(new Poker(4, Poker.Suits.DIAMOND));
-//        pokers.add(new Poker(4, Poker.Suits.SPADE));
-//        pokers.add(new Poker(4, Poker.Suits.CLUB));
-//        testGetPokerInfo(pokers, PokerModel.PLAIN_UNMANNED);
+        List<Poker> pokers7 = new ArrayList<>();
+        pokers7.add(new Poker(3, Poker.Suits.SPADE));
+        pokers7.add(new Poker(3, Poker.Suits.CLUB));
+        pokers7.add(new Poker(3, Poker.Suits.DIAMOND));
+        pokers7.add(new Poker(4, Poker.Suits.DIAMOND));
+        pokers7.add(new Poker(4, Poker.Suits.SPADE));
+        pokers7.add(new Poker(4, Poker.Suits.CLUB));
+        testGetPokerInfo(pokers7, PokerModel.PLAIN_UNMANNED);
 
         // 对牌顺子
-//        List<Poker> pokers = new ArrayList<>();
-//        pokers.add(new Poker(3, Poker.Suits.SPADE));
-//        pokers.add(new Poker(3, Poker.Suits.CLUB));
-//        pokers.add(new Poker(4, Poker.Suits.DIAMOND));
-//        pokers.add(new Poker(4, Poker.Suits.SPADE));
-//        pokers.add(new Poker(5, Poker.Suits.DIAMOND));
-//        pokers.add(new Poker(5, Poker.Suits.SPADE));
-//        testGetPokerInfo(pokers, PokerModel.SHUN_ZI_PAIR);
+        List<Poker> pokers8 = new ArrayList<>();
+        pokers8.add(new Poker(3, Poker.Suits.SPADE));
+        pokers8.add(new Poker(3, Poker.Suits.CLUB));
+        pokers8.add(new Poker(4, Poker.Suits.DIAMOND));
+        pokers8.add(new Poker(4, Poker.Suits.SPADE));
+        pokers8.add(new Poker(5, Poker.Suits.DIAMOND));
+        pokers8.add(new Poker(5, Poker.Suits.SPADE));
+        testGetPokerInfo(pokers8, PokerModel.SHUN_ZI_PAIR);
 
         // 单牌顺子
-//        List<Poker> pokers = new ArrayList<>();
-//        pokers.add(new Poker(3, Poker.Suits.SPADE));
-//        pokers.add(new Poker(8, Poker.Suits.CLUB));
-//        pokers.add(new Poker(4, Poker.Suits.DIAMOND));
-//        pokers.add(new Poker(6, Poker.Suits.SPADE));
-//        pokers.add(new Poker(5, Poker.Suits.DIAMOND));
-//        pokers.add(new Poker(7, Poker.Suits.SPADE));
-//        testGetPokerInfo(pokers, PokerModel.SHUN_ZI_SINGLE);
+        List<Poker> pokers9 = new ArrayList<>();
+        pokers9.add(new Poker(3, Poker.Suits.SPADE));
+        pokers9.add(new Poker(8, Poker.Suits.CLUB));
+        pokers9.add(new Poker(4, Poker.Suits.DIAMOND));
+        pokers9.add(new Poker(6, Poker.Suits.SPADE));
+        pokers9.add(new Poker(5, Poker.Suits.DIAMOND));
+        pokers9.add(new Poker(7, Poker.Suits.SPADE));
+        pokers9.add(new Poker(9, Poker.Suits.SPADE));
+        pokers9.add(new Poker(10, Poker.Suits.SPADE));
+        testGetPokerInfo(pokers9, PokerModel.SHUN_ZI_SINGLE);
 
         // 三带一对
-//        List<Poker> pokers = new ArrayList<>();
-//        pokers.add(new Poker(3, Poker.Suits.SPADE));
-//        pokers.add(new Poker(3, Poker.Suits.CLUB));
-//        pokers.add(new Poker(4, Poker.Suits.DIAMOND));
-//        pokers.add(new Poker(4, Poker.Suits.SPADE));
-//        pokers.add(new Poker(3, Poker.Suits.DIAMOND));
-//        testGetPokerInfo(pokers, PokerModel.THREE_ONE_PAIR);
+        List<Poker> pokers10 = new ArrayList<>();
+        pokers10.add(new Poker(3, Poker.Suits.SPADE));
+        pokers10.add(new Poker(3, Poker.Suits.CLUB));
+        pokers10.add(new Poker(4, Poker.Suits.DIAMOND));
+        pokers10.add(new Poker(4, Poker.Suits.SPADE));
+        pokers10.add(new Poker(3, Poker.Suits.DIAMOND));
+        testGetPokerInfo(pokers10, PokerModel.THREE_ONE_PAIR);
 
         // 三带一单
-//        List<Poker> pokers = new ArrayList<>();
-//        pokers.add(new Poker(3, Poker.Suits.SPADE));
-//        pokers.add(new Poker(3, Poker.Suits.CLUB));
-//        pokers.add(new Poker(4, Poker.Suits.SPADE));
-//        pokers.add(new Poker(3, Poker.Suits.DIAMOND));
-//        testGetPokerInfo(pokers, PokerModel.THREE_ONE_SINGLE);
+        List<Poker> pokers11 = new ArrayList<>();
+        pokers11.add(new Poker(3, Poker.Suits.SPADE));
+        pokers11.add(new Poker(3, Poker.Suits.CLUB));
+        pokers11.add(new Poker(4, Poker.Suits.SPADE));
+        pokers11.add(new Poker(3, Poker.Suits.DIAMOND));
+        testGetPokerInfo(pokers11, PokerModel.THREE_ONE_SINGLE);
 
         // 三张牌
-//        List<Poker> pokers = new ArrayList<>();
-//        pokers.add(new Poker(3, Poker.Suits.SPADE));
-//        pokers.add(new Poker(3, Poker.Suits.CLUB));
-//        pokers.add(new Poker(3, Poker.Suits.DIAMOND));
-//        testGetPokerInfo(pokers, PokerModel.THREE);
+        List<Poker> pokers12 = new ArrayList<>();
+        pokers12.add(new Poker(3, Poker.Suits.SPADE));
+        pokers12.add(new Poker(3, Poker.Suits.CLUB));
+        pokers12.add(new Poker(3, Poker.Suits.DIAMOND));
+        testGetPokerInfo(pokers12, PokerModel.THREE);
 
         // 对牌
-//        List<Poker> pokers = new ArrayList<>();
-//        pokers.add(new Poker(3, Poker.Suits.SPADE));
-//        pokers.add(new Poker(3, Poker.Suits.DIAMOND));
-//        testGetPokerInfo(pokers, PokerModel.PAIR);
+        List<Poker> pokers13 = new ArrayList<>();
+        pokers13.add(new Poker(3, Poker.Suits.SPADE));
+        pokers13.add(new Poker(3, Poker.Suits.DIAMOND));
+        testGetPokerInfo(pokers13, PokerModel.PAIR);
 
         // 单牌
-//        List<Poker> pokers = new ArrayList<>();
-//        pokers.add(new Poker(3, Poker.Suits.SPADE));
-//        testGetPokerInfo(pokers, PokerModel.SINGLE);
+        List<Poker> pokers14 = new ArrayList<>();
+        pokers14.add(new Poker(3, Poker.Suits.SPADE));
+        testGetPokerInfo(pokers14, PokerModel.SINGLE);
 
         // 炸弹
-//        List<Poker> pokers = new ArrayList<>();
-//        pokers.add(new Poker(3, Poker.Suits.SPADE));
-//        pokers.add(new Poker(3, Poker.Suits.CLUB));
-//        pokers.add(new Poker(3, Poker.Suits.DIAMOND));
-//        pokers.add(new Poker(3, Poker.Suits.HEART));
-//        testGetPokerInfo(pokers, PokerModel.BOMB);
+        List<Poker> pokers15 = new ArrayList<>();
+        pokers15.add(new Poker(3, Poker.Suits.SPADE));
+        pokers15.add(new Poker(3, Poker.Suits.CLUB));
+        pokers15.add(new Poker(3, Poker.Suits.DIAMOND));
+        pokers15.add(new Poker(3, Poker.Suits.HEART));
+        testGetPokerInfo(pokers15, PokerModel.BOMB);
 
         // 火箭
-//        List<Poker> pokers = new ArrayList<>();
-//        pokers.add(new Poker(16, null));
-//        pokers.add(new Poker(17, null));
-//        testGetPokerInfo(pokers, PokerModel.ROCKET);
+        List<Poker> pokers16 = new ArrayList<>();
+        pokers16.add(new Poker(16, null));
+        pokers16.add(new Poker(17, null));
+        testGetPokerInfo(pokers16, PokerModel.ROCKET);
+
+        // 单牌顺子不匹配
+        List<Poker> pokers17 = new ArrayList<>();
+        pokers17.add(new Poker(3, Poker.Suits.SPADE));
+        pokers17.add(new Poker(8, Poker.Suits.CLUB));
+        pokers17.add(new Poker(6, Poker.Suits.SPADE));
+        pokers17.add(new Poker(5, Poker.Suits.DIAMOND));
+        pokers17.add(new Poker(7, Poker.Suits.SPADE));
+        pokers17.add(new Poker(9, Poker.Suits.SPADE));
+        pokers17.add(new Poker(10, Poker.Suits.SPADE));
+        testGetPokerInfo(pokers17, null);
+
+        // 对牌顺子不匹配
+        List<Poker> pokers18 = new ArrayList<>();
+        pokers18.add(new Poker(3, Poker.Suits.SPADE));
+        pokers18.add(new Poker(3, Poker.Suits.CLUB));
+        pokers18.add(new Poker(5, Poker.Suits.DIAMOND));
+        pokers18.add(new Poker(5, Poker.Suits.SPADE));
+        pokers18.add(new Poker(6, Poker.Suits.SPADE));
+        pokers18.add(new Poker(6, Poker.Suits.SPADE));
+        pokers18.add(new Poker(7, Poker.Suits.SPADE));
+        pokers18.add(new Poker(7, Poker.Suits.SPADE));
+        testGetPokerInfo(pokers18, null);
     }
 
     private static void testGetPokerInfo(List<Poker> pokers, PokerModel pokerModel) {
         PokerInfo pokerInfo = getPokerInfo(pokers);
         System.out.println(pokerInfo);
-        if (pokerInfo == null && pokerModel != null
-                || pokerInfo.getPokerModel() != pokerModel) {
+        if ((pokerInfo == null && pokerModel != null)
+                || (pokerInfo != null && pokerInfo.getPokerModel() != pokerModel)) {
             throw new RuntimeException("不匹配！");
         }
     }

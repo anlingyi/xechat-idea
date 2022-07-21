@@ -143,7 +143,6 @@ public class AliveAction {
             this.second = second;
 
             setTitle("Are You Ok ?");
-            setOKActionEnabled(false);
             setResizable(true);
             setCrossClosesWindow(false);
 
@@ -158,7 +157,7 @@ public class AliveAction {
 
             JPanel main = new JPanel();
             main.setLayout(null);
-            main.setPreferredSize(new Dimension(width, height));
+            main.setMinimumSize(new Dimension(width, height));
 
             JLabel tipsLabel = new JLabel("休息一下，马上回来...");
             tipsLabel.setFont(new Font(null, 0, 14));
