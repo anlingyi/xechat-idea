@@ -30,6 +30,7 @@ public class User implements Serializable {
     @Setter
     private UserStatus status;
 
+    @Getter
     private transient Channel channel;
 
     public void send(Response response) {

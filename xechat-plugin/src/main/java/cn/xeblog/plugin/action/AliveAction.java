@@ -144,7 +144,7 @@ public class AliveAction {
 
             setTitle("Are You Ok ?");
             setOKActionEnabled(false);
-            setResizable(false);
+            setResizable(true);
             setCrossClosesWindow(false);
 
             init();
