@@ -26,7 +26,7 @@ public abstract class AbstractResponseHistoryService {
         resp.setType(origin.getType());
         User user = origin.getUser();
         if (user != null) {
-            resp.setUser(new User(user.getId(), user.getUsername(), user.getStatus(), null));
+            resp.setUser(new User(user.getId(), user.getUsername(), user.getStatus(), user.getIp(), user.getRegion(), null));
         }
         return resp;
     }
