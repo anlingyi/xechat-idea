@@ -2,7 +2,7 @@ FROM openjdk:8-jre-slim
 MAINTAINER "安凌毅 https://xeblog.cn"
 
 ENV JAVA_OPTS="-Xms512m -Xmx512m"
-ENV PARAMS="-path /home/xechat/config.setting"
+ENV PARAMS="-path /home/xechat/config/config.setting"
 ENV SW_FILE="/home/xechat/db/keywords.txt"
 ENV IP2REGION_PATH="/home/xechat/db/ip2region.xdb"
 ENV TZ="Asia/Shanghai"
