@@ -38,6 +38,7 @@ public class User implements Serializable {
     @Setter
     private IpRegion region;
 
+    @Getter
     private transient Channel channel;
 
     public void send(Response response) {
