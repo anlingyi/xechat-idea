@@ -1,10 +1,16 @@
 package cn.xeblog.server;
 
 import cn.hutool.core.lang.Singleton;
-import cn.xeblog.commons.util.ParamsUtils;
+import cn.hutool.core.util.StrUtil;
+import cn.xeblog.server.config.IpRegionProperties;
+import cn.xeblog.server.config.ServerConfig;
 import cn.xeblog.server.handler.DefaultChannelInitializer;
-import cn.xeblog.server.service.WeatherConfigService;
+import cn.xeblog.server.service.IpRegionService;
 import cn.xeblog.server.service.impl.HeFengWeatherConfigServiceImpl;
+import cn.xeblog.server.service.impl.Ip2RegionServiceImpl;
+import cn.xeblog.server.util.BaiDuFyUtil;
+import cn.xeblog.server.util.ConfigUtil;
+import cn.xeblog.server.util.IpUtil;
 import cn.xeblog.server.util.SensitiveWordUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
@@ -76,23 +82,33 @@ public class XEChatServer {
     }
 
     public static void main(String[] args) {
-        int port = 1024;
+        ServerConfig serverConfig = ConfigUtil.readConfig(args);
 
-        String configPort = ParamsUtils.getValue(args, "-p");
-        if (configPort != null) {
-            port = Integer.valueOf(args[1]);
-        }
-        String sensitiveWordFilePath = ParamsUtils.getValue(args, "-swfile");
-        if (sensitiveWordFilePath != null) {
+        final String sensitiveWordFilePath = serverConfig.getSensitiveWordPath();
+        if (StrUtil.isNotBlank(sensitiveWordFilePath)) {
             SensitiveWordUtils.setSensitiveWordFilePath(sensitiveWordFilePath);
         }
-        String weatherKey = ParamsUtils.getValue(args, "-weather");
-        if (weatherKey != null) {
+        final String weatherKey = serverConfig.getWeatherApiKey();
+        if (StrUtil.isNotBlank(weatherKey)) {
             // 实例化并单例存储
-            WeatherConfigService weatherConfigService = new HeFengWeatherConfigServiceImpl(weatherKey);
-            Singleton.put(weatherConfigService);
+            Singleton.put(new HeFengWeatherConfigServiceImpl(weatherKey));
         }
 
-        new XEChatServer(port).run();
+        final String translationAppId = serverConfig.getTranslationAppId();
+        final String translationAppKey = serverConfig.getTranslationAppKey();
+        if (StrUtil.isAllNotBlank(translationAppId, translationAppKey)) {
+            // 实例化并单例存储
+            Singleton.put(new BaiDuFyUtil(translationAppId, translationAppKey));
+        }
+
+        final String ip2regionPath = serverConfig.getIp2RegionPath();
+        if (StrUtil.isNotBlank(ip2regionPath)) {
+            // 后期可根据实例化实例不同的实现
+            final IpRegionService ip2RegionService = new Ip2RegionServiceImpl(IpRegionProperties.builder().ip2regionDbPath(ip2regionPath).build());
+
+            final IpUtil ipUtil = new IpUtil(ip2RegionService);
+        }
+
+        new XEChatServer(serverConfig.getPort()).run();
     }
 }
