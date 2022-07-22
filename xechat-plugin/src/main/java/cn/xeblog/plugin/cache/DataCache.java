@@ -3,6 +3,7 @@ package cn.xeblog.plugin.cache;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.enums.UserStatus;
 import cn.xeblog.plugin.action.ConnectionAction;
+import cn.xeblog.plugin.game.read.ReadConfig;
 import com.intellij.openapi.project.Project;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -59,6 +60,11 @@ public class DataCache {
      * 消息通知 1.正常通知 2.隐晦通知 3.关闭通知
      */
     public static int msgNotify;
+
+    /**
+     * 阅读配置
+     */
+    public static ReadConfig readConfig = new ReadConfig();
 
     /**
      * 获取用户信息

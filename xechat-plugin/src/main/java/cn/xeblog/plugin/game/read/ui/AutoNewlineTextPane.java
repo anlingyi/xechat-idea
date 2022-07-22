@@ -1,4 +1,4 @@
-package cn.xeblog.plugin.game.novel;
+package cn.xeblog.plugin.game.read.ui;
 
 import javax.swing.*;
 import javax.swing.text.*;

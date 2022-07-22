@@ -1,12 +1,12 @@
-package cn.xeblog.commons.entity.game.legado;
+package cn.xeblog.plugin.game.read.entity;
 
 import cn.hutool.core.util.StrUtil;
 
 /**
  * @author LYF
- * @date 2022-07-14
+ * @date 2022-07-19
  */
-public class BookInfo {
+public class LegadoBook {
     private String name;
     private String author;
     private String bookUrl;
@@ -74,5 +74,15 @@ public class BookInfo {
     @Override
     public String toString() {
         return StrUtil.format("{} - {}", this.name, this.author);
+    }
+
+    public Book toBook() {
+        Book book = new Book();
+        book.setUrl(this.bookUrl);
+        book.setType(BookType.LEGADO);
+        book.setAuthor(this.author);
+        book.setName(this.name);
+        book.setChapterIndex(this.durChapterIndex);
+        return book;
     }
 }

@@ -1,11 +1,12 @@
-package cn.xeblog.plugin.game.legado;
+package cn.xeblog.plugin.game.read.api;
 
 import cn.hutool.core.net.url.UrlBuilder;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import cn.xeblog.commons.entity.game.legado.BookInfo;
-import cn.xeblog.commons.entity.game.legado.LegadoChapter;
+import cn.xeblog.plugin.game.read.entity.Chapter;
+import cn.xeblog.plugin.game.read.entity.LegadoBook;
 import cn.xeblog.plugin.util.NotifyUtils;
 
 import java.net.URI;
@@ -22,26 +23,37 @@ import java.util.List;
  */
 public class LegadoApi {
 
+    private static final int PORT = 1122;
+
     private final String server;
     private final HttpClient client;
 
-    public LegadoApi(String server) {
-        this.server = server;
+    public LegadoApi(String host) {
+        this.server = StrUtil.format("http://{}:{}", host, PORT);
         this.client = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(5000)).build();
     }
 
-    public List<BookInfo> getBookshelf() {
+    public boolean testConnect() {
+        HttpRequest request = HttpRequest.newBuilder(URI.create(server)).build();
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 200;
+        } catch (Exception ignored) { }
+        return false;
+    }
+
+    public List<LegadoBook> getBookshelf() {
         String url = UrlBuilder.of(this.server).addPath("getBookshelf").build();
         String errorMsg = "书架获取失败";
         JSONObject result = get(url, errorMsg);
-        return handleArray(result, BookInfo.class, errorMsg);
+        return handleArray(result, LegadoBook.class, errorMsg);
     }
 
-    public List<LegadoChapter> getChapterList(String bookUrl) {
+    public List<Chapter> getChapterList(String bookUrl) {
         String url = UrlBuilder.of(this.server).addPath("getChapterList").addQuery("url", bookUrl).build();
         String errorMsg = "章节列表获取失败";
         JSONObject result = get(url, errorMsg);
-        return handleArray(result, LegadoChapter.class, errorMsg);
+        return handleArray(result, Chapter.class, errorMsg);
     }
 
     public String getBookContent(String bookUrl, int index) {
@@ -55,7 +67,7 @@ public class LegadoApi {
         return handleStr(result, errorMsg);
     }
 
-    public void saveBookProgress(BookInfo bookInfo) {
+    public void saveBookProgress(LegadoBook bookInfo) {
         String url = UrlBuilder.of(this.server).addPath("saveBookProgress").build();
         post(url, bookInfo);
     }
