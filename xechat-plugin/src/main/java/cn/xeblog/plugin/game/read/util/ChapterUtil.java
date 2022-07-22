@@ -3,6 +3,7 @@ package cn.xeblog.plugin.game.read.util;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.game.read.api.LegadoApi;
@@ -85,11 +86,14 @@ public class ChapterUtil {
     private void saveBookProgress() {
         if (this.book.getType() == BookType.LEGADO) {
             LegadoBook legadoBook = new LegadoBook();
+            legadoBook.setBookUrl(book.getUrl());
+            legadoBook.setName(book.getName());
+            legadoBook.setAuthor(book.getAuthor());
             legadoBook.setDurChapterIndex(book.getChapterIndex());
             legadoBook.setDurChapterPos(0);
             legadoBook.setDurChapterTitle(this.book.getCurrentChapter().getTitle());
             legadoBook.setDurChapterTime(DateUtil.current());
-            this.legadoApi.saveBookProgress(legadoBook);
+            ThreadUtil.execute(() -> legadoApi.saveBookProgress(legadoBook));
         }
     }
 

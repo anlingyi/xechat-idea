@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.game.read.page;
 
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
@@ -105,7 +106,7 @@ public class SettingPage implements IPage {
             for (Component component : settingPanel.getContentPanel().getComponents()) {
                 component.setVisible(false);
             }
-            new Thread(() -> {
+            ThreadUtil.execute(() -> {
                 try {
                     if (saveConfig()) {
                         modified = false;
@@ -117,7 +118,7 @@ public class SettingPage implements IPage {
                     }
                     settingPanel.stopLoading();
                 }
-            }).start();
+            });
         });
         return saveButton;
     }

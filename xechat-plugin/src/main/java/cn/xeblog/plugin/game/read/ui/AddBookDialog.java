@@ -1,8 +1,8 @@
 package cn.xeblog.plugin.game.read.ui;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.xeblog.commons.util.ThreadUtils;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.game.read.api.LegadoApi;
 import cn.xeblog.plugin.game.read.entity.Book;
@@ -215,7 +215,7 @@ public class AddBookDialog extends JDialog {
 
     private void getDirectory(Book book) {
         directoryCard.startLoading();
-        new Thread(() -> {
+        ThreadUtil.execute(() -> {
             try {
                 chapters = book.generateChapter();
                 chapterList.setListData(chapters.toArray(Chapter[]::new));
@@ -226,12 +226,12 @@ public class AddBookDialog extends JDialog {
             } finally {
                 directoryCard.stopLoading();
             }
-        }).start();
+        });
     }
 
     private void getLegadoBookshelf() {
         legadoBookAddCard.startLoading();
-        new Thread(() -> {
+        ThreadUtil.execute(() -> {
             if (!DataCache.readConfig.verifyLegadoHost()) {
                 SwingUtilities.invokeLater(() -> {
                     AlertMessagesUtil.showWarningDialog("警告", "请先配置正确的Legado服务HOST");
@@ -242,6 +242,6 @@ public class AddBookDialog extends JDialog {
             bookshelf = api.getBookshelf();
             bookTable.setModel(TableDataUtil.legadoBookToTableModel(bookshelf));
             legadoBookAddCard.stopLoading();
-        }).start();
+        });
     }
 }
