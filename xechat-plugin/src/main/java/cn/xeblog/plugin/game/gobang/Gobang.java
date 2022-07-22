@@ -861,12 +861,13 @@ public class Gobang extends AbstractGame<GobangDTO> {
         initChessPanel();
         if (isHomeowner) {
             // 自旋等待一段时间，再发送游戏数据
-            spinMoment(500);
-            int randomType = RandomUtil.randomInt(1, 3);
-            GobangDTO msg = new GobangDTO();
-            msg.setType(3 - randomType);
-            sendMsg(msg);
-            handle(new GobangDTO(0, 0, randomType));
+            invoke(() -> {
+                int randomType = new Random().nextInt(2) + 1;
+                GobangDTO msg = new GobangDTO();
+                msg.setType(3 - randomType);
+                sendMsg(msg);
+                handle(new GobangDTO(0, 0, randomType));
+            }, 1200);
         }
     }
 
