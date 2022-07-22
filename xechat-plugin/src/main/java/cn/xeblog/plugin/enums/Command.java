@@ -56,9 +56,9 @@ public enum Command {
     },
     NOTIFY("notify", "消息通知，1.正常通知 | 2.隐晦通知 | 3.关闭通知"),
     ALIVE("alive", "活着，0.关闭｜1.开启"),
+    MO_YU("moyu", "摸鱼办生成"),
     LOGOUT("exit", "退出"),
     CLEAN("clean", "清屏"),
-    MO_YU("moyu", "摸鱼办生成"),
     HELP("help", "帮助");
 
     private String command;

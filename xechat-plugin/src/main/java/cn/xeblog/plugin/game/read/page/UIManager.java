@@ -1,8 +1,5 @@
 package cn.xeblog.plugin.game.read.page;
 
-import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.ui.messages.AlertMessagesManager;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -22,11 +19,13 @@ public class UIManager {
     public static SettingPage settingPage;
 
     public static void showPage(JComponent panel, int width, int height) {
-        mainPanel.removeAll();
-        mainPanel.setLayout(null);
-        mainPanel.setMinimumSize(new Dimension(width, height));
+        SwingUtilities.invokeLater(() -> {
+            mainPanel.removeAll();
+            mainPanel.setLayout(null);
+            mainPanel.setMinimumSize(new Dimension(width, height));
 
-        mainPanel.add(panel);
-        mainPanel.updateUI();
+            mainPanel.add(panel);
+            mainPanel.updateUI();
+        });
     }
 }
