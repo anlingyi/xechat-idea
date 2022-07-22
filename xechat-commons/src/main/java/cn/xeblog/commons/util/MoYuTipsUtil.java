@@ -30,7 +30,7 @@ public class MoYuTipsUtil {
             "{}\n" +
             "{}\n" +
             "\n" +
-            "欢迎加入摸鱼交流群：754126966";
+            "欢迎加入摸鱼技术交流群：754126966";
 
     private static final List<String> hellos = new ArrayList<String>(3) {{
         add("摸鱼能增加工作动力，摸鱼能放松筋骨舒展神经。人都是被摸鱼摸大的，摸鱼是人的天性，无论是顺境还是逆境，工作摸鱼，才不会被工作抛弃。");
