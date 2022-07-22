@@ -2,22 +2,23 @@ package cn.xeblog.server.action.handler;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.comparator.VersionComparator;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.xeblog.commons.entity.HistoryMsgDTO;
-import cn.xeblog.commons.entity.LoginDTO;
-import cn.xeblog.commons.entity.Response;
+import cn.xeblog.commons.constants.IpConstants;
+import cn.xeblog.commons.entity.*;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.server.action.ChannelAction;
 import cn.xeblog.server.annotation.DoAction;
 import cn.xeblog.server.builder.ResponseBuilder;
 import cn.xeblog.server.cache.UserCache;
-import cn.xeblog.commons.entity.User;
 import cn.xeblog.server.constant.CommonConstants;
 import cn.xeblog.server.factory.ObjectFactory;
 import cn.xeblog.server.service.AbstractResponseHistoryService;
+import cn.xeblog.server.util.IpUtil;
 import cn.xeblog.server.util.SensitiveWordUtils;
 import io.netty.channel.ChannelHandlerContext;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ import java.util.List;
  * @author anlingyi
  * @date 2020/8/14
  */
+@Slf4j
 @DoAction(Action.LOGIN)
 public class LoginActionHandler implements ActionHandler<LoginDTO> {
 
@@ -75,7 +77,9 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
         }
 
         String id = ChannelAction.getId(ctx);
-        User user = new User(id, username, body.getStatus(), ctx.channel());
+        final String ip = IpUtil.getIpByCtx(ctx);
+        final IpRegion ipRegion = IpUtil.getRegionByIp(ip);
+        User user = new User(id, username, body.getStatus(), ip, ipRegion, ctx.channel());
         UserCache.add(id, user);
 
         ChannelAction.sendOnlineUsers();
@@ -84,7 +88,9 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
         }
         user.send(ResponseBuilder.system("修身洁行，言必由绳墨。"));
         List<Response> historyMsgList = ObjectFactory.getObject(AbstractResponseHistoryService.class).getHistory(15);
-        ChannelAction.send(ResponseBuilder.system(user.getUsername() + "进入了鱼塘！"));
+        final String loginMsg = StrUtil.format("来鱼咯...欢迎[{}·{}]鱼友进入了鱼塘！",
+                MapUtil.getStr(IpConstants.SHORT_PROVINCE, ipRegion.getProvince(), ipRegion.getCountry()), user.getUsername());
+        ChannelAction.send(ResponseBuilder.system(loginMsg));
         if (CollectionUtil.isNotEmpty(historyMsgList)) {
             user.send(ResponseBuilder.build(null, new HistoryMsgDTO(historyMsgList), MessageType.HISTORY_MSG));
         }

@@ -1,6 +1,9 @@
 package cn.xeblog.plugin.util;
 
+import cn.hutool.core.img.ImgUtil;
+import cn.hutool.core.io.FileTypeUtil;
 import cn.hutool.core.thread.GlobalThreadPool;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.xeblog.commons.entity.UserMsgDTO;
 import cn.xeblog.commons.enums.Action;
@@ -17,7 +20,10 @@ import org.apache.commons.io.IOUtils;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 /**
  * @author anlingyi
@@ -26,21 +32,26 @@ import java.io.*;
 public class UploadUtils {
 
     private static boolean UPLOADING;
-    private static final String ACCEPT_IMAGE_TYPE = "jpg,jpeg,gif,png";
+    private static final String[] ACCEPT_IMAGE_TYPE = new String[]{
+            ImgUtil.IMAGE_TYPE_GIF,
+            ImgUtil.IMAGE_TYPE_JPG,
+            ImgUtil.IMAGE_TYPE_JPEG,
+            ImgUtil.IMAGE_TYPE_BMP,
+            ImgUtil.IMAGE_TYPE_PNG
+    };
+
     private static final int MAX_SIZE = 2 << 20;
 
     public static void uploadImageFile(File file) {
-        String fileType = file.getName().substring(file.getName().lastIndexOf(".") + 1);
-        if (ACCEPT_IMAGE_TYPE.indexOf(fileType.toLowerCase()) < 0) {
-            ConsoleAction.showSimpleMsg("不支持的图片类型！");
-            return;
-        }
-
         try (FileInputStream inputStream = new FileInputStream(file)) {
+            String fileType = FileTypeUtil.getType(inputStream);
+            if (!ArrayUtil.contains(ACCEPT_IMAGE_TYPE, fileType)) {
+                throw new Exception("不支持的图片类型！");
+            }
             sendImgAsync(IOUtils.toByteArray(inputStream), generateFileName(fileType));
         } catch (Exception e) {
             e.printStackTrace();
-            ConsoleAction.showSimpleMsg("图片上传失败！");
+            ConsoleAction.showSimpleMsg(e.getMessage());
         }
     }
 

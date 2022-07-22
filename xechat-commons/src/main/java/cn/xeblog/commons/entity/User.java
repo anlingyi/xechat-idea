@@ -31,6 +31,14 @@ public class User implements Serializable {
     private UserStatus status;
 
     @Getter
+    @Setter
+    private String ip;
+
+    @Getter
+    @Setter
+    private IpRegion region;
+
+    @Getter
     private transient Channel channel;
 
     public void send(Response response) {

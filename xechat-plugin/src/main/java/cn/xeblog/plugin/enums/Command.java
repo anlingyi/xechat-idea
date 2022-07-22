@@ -58,6 +58,7 @@ public enum Command {
     ALIVE("alive", "活着，0.关闭｜1.开启"),
     LOGOUT("exit", "退出"),
     CLEAN("clean", "清屏"),
+    MO_YU("moyu", "摸鱼办生成"),
     HELP("help", "帮助");
 
     private String command;
