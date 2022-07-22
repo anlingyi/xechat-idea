@@ -1,7 +1,10 @@
 package cn.xeblog.plugin.action.handler.command;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.xeblog.commons.entity.OnlineServer;
 import cn.xeblog.plugin.action.ConnectionAction;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.annotation.DoCommand;
@@ -11,6 +14,8 @@ import cn.xeblog.commons.util.ParamsUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
 
 /**
  * @author anlingyi
@@ -35,7 +40,11 @@ public class LoginCommandHandler extends AbstractCommandHandler {
         /**
          * 清除缓存的服务器配置信息
          */
-        CLEAN("-c");
+        CLEAN("-c"),
+        /**
+         * 指定服务器编号
+         */
+        SERVER("-s");
 
         private String key;
 
@@ -96,6 +105,28 @@ public class LoginCommandHandler extends AbstractCommandHandler {
         }
         if (StrUtil.isNotBlank(port)) {
             conn.setPort(Integer.parseInt(port));
+        }
+
+        String serverIdStr = ParamsUtils.getValue(args, Config.SERVER.getKey());
+        if (StrUtil.isNotBlank(serverIdStr)) {
+            List<OnlineServer> onlineServerList = DataCache.serverList;
+            if (CollUtil.isEmpty(onlineServerList)) {
+                ConsoleAction.showSimpleMsg("服务列表为空！");
+                return;
+            }
+
+            int serverId = -1;
+            if (NumberUtil.isNumber(serverIdStr)) {
+                serverId = Integer.parseInt(serverIdStr);
+            }
+            if (serverId < 0 || serverId >= onlineServerList.size()) {
+                ConsoleAction.showSimpleMsg("非法的服务器编号！");
+                return;
+            }
+
+            OnlineServer onlineServer = onlineServerList.get(serverId);
+            conn.setHost(onlineServer.getIp());
+            conn.setPort(onlineServer.getPort());
         }
 
         CONNECTING = true;

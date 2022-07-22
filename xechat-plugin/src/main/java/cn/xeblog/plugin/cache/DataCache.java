@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.cache;
 
+import cn.xeblog.commons.entity.OnlineServer;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.enums.UserStatus;
 import cn.xeblog.plugin.action.ConnectionAction;
@@ -7,6 +8,7 @@ import cn.xeblog.plugin.game.read.ReadConfig;
 import com.intellij.openapi.project.Project;
 import io.netty.channel.ChannelHandlerContext;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -62,6 +64,12 @@ public class DataCache {
     public static int msgNotify;
 
     /**
+     * 服务端列表
+     */
+    public static List<OnlineServer> serverList;
+
+    /**
+
      * 阅读配置
      */
     public static ReadConfig readConfig = new ReadConfig();

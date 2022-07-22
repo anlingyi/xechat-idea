@@ -1,6 +1,6 @@
 # XEChat-Idea
 
-> Version 1.5.9-beta
+> Version 1.6.0-beta1
 
 > 基于Netty的IDEA即时聊天插件：让你能够在IDEA里实现聊天、下棋、斗地主！(理论上支持JetBrains全系列开发工具🙂)
 
@@ -18,9 +18,8 @@
             - [本地运行](#本地运行)
             - [插件部署](#插件部署)
     - [安装体验](#安装体验)
-    - [Docker部署](#docker部署)
-        - [镜像打包](#镜像打包)
-        - [运行](#运行-1)
+    - [Docker运行](#docker运行)
+    - [公开你的鱼塘](#公开你的鱼塘)
     - [学习交流](#学习交流)
 
 ## 项目介绍
@@ -140,7 +139,7 @@ java -jar target/xechat-server-xxx.jar -p 1024 -swfile /Users/anlingyi/local/tes
 
 #### 修改IDEA版本
 
-修改 `build.gradle` 配置文件，将 `IDEA` 版本号改为你想使用的版本
+修改 `build.gradle` 配置文件，将 `IDEA` 版本号改为你想使用的版本（仅限开发调试阶段）
 
 ```
 intellij {
@@ -198,60 +197,41 @@ http://plugins.xeblog.cn
 
 如有条件，还请自行部署服务端。
 
-## Docker部署
+## Docker运行
 
 > 感谢 [@猎隼丶止戈](https://github.com/nn200433) 对此部分做的贡献 😊
 
-### 镜像打包
+镜像地址：[https://hub.docker.com/r/anlingyi/xechat-server/tags](https://hub.docker.com/r/anlingyi/xechat-server/tags)
 
-```dockerfile
-FROM openjdk:8-jre-slim
-MAINTAINER "安凌毅 https://xeblog.cn"
+**docker-compose.yml**
 
-ENV JAVA_OPTS=""
-ENV PARAMS="-p 1024"
-ENV TZ="Asia/Shanghai"
-
-EXPOSE 1024
-
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-ADD server.jar /home/xechat/server.jar
-
-WORKDIR /home/xechat/
-
-ENTRYPOINT ["sh","-c","java -jar $JAVA_OPTS server.jar $PARAMS"]
-```
-
-### 运行
-
-> 不想自己打包可下载第三方镜像。[https://hub.docker.com/r/nn200433/xechat](https://hub.docker.com/r/nn200433/xechat)
-
-```bash
-# 下载镜像，一定要指定版本
-docker pull nn200433/xechat:{Version}
-
-# 运行
-docker run -itd -p 1024:1024 --restart=always --name=xechat nn200433/xechat:{Version}
-````
-
-docker-compose.yml 方式：
-
-```bash
+```yml
 version: '3'
 services:
   xechat:
-    image: nn200433/xechat:{Version}
-    container_name: xechat
+    image: anlingyi/xechat-server:{Version}
+    container_name: xechat-server
     restart: always
     ports:
-      - 1024:1025
-    environment: 
-      - PARAMS=-p 1025 -weather <和风天气 api key>
-    volumes: 
-      - /home/xechat/logs:/home/xechat/logs
+      - 1024:1024
+    environment:
+      - PARAMS=-p 1024 -swfile /xechat/sensitive-words.txt -weather {和风天气api key}
+    volumes:
+      - /xechat/logs:/var/log/xechat-server
+      - /xechat/sensitive-words.txt:/xechat/sensitive-words.txt
 ```
 
-*插件编译请参考上方文档*
+## 公开你的鱼塘
+
+如果你想公开你的鱼塘，请编辑项目中的 `server_list.json` 文件，添加上你的鱼塘信息，然后提交PR到这里，待我们审核通过后即可。
+
+```json
+    {
+        "name": "xxx", //鱼塘名
+        "ip": "127.0.0.1", //你的服务器IP或域名
+        "port": 1024 //端口号
+    }
+```
 
 ## 学习交流
 

@@ -249,12 +249,34 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         mainPanel.updateUI();
     }
 
+    private int getUserStatusOrder(UserStatus status) {
+        switch (status) {
+            case FISHING:
+                return 0;
+            case PLAYING:
+                return 1;
+            case WORKING:
+                return 2;
+        }
+
+        return -1;
+    }
+
     private void flushOnlineUsers() {
+        if (gameRoom == null) {
+            return;
+        }
+
         Map<String, User> onlineUserMap = DataCache.userMap;
         List<User> userList = new ArrayList<>(onlineUserMap.values());
         userList.sort((u1, u2) -> {
-            if (u1.getStatus() == UserStatus.FISHING) {
+            int o1 = getUserStatusOrder(u1.getStatus());
+            int o2 = getUserStatusOrder(u2.getStatus());
+            if (o1 < o2) {
                 return -1;
+            }
+            if (o1 == o2) {
+                return 0;
             }
             return 1;
         });
@@ -295,6 +317,10 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
     }
 
     private void flushGameRoomUsers() {
+        if (gameRoom == null) {
+            return;
+        }
+
         int nums = gameRoom.getNums();
         List<GameRoom.Player> userList = new ArrayList<>(gameRoom.getUsers().values());
         int currentNums = userList.size();

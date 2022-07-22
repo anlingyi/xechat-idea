@@ -46,9 +46,16 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
                 currentPluginVersion += padding;
             }
         }
-        boolean needUpdate = VersionComparator.INSTANCE.compare(currentPluginVersion, userPluginVersion) > 0;
-        if (needUpdate) {
-            ctx.writeAndFlush(ResponseBuilder.system("温馨提醒~ 请尽快更新插件版本至 [v" + CommonConstants.PLUGIN_VERSION + "]！"));
+
+        int versionState = VersionComparator.INSTANCE.compare(currentPluginVersion, userPluginVersion);
+        if (versionState > 0) {
+            ctx.writeAndFlush(ResponseBuilder.system("温馨提醒~ 请尽快更新插件版本至v" + CommonConstants.PLUGIN_VERSION + "！"));
+            ctx.close();
+            return;
+        }
+        if (versionState < 0) {
+            ctx.writeAndFlush(ResponseBuilder.system("当前服务端版本过低！你的版本：v" + body.getPluginVersion()
+                    + "，服务端版本：v" + CommonConstants.PLUGIN_VERSION));
             ctx.close();
             return;
         }

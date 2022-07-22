@@ -6,7 +6,7 @@
 
     <groupId>cn.xeblog</groupId>
     <artifactId>xechat-commons</artifactId>
-    <version>1.5.9-beta</version>
+    <version>1.6.0-beta</version>
     <build>
         <plugins>
             <plugin>
@@ -67,6 +67,10 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-http</artifactId>
         </dependency>
         <dependency>
             <groupId>cn.hutool</groupId>

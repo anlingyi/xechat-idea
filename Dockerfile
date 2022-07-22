@@ -8,7 +8,7 @@ ENV TZ="Asia/Shanghai"
 EXPOSE 1024
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-ADD server.jar /home/xechat/server.jar
+ADD xechat-server/target/*.jar /home/xechat/server.jar
 
 WORKDIR /home/xechat/
 
