@@ -20,10 +20,7 @@ import org.apache.commons.io.IOUtils;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * @author anlingyi
@@ -43,11 +40,14 @@ public class UploadUtils {
     private static final int MAX_SIZE = 2 << 20;
 
     public static void uploadImageFile(File file) {
-        try (FileInputStream inputStream = new FileInputStream(file)) {
+        try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file))) {
+            inputStream.mark(28);
             String fileType = FileTypeUtil.getType(inputStream);
             if (!ArrayUtil.contains(ACCEPT_IMAGE_TYPE, fileType)) {
                 throw new Exception("不支持的图片类型！");
             }
+
+            inputStream.reset();
             sendImgAsync(IOUtils.toByteArray(inputStream), generateFileName(fileType));
         } catch (Exception e) {
             e.printStackTrace();
