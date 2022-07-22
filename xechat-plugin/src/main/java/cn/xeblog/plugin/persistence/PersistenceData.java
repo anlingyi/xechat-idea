@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.persistence;
 
+import cn.xeblog.plugin.game.read.ReadConfig;
 import lombok.Data;
 
 import java.util.List;
@@ -27,5 +28,10 @@ public class PersistenceData {
      * 历史命令列表
      */
     public List<String> historyCommandList;
+
+    /**
+     * 阅读持久化数据
+     */
+    public ReadConfig readConfig;
 
 }

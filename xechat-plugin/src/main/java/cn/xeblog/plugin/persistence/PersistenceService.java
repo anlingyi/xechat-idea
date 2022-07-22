@@ -2,6 +2,7 @@ package cn.xeblog.plugin.persistence;
 
 import cn.xeblog.commons.constants.Commons;
 import cn.xeblog.plugin.cache.DataCache;
+import cn.xeblog.plugin.game.read.ReadConfig;
 import cn.xeblog.plugin.util.CommandHistoryUtils;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
@@ -22,6 +23,7 @@ public class PersistenceService implements PersistentStateComponent<PersistenceD
     public @Nullable PersistenceData getState() {
         data.setUsername(DataCache.username);
         data.setMsgNotify(DataCache.msgNotify);
+        data.setReadConfig(DataCache.readConfig);
         data.setHistoryCommandList(CommandHistoryUtils.getHistoryList());
         return data;
     }
@@ -31,6 +33,7 @@ public class PersistenceService implements PersistentStateComponent<PersistenceD
         data = state;
         DataCache.username = data.getUsername();
         DataCache.msgNotify = data.getMsgNotify();
+        DataCache.readConfig = state.getReadConfig() == null ? new ReadConfig() : state.getReadConfig();
         CommandHistoryUtils.setHistoryList(state.getHistoryCommandList());
     }
 
