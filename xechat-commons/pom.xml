@@ -25,6 +25,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
         <hutool.version>5.8.4</hutool.version>
+        <lunar.version>1.2.24</lunar.version>
     </properties>
 
     <dependencies>
@@ -63,6 +64,11 @@
             <groupId>io.protostuff</groupId>
             <artifactId>protostuff-runtime</artifactId>
             <version>1.8.0</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.6tail</groupId>
+            <artifactId>lunar</artifactId>
+            <version>${lunar.version}</version>
         </dependency>
         <dependency>
             <groupId>cn.hutool</groupId>
