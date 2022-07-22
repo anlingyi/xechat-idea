@@ -1,6 +1,7 @@
 package cn.xeblog.plugin.game;
 
 import cn.hutool.core.thread.GlobalThreadPool;
+import cn.hutool.core.util.StrUtil;
 import cn.xeblog.commons.entity.game.GameDTO;
 import cn.xeblog.commons.entity.game.GameRoom;
 import cn.xeblog.commons.entity.User;
@@ -20,6 +21,8 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
@@ -37,6 +40,8 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
     private JPanel onlineUserListPanel;
     private JButton startGameButton;
     private JLabel readyLabel;
+
+    private JTextField searchUserField;
 
     public AbstractGame() {
         this.mainPanel = MainWindow.getInstance().getRightPanel();
@@ -203,6 +208,17 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         hBox2.add(flushOnlineUserLabel);
 
         Box vBox2 = Box.createVerticalBox();
+
+        searchUserField = new JTextField();
+        searchUserField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                flushOnlineUsers();
+            }
+        });
+        vBox2.add(searchUserField);
+        vBox2.add(Box.createVerticalStrut(5));
+
         JPanel onlineUserMainPanel = new JPanel(new BorderLayout());
         onlineUserMainPanel.setPreferredSize(new Dimension(250, 150));
         onlineUserListPanel = new JPanel();
@@ -268,7 +284,18 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         }
 
         Map<String, User> onlineUserMap = DataCache.userMap;
-        List<User> userList = new ArrayList<>(onlineUserMap.values());
+        List<User> userList = new ArrayList<>();
+        String search = searchUserField != null ? searchUserField.getText() : "";
+        if (StrUtil.isBlank(search)) {
+            userList.addAll(onlineUserMap.values());
+        } else {
+            onlineUserMap.forEach((k, v) -> {
+                if (k.toLowerCase().contains(search.toLowerCase())) {
+                    userList.add(v);
+                }
+            });
+        }
+
         userList.sort((u1, u2) -> {
             int o1 = getUserStatusOrder(u1.getStatus());
             int o2 = getUserStatusOrder(u2.getStatus());

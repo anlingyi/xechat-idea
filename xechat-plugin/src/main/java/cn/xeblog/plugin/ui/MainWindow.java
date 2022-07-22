@@ -42,12 +42,33 @@ public class MainWindow {
     private JPanel contentPanel;
     private JScrollPane consoleScroll;
     private JPanel leftTopPanel;
-
-    private static long lastSendTime;
-
     private JBList jbList = null;
 
     private boolean isProactive;
+
+    /**
+     * 冻结时间
+     */
+    private final static long FREEZE_TIME = 15 * 1000;
+    /**
+     * 间隔时间
+     */
+    private final static long INTERVAL_TIME = 10 * 1000;
+
+    /**
+     * 冻结结束时间
+     */
+    private static long freezeEndTime;
+
+    /**
+     * 消息发送计数
+     */
+    private static int sendCounter = -1;
+
+    /**
+     * 消息发送计数开始时间
+     */
+    private static long sendCounterStartTime;
 
     private MainWindow() {
         init();
@@ -255,21 +276,25 @@ public class MainWindow {
             return;
         }
 
-        if (content.length() > 500) {
-            ConsoleAction.showSimpleMsg("发送的内容长度不能超过500字符！");
+        if (content.length() > 200) {
+            ConsoleAction.showSimpleMsg("发送的内容长度不能超过200字符！");
         } else {
             if (content.startsWith(Command.COMMAND_PREFIX)) {
                 ConsoleAction.showSimpleMsg(content);
                 Command.handle(content);
             } else {
                 if (DataCache.isOnline) {
-                    long sendTime = System.currentTimeMillis();
-                    if (lastSendTime + 800 > sendTime) {
-                        ConsoleAction.showSimpleMsg("休息一下哦~");
+                    if (sendCounter == 0 && System.currentTimeMillis() - sendCounterStartTime < INTERVAL_TIME) {
+                        sendCounterStartTime = 0;
+                        freezeEndTime = System.currentTimeMillis() + FREEZE_TIME;
+                    }
+
+                    long endTime = freezeEndTime - System.currentTimeMillis();
+                    if (endTime > 0) {
+                        ConsoleAction.showSimpleMsg("消息发送过于频繁，请于" + endTime / 1000 + "s后再发...");
                         return;
                     }
 
-                    lastSendTime = sendTime;
                     String[] toUsers = null;
                     List<String> toUserList = ReUtil.findAll("(@)([^\\s]+)([\\s]*)", content, 2);
                     if (CollectionUtil.isNotEmpty(toUserList)) {
@@ -287,6 +312,17 @@ public class MainWindow {
                             toUsers = ArrayUtil.toArray(new HashSet<>(toUserList), String.class);
                         }
                     }
+
+                    if (sendCounter == -1) {
+                        sendCounter = 0;
+                    }
+                    if (++sendCounter >= 6) {
+                        sendCounter = 0;
+                    }
+                    if (sendCounter == 1) {
+                        sendCounterStartTime = System.currentTimeMillis();
+                    }
+
                     MessageAction.send(new UserMsgDTO(content, toUsers), Action.CHAT);
                 } else {
                     ConsoleAction.showLoginMsg();
