@@ -25,3 +25,8 @@ appKey = ${BD_APP_KEY}
 # ip2region
 # 下载地址：https://gitee.com/lionsoul/ip2region/tree/master/data
 ip2Region_path = ${IP2REGION_PATH}
+
+########## 管理员配置 ##########
+[ADMIN]
+# 管理员令牌
+token = ${TOKEN}

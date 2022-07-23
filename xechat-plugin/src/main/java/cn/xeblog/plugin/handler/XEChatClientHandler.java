@@ -9,6 +9,7 @@ import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.commons.entity.Response;
+import cn.xeblog.plugin.persistence.PersistenceService;
 import cn.xeblog.plugin.util.IdeaUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -38,7 +39,10 @@ public class XEChatClientHandler extends SimpleChannelInboundHandler<Response> {
         if (GameAction.playing()) {
             status = UserStatus.PLAYING;
         }
-        MessageAction.send(new LoginDTO(DataCache.username, status, reconnected, IdeaUtils.getPluginVersion()), Action.LOGIN);
+
+        String token = PersistenceService.getData().getToken();
+        MessageAction.send(new LoginDTO(DataCache.username, status, reconnected, IdeaUtils.getPluginVersion(), token),
+                Action.LOGIN);
         DataCache.reconnected = false;
     }
 

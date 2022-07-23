@@ -1,10 +1,7 @@
 package cn.xeblog.server.config;
 
 import cn.hutool.core.util.StrUtil;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * @author nn200433
@@ -46,6 +43,25 @@ public class ServerConfig {
      */
     private String ip2RegionPath;
 
+    /**
+     * 管理员token
+     */
+    private String token;
+
+    private static ServerConfig serverConfig;
+
+    public static ServerConfig getConfig() {
+        if (serverConfig == null) {
+            serverConfig = new ServerConfig();
+        }
+
+        return serverConfig;
+    }
+
+    public static void setServerConfig(ServerConfig config) {
+        serverConfig = config;
+    }
+
     public Integer getPort() {
         return port;
     }
@@ -68,6 +84,10 @@ public class ServerConfig {
 
     public String getIp2RegionPath() {
         return StrUtil.equals("${IP2REGION_PATH}", ip2RegionPath) ? null : ip2RegionPath;
+    }
+
+    public String getToken() {
+        return StrUtil.equals("${TOKEN}", token) ? null : token;
     }
 
 }

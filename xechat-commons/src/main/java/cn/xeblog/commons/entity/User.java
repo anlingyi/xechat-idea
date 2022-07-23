@@ -13,7 +13,6 @@ import java.util.Objects;
  */
 @ToString
 @NoArgsConstructor
-@AllArgsConstructor
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -39,7 +38,25 @@ public class User implements Serializable {
     private IpRegion region;
 
     @Getter
+    @Setter
+    private Role role;
+
+    @Getter
     private transient Channel channel;
+
+    public enum Role {
+        ADMIN,
+        USER
+    }
+
+    public User(String id, String username, UserStatus status, String ip, IpRegion region, Channel channel) {
+        this.id = id;
+        this.username = username;
+        this.status = status;
+        this.ip = ip;
+        this.region = region;
+        this.channel = channel;
+    }
 
     public void send(Response response) {
         if (channel == null) {

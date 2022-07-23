@@ -32,6 +32,7 @@ public class ConfigUtil {
         final String translationAppKey = ParamsUtils.getValue(args, "-fyAppKey");
         final String ip2regionPath = ParamsUtils.getValue(args, "-ipfile");
         final String configPath = ParamsUtils.getValue(args, "-path");
+        final String token = ParamsUtils.getValue(args, "-token");
 
         final Setting configSetting = new Setting(StrUtil.blankToDefault(configPath, "config.setting"), StandardCharsets.UTF_8, Boolean.TRUE);
         final String fileConfigPort = configSetting.getByGroup(ConfigConstants.SERVER_PORT, ConfigConstants.SERVER);
@@ -40,6 +41,7 @@ public class ConfigUtil {
         final String fileTranslationAppId = configSetting.getByGroup(ConfigConstants.TRANSLATION_APP_ID, ConfigConstants.TRANSLATION);
         final String fileTranslationAppKey = configSetting.getByGroup(ConfigConstants.TRANSLATION_APP_KEY, ConfigConstants.TRANSLATION);
         final String fileIp2regionPath = configSetting.getByGroup(ConfigConstants.IP2REGION_PATH, ConfigConstants.IP_SEARCH);
+        final String fileToken = configSetting.getByGroup(ConfigConstants.ADMIN_TOKEN, ConfigConstants.ADMIN);
 
         return ServerConfig.builder()
                 .port(Convert.toInt(StrUtil.blankToDefault(configPort, fileConfigPort), 1024))
@@ -48,6 +50,7 @@ public class ConfigUtil {
                 .translationAppId(StrUtil.blankToDefault(translationAppId, fileTranslationAppId))
                 .translationAppKey(StrUtil.blankToDefault(translationAppKey, fileTranslationAppKey))
                 .ip2RegionPath(StrUtil.blankToDefault(ip2regionPath, fileIp2regionPath))
+                .token(StrUtil.blankToDefault(token, fileToken))
                 .build();
     }
 

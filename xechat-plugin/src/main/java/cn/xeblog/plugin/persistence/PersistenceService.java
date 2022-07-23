@@ -37,4 +37,8 @@ public class PersistenceService implements PersistentStateComponent<PersistenceD
         CommandHistoryUtils.setHistoryList(state.getHistoryCommandList());
     }
 
+    public static PersistenceData getData() {
+        return data;
+    }
+
 }

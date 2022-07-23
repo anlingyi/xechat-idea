@@ -13,11 +13,11 @@ public interface ConfigConstants {
     /**
      * 分组 - 服务器
      */
-    public static final String SERVER = "SERVER";
+    String SERVER = "SERVER";
     /**
      * 服务器端口
      */
-    public static final String SERVER_PORT = "port";
+    String SERVER_PORT = "port";
 
     // endregion
 
@@ -26,11 +26,11 @@ public interface ConfigConstants {
     /**
      * 分组 - 敏感词
      */
-    public static final String SENSITIVE_WORD = "SENSITIVE_WORD";
+    String SENSITIVE_WORD = "SENSITIVE_WORD";
     /**
      * 敏感词文件路径
      */
-    public static final String SENSITIVE_WORD_FILE = "file";
+    String SENSITIVE_WORD_FILE = "file";
 
     // endregion
 
@@ -39,11 +39,11 @@ public interface ConfigConstants {
     /**
      * 分组 - 天气
      */
-    public static final String WEATHER = "WEATHER";
+    String WEATHER = "WEATHER";
     /**
      * 天气 app key
      */
-    public static final String WEATHER_KEY = "key";
+    String WEATHER_KEY = "key";
 
     // endregion
 
@@ -52,15 +52,15 @@ public interface ConfigConstants {
     /**
      * 分组 - 翻译
      */
-    public static final String TRANSLATION = "TRANSLATION";
+    String TRANSLATION = "TRANSLATION";
     /**
      * 翻译应用 id
      */
-    public static final String TRANSLATION_APP_ID = "appId";
+    String TRANSLATION_APP_ID = "appId";
     /**
      * 翻译应用 key
      */
-    public static final String TRANSLATION_APP_KEY = "appKey";
+    String TRANSLATION_APP_KEY = "appKey";
 
     // endregion
 
@@ -69,12 +69,26 @@ public interface ConfigConstants {
     /**
      * 分组 - IP配置
      */
-    public static final String IP_SEARCH = "IP_SEARCH";
+    String IP_SEARCH = "IP_SEARCH";
 
     /**
      * 离线ip查询库地址
      */
-    public static final String IP2REGION_PATH = "ip2Region_path";
+    String IP2REGION_PATH = "ip2Region_path";
+
+    // endregion
+
+    // region ============================== 管理员 配置 ==============================
+
+    /**
+     * 分组 - 管理员
+     */
+    String ADMIN = "ADMIN";
+
+    /**
+     * 管理员令牌
+     */
+    String ADMIN_TOKEN = "token";
 
     // endregion
 

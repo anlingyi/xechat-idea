@@ -12,6 +12,7 @@ import cn.xeblog.server.action.ChannelAction;
 import cn.xeblog.server.annotation.DoAction;
 import cn.xeblog.server.builder.ResponseBuilder;
 import cn.xeblog.server.cache.UserCache;
+import cn.xeblog.server.config.ServerConfig;
 import cn.xeblog.server.constant.CommonConstants;
 import cn.xeblog.server.factory.ObjectFactory;
 import cn.xeblog.server.service.AbstractResponseHistoryService;
@@ -79,7 +80,10 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
         String id = ChannelAction.getId(ctx);
         final String ip = IpUtil.getIpByCtx(ctx);
         final IpRegion ipRegion = IpUtil.getRegionByIp(ip);
+        String configToken = ServerConfig.getConfig().getToken();
+        boolean isAdmin = StrUtil.isNotBlank(configToken) && StrUtil.equals(configToken, body.getToken());
         User user = new User(id, username, body.getStatus(), ip, ipRegion, ctx.channel());
+        user.setRole(isAdmin ? User.Role.ADMIN : User.Role.USER);
         UserCache.add(id, user);
 
         ChannelAction.sendOnlineUsers(user);

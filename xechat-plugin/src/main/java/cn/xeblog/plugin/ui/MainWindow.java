@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.entity.UserMsgDTO;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.plugin.action.ConsoleAction;
@@ -173,13 +174,27 @@ public class MainWindow {
                             String atContent = content.substring(0, caretPosition);
                             atIndex = atContent.lastIndexOf("@");
                             if (atIndex > -1) {
-                                String name = content.substring(atIndex + 1, caretPosition);
-                                List<String> allUserList = new ArrayList<>(DataCache.userMap.keySet());
+                                List<User> onlineUserList = new ArrayList<>(DataCache.userMap.values());
+                                onlineUserList.sort((u1, u2) -> {
+                                    int o1 = u1.getRole().ordinal();
+                                    int o2 = u2.getRole().ordinal();
+                                    if (o1 < o2) {
+                                        return -1;
+                                    }
+                                    if (o1 == o2) {
+                                        return 0;
+                                    }
+                                    return 1;
+                                });
+
+                                List<String> allUserList = new ArrayList<>();
+                                onlineUserList.forEach(user -> allUserList.add(user.getUsername()));
 
                                 if (atIndex + 1 == caretPosition) {
                                     dataList = allUserList;
                                 }
 
+                                String name = content.substring(atIndex + 1, caretPosition);
                                 if (StrUtil.isNotBlank(name)) {
                                     dataList = new ArrayList<>();
                                     for (String user : allUserList) {

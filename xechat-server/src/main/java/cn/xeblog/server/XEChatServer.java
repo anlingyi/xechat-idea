@@ -83,6 +83,7 @@ public class XEChatServer {
 
     public static void main(String[] args) {
         ServerConfig serverConfig = ConfigUtil.readConfig(args);
+        ServerConfig.setServerConfig(serverConfig);
 
         final String sensitiveWordFilePath = serverConfig.getSensitiveWordPath();
         if (StrUtil.isNotBlank(sensitiveWordFilePath)) {

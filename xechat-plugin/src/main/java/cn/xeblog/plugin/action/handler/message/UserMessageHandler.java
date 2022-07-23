@@ -83,8 +83,6 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
     @Override
     protected void process(Response<UserMsgDTO> response) {
         User user = response.getUser();
-        IpRegion region = user.getRegion();
-        final String shortProvince = MapUtil.getStr(IpConstants.SHORT_PROVINCE, region.getProvince(), region.getCountry());
         UserMsgDTO body = response.getBody();
         boolean isImage = body.getMsgType() == UserMsgDTO.MsgType.IMAGE;
         if (isImage) {
@@ -104,9 +102,7 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
                 imgLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 imgLabel.setForeground(StyleConstants.getForeground(Style.DEFAULT.get()));
                 ConsoleAction.atomicExec(() -> {
-                    ConsoleAction.renderText(
-                            String.format("[%s][%s] %s (%s)：", response.getTime(), shortProvince, user.getUsername(),
-                                    user.getStatus().getName()), Style.USER_NAME);
+                    renderName(response);
                     ConsoleAction.renderImageLabel(imgLabel);
                 });
             }
@@ -147,9 +143,7 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
             }
         } else {
             ConsoleAction.atomicExec(() -> {
-                ConsoleAction.renderText(
-                        String.format("[%s][%s] %s (%s)：", response.getTime(), shortProvince, user.getUsername(),
-                                user.getStatus().getName()), Style.USER_NAME);
+                renderName(response);
                 boolean notified = body.hasUser(DataCache.username);
                 Style style = Style.DEFAULT;
                 String msg = (String) body.getContent();
@@ -163,4 +157,19 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
             });
         }
     }
+
+    private void renderName(Response<UserMsgDTO> response) {
+        User user = response.getUser();
+        IpRegion region = user.getRegion();
+        final String shortProvince = MapUtil.getStr(IpConstants.SHORT_PROVINCE, region.getProvince(), region.getCountry());
+        String roleDisplay = "";
+        if (user.getRole() == User.Role.ADMIN) {
+            roleDisplay = " ☆";
+        }
+
+        ConsoleAction.renderText(
+                String.format("[%s][%s] %s (%s)%s：", response.getTime(), shortProvince, user.getUsername(),
+                        user.getStatus().getName(), roleDisplay), Style.USER_NAME);
+    }
+
 }

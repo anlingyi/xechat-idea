@@ -24,6 +24,8 @@
         <notificationGroup id="cn.xeblog.xechat.notify"
                            displayType="BALLOON"
                            key="xechat-idea"/>
+        <applicationConfigurable parentId="tools" instance="cn.xeblog.plugin.setting.PluginConfigSetting"
+                                 id="cn.xeblog.xechat.setting" displayName="XEChat"/>
     </extensions>
 
     <actions>
