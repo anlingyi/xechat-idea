@@ -3,7 +3,6 @@ package cn.xeblog.plugin.action.handler.message;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.entity.UserListMsgDTO;
 import cn.xeblog.commons.enums.MessageType;
-import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.annotation.DoMessage;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.commons.entity.Response;
@@ -25,7 +24,6 @@ public class OnlineUsersMessageHandler extends AbstractMessageHandler<UserListMs
         List<User> userList = response.getBody().getUserList();
         userList.forEach(user -> userMap.put(user.getUsername(), user));
         DataCache.userMap = userMap;
-        ConsoleAction.setConsoleTitle("Debug(" + userList.size() + ")");
     }
 
 }

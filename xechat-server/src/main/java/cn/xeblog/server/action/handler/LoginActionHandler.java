@@ -82,7 +82,9 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
         User user = new User(id, username, body.getStatus(), ip, ipRegion, ctx.channel());
         UserCache.add(id, user);
 
-        ChannelAction.sendOnlineUsers();
+        ChannelAction.sendOnlineUsers(user);
+        ChannelAction.sendUserState(user, UserStateMsgDTO.State.ONLINE);
+
         if (isReconnect) {
             user.send(ResponseBuilder.system("重新连接服务器成功！"));
         }

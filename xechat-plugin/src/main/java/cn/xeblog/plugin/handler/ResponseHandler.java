@@ -27,6 +27,7 @@ public class ResponseHandler {
             case SYSTEM:
             case HISTORY_MSG:
             case ONLINE_USERS:
+            case USER_STATE:
                 process();
                 return;
         }
