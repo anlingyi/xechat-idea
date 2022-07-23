@@ -144,7 +144,9 @@ public class GameRoomMessageHandler extends AbstractGameMessageHandler<GameRoomM
         if (GameAction.playing()) {
             GameAction.getAction().roomClosed();
         }
-        GameAction.clean();
+        if (GameAction.getRoomId() != null) {
+            GameAction.over();
+        }
     }
 
 }

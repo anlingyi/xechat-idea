@@ -80,7 +80,7 @@ public class GameRoomActionHandler extends AbstractGameActionHandler<GameRoomMsg
             } else {
                 player.setStatus(UserStatus.FISHING);
                 ChannelAction.updateUserStatus(player);
-                player.send(ResponseBuilder.build(null, new GameRoomMsgDTO(GameRoomMsgDTO.MsgType.GAME_ERROR, "加入游戏房间失败！"), MessageType.GAME_ROOM));
+                player.send(ResponseBuilder.build(null, new GameRoomMsgDTO(GameRoomMsgDTO.MsgType.GAME_ERROR, "加入游戏失败，游戏房间已满员！"), MessageType.GAME_ROOM));
             }
         } else {
             if (player.getStatus() == UserStatus.PLAYING) {
