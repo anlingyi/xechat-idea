@@ -59,11 +59,16 @@ public class GameRoomMessageHandler extends AbstractGameMessageHandler<GameRoomM
     private void roomClosed(Response<GameRoomMsgDTO> response) {
         User player = response.getUser();
         ConsoleAction.showSystemMsg(response.getTime(), player.getUsername() + "关闭了游戏房间！");
-        if (!GameAction.playing()) {
-            GameAction.clean();
-            return;
+        roomClosedHandler();
+    }
+
+    private void roomClosedHandler() {
+        if (GameAction.playing()) {
+            GameAction.getAction().roomClosed();
         }
-        GameAction.getAction().roomClosed();
+        if (GameAction.getRoomId() != null) {
+            GameAction.over();
+        }
     }
 
     private void gameStart(Response<GameRoomMsgDTO> response) {
@@ -141,12 +146,7 @@ public class GameRoomMessageHandler extends AbstractGameMessageHandler<GameRoomM
     private void gameError(Response<GameRoomMsgDTO> response) {
         String content = (String) response.getBody().getContent();
         ConsoleAction.showSystemMsg(response.getTime(), content);
-        if (GameAction.playing()) {
-            GameAction.getAction().roomClosed();
-        }
-        if (GameAction.getRoomId() != null) {
-            GameAction.over();
-        }
+        roomClosedHandler();
     }
 
 }

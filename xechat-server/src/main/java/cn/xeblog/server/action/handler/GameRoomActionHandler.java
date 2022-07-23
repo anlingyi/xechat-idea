@@ -35,12 +35,7 @@ public class GameRoomActionHandler extends AbstractGameActionHandler<GameRoomMsg
                 playerInviteResult(user, gameRoom, body);
                 break;
             case ROOM_CLOSE:
-                GameRoomCache.removeRoom(gameRoom.getId());
-                Response resp = ResponseBuilder.build(user, body, MessageType.GAME_ROOM);
-                // 通知已收到游戏邀请但还未进入游戏房间的用户
-                gameRoom.getInviteUsers().forEach(player -> player.send(resp));
-                // 通知房间内的用户
-                sendMsg(gameRoom, resp);
+                roomClose(user, gameRoom);
                 break;
             case GAME_START:
                 gameRoom.getUsers().forEach((k, v) -> v.setReadied(false));
@@ -59,6 +54,20 @@ public class GameRoomActionHandler extends AbstractGameActionHandler<GameRoomMsg
                 user.send(ResponseBuilder.build(user, body, MessageType.GAME_ROOM));
                 break;
         }
+    }
+
+    private void roomClose(User user, GameRoom gameRoom) {
+        GameRoomCache.removeRoom(gameRoom.getId());
+
+        GameRoomMsgDTO msg = new GameRoomMsgDTO();
+        msg.setRoomId(gameRoom.getId());
+        msg.setMsgType(GameRoomMsgDTO.MsgType.ROOM_CLOSE);
+
+        Response resp = ResponseBuilder.build(user, msg, MessageType.GAME_ROOM);
+        // 通知已收到游戏邀请但还未进入游戏房间的用户
+        gameRoom.getInviteUsers().forEach(player -> player.send(resp));
+        // 通知房间内的用户
+        sendMsg(gameRoom, resp);
     }
 
     private void playerInviteResult(User user, GameRoom gameRoom, GameRoomMsgDTO body) {
@@ -131,6 +140,9 @@ public class GameRoomActionHandler extends AbstractGameActionHandler<GameRoomMsg
         if (GameRoomCache.leftRoom(gameRoom.getId(), user)) {
             Response resp = ResponseBuilder.build(user, body, MessageType.GAME_ROOM);
             sendMsg(gameRoom, resp);
+            if (gameRoom.isHomeowner(user.getUsername())) {
+                roomClose(user, gameRoom);
+            }
         }
     }
 
