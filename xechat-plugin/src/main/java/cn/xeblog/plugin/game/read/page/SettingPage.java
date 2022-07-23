@@ -143,7 +143,7 @@ public class SettingPage implements IPage {
      */
     private boolean saveConfig() {
         String host = (String) configTable.getValueAt(0, 1);
-        if (StrUtil.isNotEmpty(host)) {
+        if (StrUtil.isNotEmpty(host) && !StrUtil.equals(DataCache.readConfig.getLegadoHost(), host)) {
             if (DataCache.readConfig.verifyLegadoHost(host)) {
                 DataCache.readConfig.setLegadoHost(host);
             } else {

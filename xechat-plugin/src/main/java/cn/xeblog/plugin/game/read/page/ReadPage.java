@@ -50,20 +50,35 @@ public class ReadPage implements IPage {
     }
 
     public static ReadPage getInstance(Book book) {
-        if (UIManager.readPage != null && book.equals(UIManager.readPage.getBook())) {
-            return UIManager.readPage;
-        } else {
-            return new ReadPage(book);
+        ReadPage instance = UIManager.readPage;
+        if (instance != null) {
+            if (book.equals(UIManager.readPage.getBook())) {
+                return instance;
+            }
+
+            instance.cleanProcessor();
         }
+
+        return new ReadPage(book);
+    }
+
+    private void cleanProcessor() {
+        if (processor == null) {
+            return;
+        }
+
+        KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        manager.removeKeyEventPostProcessor(processor);
     }
 
     @Override
     public void show() {
         if (readPanel == null) {
             initUI();
+        } else {
+            // 添加热键监听
+            addKeyEventPostProcessor();
         }
-        // 添加热键监听
-        addKeyEventPostProcessor();
 
         UIManager.showPage(readPanel, 370, 220);
         this.isShow = true;
@@ -134,6 +149,8 @@ public class ReadPage implements IPage {
         optPanel.add(getHomeButton());
         readPanel.add(optPanel, BorderLayout.SOUTH);
         readPanel.updateUI();
+
+        addKeyEventPostProcessor();
     }
 
     /**
@@ -279,6 +296,7 @@ public class ReadPage implements IPage {
         if (processor != null) {
             manager.removeKeyEventPostProcessor(processor);
         }
+
         processor = event -> {
             if (event.getID() != KeyEvent.KEY_PRESSED || !isShow) {
                 return false;
