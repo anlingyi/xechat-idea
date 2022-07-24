@@ -41,3 +41,7 @@ intellij {
 patchPluginXml {
     sinceBuild(191)
 }
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
