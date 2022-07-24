@@ -176,7 +176,10 @@ public abstract class GameRoomHandler implements GameRoomEventHandler {
     @Override
     public void roomClosed() {
         gameRoom = null;
-        timeoutTask = null;
+        if (timeoutTask != null) {
+            timeoutTask.forEach((k, v) -> v.cancel());
+            timeoutTask = null;
+        }
     }
 
     @Override

@@ -194,6 +194,10 @@ public class AIPlayerAction extends PlayerAction {
         return out;
     }
 
+    protected void buildPokerModel() {
+        buildPokerModel(this.pokers);
+    }
+
     protected void buildPokerModel(List<Poker> pokers) {
         singleList = new ArrayList<>();
         pairList = new ArrayList<>();
@@ -309,18 +313,21 @@ public class AIPlayerAction extends PlayerAction {
 
                 pairList.subList(0, pairTotal).forEach(val -> pokerList.addAll(pokersMap.get(val)));
             } else {
-                int singleSize = Math.min(singleList.size(), withTotal);
-                int surplus = withTotal - singleSize;
+                int singleSize = singleList.size();
+                int surplus = withTotal;
                 if (singleSize > 0) {
-                    singleList.subList(0, withTotal).forEach(val -> pokerList.addAll(pokersMap.get(val)));
+                    int withSingleSize = Math.min(singleSize, withTotal);
+                    surplus -= withSingleSize;
+                    singleList.subList(0, withSingleSize).forEach(val -> pokerList.addAll(pokersMap.get(val)));
                 }
                 if (surplus > 0) {
                     if (pairList.size() > 0) {
+                        out:
                         for (Integer val : pairList) {
                             for (Poker poker : pokersMap.get(val)) {
                                 pokerList.add(poker);
                                 if (--surplus == 0) {
-                                    break;
+                                    break out;
                                 }
                             }
                         }
@@ -329,11 +336,12 @@ public class AIPlayerAction extends PlayerAction {
                         List<Integer> copyThreeList = new ArrayList<>(threeList);
                         copyThreeList.removeAll(shunziPokerValues);
                         if (copyThreeList.size() > 0) {
+                            out:
                             for (Integer val : copyThreeList) {
                                 for (Poker poker : pokersMap.get(val)) {
                                     pokerList.add(poker);
                                     if (--surplus == 0) {
-                                        break;
+                                        break out;
                                     }
                                 }
                             }
@@ -457,18 +465,21 @@ public class AIPlayerAction extends PlayerAction {
         if (pairList.size() >= withTotal) {
             pairList.subList(0, withTotal).forEach(val -> pokerList.addAll(pokersMap.get(val)));
         } else {
-            int singleSize = Math.min(singleList.size(), withTotal);
-            int surplus = withTotal - singleSize;
+            int singleSize = singleList.size();
+            int surplus = withTotal;
             if (singleSize > 0) {
-                singleList.subList(0, withTotal).forEach(val -> pokerList.addAll(pokersMap.get(val)));
+                int withSingleSize = Math.min(singleSize, withTotal);
+                surplus -= withSingleSize;
+                singleList.subList(0, withSingleSize).forEach(val -> pokerList.addAll(pokersMap.get(val)));
             }
             if (surplus > 0) {
                 if (pairList.size() > 0) {
+                    out:
                     for (Integer val : pairList) {
                         for (Poker poker : pokersMap.get(val)) {
                             pokerList.add(poker);
                             if (--surplus == 0) {
-                                break;
+                                break out;
                             }
                         }
                     }
@@ -477,11 +488,12 @@ public class AIPlayerAction extends PlayerAction {
                     List<Integer> copyThreeList = new ArrayList<>(threeList);
                     copyThreeList.removeAll(shunziPokerValues);
                     if (copyThreeList.size() > 0) {
+                        out:
                         for (Integer val : copyThreeList) {
                             for (Poker poker : pokersMap.get(val)) {
                                 pokerList.add(poker);
                                 if (--surplus == 0) {
-                                    break;
+                                    break out;
                                 }
                             }
                         }
@@ -594,50 +606,38 @@ public class AIPlayerAction extends PlayerAction {
         List<Poker> pokers = new ArrayList<>();
         pokers.add(new Poker(3, Poker.Suits.SPADE));
         pokers.add(new Poker(3, Poker.Suits.CLUB));
+        pokers.add(new Poker(3, Poker.Suits.DIAMOND));
+        pokers.add(new Poker(4, Poker.Suits.SPADE));
+        pokers.add(new Poker(4, Poker.Suits.DIAMOND));
+        pokers.add(new Poker(4, Poker.Suits.CLUB));
         pokers.add(new Poker(5, Poker.Suits.SPADE));
+        pokers.add(new Poker(5, Poker.Suits.DIAMOND));
         pokers.add(new Poker(5, Poker.Suits.CLUB));
-        pokers.add(new Poker(6, Poker.Suits.DIAMOND));
-        pokers.add(new Poker(6, Poker.Suits.CLUB));
-        pokers.add(new Poker(7, Poker.Suits.DIAMOND));
-        pokers.add(new Poker(7, Poker.Suits.DIAMOND));
+        pokers.add(new Poker(6, Poker.Suits.HEART));
+        pokers.add(new Poker(7, Poker.Suits.SPADE));
+        pokers.add(new Poker(8, Poker.Suits.CLUB));
         pokers.add(new Poker(8, Poker.Suits.SPADE));
-        pokers.add(new Poker(8, Poker.Suits.HEART));
-        pokers.add(new Poker(9, Poker.Suits.SPADE));
         pokers.add(new Poker(9, Poker.Suits.CLUB));
-
-        List<Poker> pokers2 = new ArrayList<>();
-        pokers2.add(new Poker(8, Poker.Suits.SPADE));
-        pokers2.add(new Poker(5, Poker.Suits.SPADE));
-        pokers2.add(new Poker(5, Poker.Suits.CLUB));
-        pokers2.add(new Poker(7, Poker.Suits.DIAMOND));
-        pokers2.add(new Poker(6, Poker.Suits.CLUB));
-        pokers2.add(new Poker(8, Poker.Suits.DIAMOND));
-        pokers2.add(new Poker(7, Poker.Suits.DIAMOND));
-        pokers2.add(new Poker(6, Poker.Suits.SPADE));
-        pokers2.add(new Poker(4, Poker.Suits.SPADE));
-        pokers2.add(new Poker(4, Poker.Suits.CLUB));
-
-        PokerInfo out = PokerUtil.getPokerInfo(pokers2);
-        System.out.println(out);
+        pokers.add(new Poker(9, Poker.Suits.DIAMOND));
+        pokers.add(new Poker(10, Poker.Suits.CLUB));
+        pokers.add(new Poker(10, Poker.Suits.DIAMOND));
 
         AIPlayerAction playerAction = new AIPlayerAction(playerNode);
 //        playerAction.setPokers(allocPokers.get(0));
-        playerAction.setPokers(pokers);
-        System.out.println(playerAction.getPokers());
-        System.out.println(playerAction.callScore(0));
 //        playerAction.setLastPokers(allocPokers.get(3));
-//        System.out.println(playerAction.getPokers());
+        playerAction.setPokers(pokers);
+        playerAction.buildPokerModel();
 
+        System.out.println("手牌：" + playerAction.getPokers());
+        System.out.println("叫分" + playerAction.callScore(0));
         System.out.println("飞机：" + playerAction.getPlain());
         System.out.println("联对：" + playerAction.getShunzi(false));
         System.out.println("单顺子：" + playerAction.getShunzi(true));
         System.out.println("三张：" + playerAction.getThree());
         System.out.println("对牌：" + playerAction.getPair());
         System.out.println("单牌：" + playerAction.getSingle());
-        System.out.println("吃：" + playerAction.outPoker(playerNode2, out));
-        System.out.println(playerAction.outPoker(null, null));
-        System.out.println(playerAction.outPoker(null, null));
-        System.out.println(playerAction.outPoker(null, null));
+
+        System.out.println("出牌：" + playerAction.outPoker(null, null));
     }
 
 }

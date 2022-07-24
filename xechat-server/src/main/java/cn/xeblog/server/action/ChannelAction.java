@@ -63,7 +63,16 @@ public class ChannelAction {
     }
 
     public static void sendOnlineUsers() {
-        send(ResponseBuilder.build(null, new UserListMsgDTO(UserCache.listUser()), MessageType.ONLINE_USERS));
+        sendOnlineUsers(null);
+    }
+
+    public static void sendOnlineUsers(User user) {
+        Response response = ResponseBuilder.build(null, new UserListMsgDTO(UserCache.listUser()), MessageType.ONLINE_USERS);
+        if (user == null) {
+            send(response);
+        } else {
+            user.send(response);
+        }
     }
 
     public static void cleanUser(ChannelHandlerContext ctx) {
@@ -96,14 +105,17 @@ public class ChannelAction {
         }
 
         UserCache.remove(id);
-        sendOnlineUsers();
-        send(ResponseBuilder.system(user.getUsername() + "离开了鱼塘！"));
+        sendUserState(user, UserStateMsgDTO.State.OFFLINE);
 
         return user;
     }
 
     public static void updateUserStatus(User user) {
         send(ResponseBuilder.build(user, user.getStatus(), MessageType.STATUS_UPDATE));
+    }
+
+    public static void sendUserState(User user, UserStateMsgDTO.State state) {
+        send(ResponseBuilder.build(null, new UserStateMsgDTO(user, state), MessageType.USER_STATE));
     }
 
 }

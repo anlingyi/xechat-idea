@@ -44,6 +44,10 @@ public enum MessageType {
      */
     STATUS_UPDATE,
     /**
+     * 用户上线、离线消息
+     */
+    USER_STATE,
+    /**
      * 心跳消息
      */
     HEARTBEAT;

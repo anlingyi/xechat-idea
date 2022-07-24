@@ -59,6 +59,10 @@ public class ConsoleAction {
         Document document = console.getDocument();
         try {
             document.insertString(document.getLength(), content, attributeSet);
+            if (document.getLength() > 10000) {
+                document.remove(0, 2000);
+                document.insertString(0, "...", Style.DEFAULT.get());
+            }
         } catch (BadLocationException e) {
             e.printStackTrace();
         }
