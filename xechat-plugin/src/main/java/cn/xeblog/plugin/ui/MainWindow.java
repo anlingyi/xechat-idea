@@ -215,7 +215,16 @@ public class MainWindow {
                         int copyAtIndex = atIndex;
 
                         Runnable runnable = () -> {
-                            String value = jbList.getSelectedValue().toString();
+                            if (jbList == null) {
+                                return;
+                            }
+
+                            Object selectedValue = jbList.getSelectedValue();
+                            if (selectedValue == null) {
+                                return;
+                            }
+
+                            String value = selectedValue.toString();
                             if (copyIsAt) {
                                 contentArea.replaceRange(value + " ", copyAtIndex + 1, caretPosition);
                             } else {
