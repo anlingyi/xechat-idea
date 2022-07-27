@@ -231,19 +231,27 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         showTips("请等待...");
 
         int usersTotal = userList.size();
+        int nums = 3 - usersTotal;
+        boolean needRobots = nums > 0;
+        if (needRobots) {
+            showTips("正在加入机器人...");
+        } else {
+            showTips("等待发牌...");
+        }
+
         if (isHomeowner) {
-            spinMoment(100);
-            int nums = 3 - usersTotal;
-            if (nums > 0) {
-                List<String> joinedAIList = new ArrayList<>(aiPlayerList);
-                joinedAIList.removeAll(userList);
-                Collections.shuffle(joinedAIList);
-                List<String> aiList = joinedAIList.subList(0, nums);
-                aiList.forEach(ai -> aiPlayerActionMap.put(ai, null));
-                sendMsg(LandlordsGameDTO.MsgType.JOIN_ROBOTS, GameAction.getNickname(), new ArrayList<>(aiList));
-            } else {
-                allocPokersMsg();
-            }
+            invoke(() -> {
+                if (needRobots) {
+                    List<String> joinedAIList = new ArrayList<>(aiPlayerList);
+                    joinedAIList.removeAll(userList);
+                    Collections.shuffle(joinedAIList);
+                    List<String> aiList = joinedAIList.subList(0, nums);
+                    aiList.forEach(ai -> aiPlayerActionMap.put(ai, null));
+                    sendMsg(LandlordsGameDTO.MsgType.JOIN_ROBOTS, GameAction.getNickname(), new ArrayList<>(aiList));
+                } else {
+                    allocPokersMsg();
+                }
+            }, 1800);
         }
     }
 
@@ -324,8 +332,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                 showGamePanel();
                 showTips("等待发牌...");
                 if (isHomeowner) {
-                    spinMoment(100);
-                    allocPokersMsg();
+                    invoke(() -> allocPokersMsg(), 1500);
                 }
                 break;
             case ALLOC_POKER:
