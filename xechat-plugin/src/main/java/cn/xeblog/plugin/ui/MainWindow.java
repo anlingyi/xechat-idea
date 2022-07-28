@@ -22,6 +22,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -81,6 +82,18 @@ public class MainWindow {
         JPopupMenu jPopupMenu = new JPopupMenu("右键菜单");
         console.setComponentPopupMenu(jPopupMenu);
 
+        JMenuItem menuItem3_copy = new JMenuItem("复制");
+        menuItem3_copy.addActionListener(ev -> {
+            String selectedText = console.getSelectedText();
+            if(selectedText==null || selectedText.strip().equals("")){
+                JOptionPane.showConfirmDialog(null, "你好像没选中文本");
+                return;
+            }
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            StringSelection contents = new StringSelection(selectedText);
+            clipboard.setContents(contents, null);
+        });
+
         JMenuItem menuItem1 = new JMenuItem("百度搜索选中文本");
         menuItem1.addActionListener(ev -> {
             String selectedText = console.getSelectedText();
@@ -103,19 +116,21 @@ public class MainWindow {
             }
             BrowserUtil.browse(selectedText);
         });
+
+        jPopupMenu.add(menuItem3_copy);
         jPopupMenu.add(menuItem1);
         jPopupMenu.add(menuItem2);
 
         // 常用命令
-        //        jPopupMenu.add("#login");
-        //        jPopupMenu.add("#exit");
-        //        jPopupMenu.add("#clean");
-        //        jPopupMenu.add("#help");
+        jPopupMenu.add("#login");
+        jPopupMenu.add("#exit");
+        jPopupMenu.add("#clean");
+        jPopupMenu.add("#help");
 
         // 添加全部命令
-        for (Command command : Command.values()) {
-            jPopupMenu.add( command.getCommand());
-        }
+//        for (Command command : Command.values()) {
+//            jPopupMenu.add( command.getCommand());
+//        }
 
         for(int i=0; i<jPopupMenu.getComponentCount(); i++) {
             JMenuItem mi = (JMenuItem)jPopupMenu.getComponent(i);
