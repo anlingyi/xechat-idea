@@ -7,7 +7,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.xeblog.plugin.game.read.entity.Chapter;
 import cn.xeblog.plugin.game.read.entity.LegadoBook;
-import cn.xeblog.plugin.util.NotifyUtils;
+import cn.xeblog.plugin.game.read.error.LegadoApiException;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -42,16 +42,16 @@ public class LegadoApi {
         return false;
     }
 
-    public List<LegadoBook> getBookshelf() {
+    public List<LegadoBook> getBookshelf() throws LegadoApiException {
         String url = UrlBuilder.of(this.server).addPath("getBookshelf").build();
-        String errorMsg = "书架获取失败";
+        String errorMsg = "[Legado]书架获取失败";
         JSONObject result = get(url, errorMsg);
         return handleArray(result, LegadoBook.class, errorMsg);
     }
 
-    public List<Chapter> getChapterList(String bookUrl) {
+    public List<Chapter> getChapterList(String bookUrl) throws LegadoApiException {
         String url = UrlBuilder.of(this.server).addPath("getChapterList").addQuery("url", bookUrl).build();
-        String errorMsg = "章节列表获取失败";
+        String errorMsg = "[Legado]章节列表获取失败";
         JSONObject result = get(url, errorMsg);
         return handleArray(result, Chapter.class, errorMsg);
     }
@@ -63,8 +63,15 @@ public class LegadoApi {
                 .addQuery("index", index)
                 .build();
         String errorMsg = "书籍内容获取失败";
-        JSONObject result = get(url, errorMsg);
-        return handleStr(result, errorMsg);
+        try {
+            JSONObject result = get(url, errorMsg);
+            if (result != null && StrUtil.isNotBlank(result.getStr("errorMsg"))) {
+                return result.getStr("errorMsg");
+            }
+            return handleStr(result, errorMsg);
+        } catch (LegadoApiException e) {
+            return errorMsg;
+        }
     }
 
     public void saveBookProgress(LegadoBook bookInfo) {
@@ -72,7 +79,7 @@ public class LegadoApi {
         post(url, bookInfo);
     }
 
-    private JSONObject get(String url, String errorMsg) {
+    private JSONObject get(String url, String errorMsg) throws LegadoApiException {
         HttpRequest request = HttpRequest.newBuilder(URI.create(url)).build();
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -80,7 +87,7 @@ public class LegadoApi {
                 return JSONUtil.parseObj(response.body());
             }
         } catch (Exception e) {
-            errorNotify(errorMsg);
+            LegadoApiException.throwException(errorMsg);
         }
         return null;
     }
@@ -95,24 +102,20 @@ public class LegadoApi {
         } catch (Exception ignored) { }
     }
 
-    private <T> List<T> handleArray(JSONObject result, Class<T> elementType, String errorMsg) {
+    private <T> List<T> handleArray(JSONObject result, Class<T> elementType, String errorMsg) throws LegadoApiException {
         if (result != null && result.getBool("isSuccess")) {
             JSONArray data = result.getJSONArray("data");
             return JSONUtil.toList(data, elementType);
         }
-        errorNotify(errorMsg);
+        LegadoApiException.throwException(errorMsg);
         return new ArrayList<>();
     }
 
-    private String handleStr(JSONObject result, String errorMsg) {
+    private String handleStr(JSONObject result, String errorMsg) throws LegadoApiException {
         if (result != null && result.getBool("isSuccess")) {
             return result.getStr("data", "");
         }
-        errorNotify(errorMsg);
+        LegadoApiException.throwException(errorMsg);
         return "";
-    }
-
-    private void errorNotify(String errorMsg) {
-        NotifyUtils.error("Api Error", errorMsg);
     }
 }

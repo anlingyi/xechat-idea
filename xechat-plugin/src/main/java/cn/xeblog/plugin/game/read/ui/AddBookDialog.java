@@ -9,6 +9,7 @@ import cn.xeblog.plugin.game.read.entity.Book;
 import cn.xeblog.plugin.game.read.entity.BookType;
 import cn.xeblog.plugin.game.read.entity.Chapter;
 import cn.xeblog.plugin.game.read.entity.LegadoBook;
+import cn.xeblog.plugin.game.read.error.LegadoApiException;
 import cn.xeblog.plugin.game.read.util.TableDataUtil;
 import cn.xeblog.plugin.util.AlertMessagesUtil;
 import cn.xeblog.plugin.util.CharsetUtils;
@@ -239,9 +240,14 @@ public class AddBookDialog extends JDialog {
                 showCard("StartCard");
                 return;
             }
-            bookshelf = api.getBookshelf();
-            bookTable.setModel(TableDataUtil.legadoBookToTableModel(bookshelf));
-            legadoBookAddCard.stopLoading();
+            try {
+                bookshelf = api.getBookshelf();
+                bookTable.setModel(TableDataUtil.legadoBookToTableModel(bookshelf));
+            } catch (LegadoApiException e) {
+                e.showErrorAlert();
+            } finally {
+                legadoBookAddCard.stopLoading();
+            }
         });
     }
 }

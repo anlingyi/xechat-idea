@@ -15,7 +15,8 @@ public class KeyFormatUtil {
             keyStr += modifiersText;
         }
         if (!keyStr.contains(KeyEvent.getKeyText(e.getKeyCode()))) {
-            keyStr += "+"+KeyEvent.getKeyText(e.getKeyCode());
+            keyStr += keyStr.isEmpty() ? "" : "+";
+            keyStr += KeyEvent.getKeyText(e.getKeyCode());
         }
         if (keyStr.contains("箭头")) {
             keyStr = keyStr.replaceAll("向上箭头", "↑")

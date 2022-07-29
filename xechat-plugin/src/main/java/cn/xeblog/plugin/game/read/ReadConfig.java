@@ -1,6 +1,7 @@
 package cn.xeblog.plugin.game.read;
 
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.ArrayUtil;
 import cn.xeblog.plugin.game.read.api.LegadoApi;
 import cn.xeblog.plugin.game.read.entity.Book;
 
@@ -15,11 +16,29 @@ public class ReadConfig {
     /** 书架 */
     private List<Book> books;
     /** 热键 */
-    private String[] key = new String[]{"Ctrl+↑", "Ctrl+↓", "Shift+↓", "Shift+↑"};
+    private String[] key = {"Ctrl+↑", "Ctrl+↓", "Shift+↓", "Shift+↑", "Ctrl+1", "Ctrl+2"};
     /** legado阅读web服务的Host */
     private String legadoHost;
     /** 困难模式一次显示的字符数 */
-    private int hardColumns = 50;
+    private Integer hardColumns = 50;
+    /** 自动翻译速度（秒） */
+    private Integer pageTurningSpeed = 3;
+
+    public static ReadConfig getInstance(ReadConfig config) {
+        ReadConfig instance = new ReadConfig();
+        if (config != null) {
+            instance.books = config.books;
+            instance.legadoHost = config.legadoHost;
+            if (config.hardColumns != null && config.hardColumns != 0) {
+                instance.hardColumns = config.hardColumns;
+            }
+            if (config.pageTurningSpeed != null && config.pageTurningSpeed != 0) {
+                instance.pageTurningSpeed = config.pageTurningSpeed;
+            }
+            instance.key = ArrayUtil.replace(instance.key, 0, config.key);
+        }
+        return instance;
+    }
 
     public List<Book> getBooks() {
         return books;
@@ -45,12 +64,20 @@ public class ReadConfig {
         this.legadoHost = legadoHost;
     }
 
-    public int getHardColumns() {
+    public Integer getHardColumns() {
         return hardColumns;
     }
 
-    public void setHardColumns(int hardColumns) {
+    public void setHardColumns(Integer hardColumns) {
         this.hardColumns = hardColumns;
+    }
+
+    public Integer getPageTurningSpeed() {
+        return pageTurningSpeed;
+    }
+
+    public void setPageTurningSpeed(Integer pageTurningSpeed) {
+        this.pageTurningSpeed = pageTurningSpeed;
     }
 
     /**

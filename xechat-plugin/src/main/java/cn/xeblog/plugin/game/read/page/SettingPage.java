@@ -63,11 +63,17 @@ public class SettingPage implements IPage {
      */
     private void initConfigTableData() {
         DefaultTableModel model = new DefaultTableModel();
-        model.addColumn("名称", new String[]{"Legado Host", "困难模式单行字数", "上一页热键", "下一页热键", "老板键", "恢复键"});
+        model.addColumn("名称", new String[]{
+                "Legado Host", "困难模式单行字数",
+                "上一页热键", "下一页热键", "老板键", "恢复键",
+                "自动翻译速度(秒)", "自动翻译开始", "自动翻页停止"
+        });
         String[] values = new String[2];
         values[0] = DataCache.readConfig.getLegadoHost();
         values[1] = String.valueOf(DataCache.readConfig.getHardColumns());
-        model.addColumn("值", ArrayUtil.append(values, DataCache.readConfig.getKey()));
+        values = ArrayUtil.append(values, DataCache.readConfig.getKey());
+        String pageTurningSpeed = String.valueOf(DataCache.readConfig.getPageTurningSpeed());
+        model.addColumn("值", ArrayUtil.insert(values, 6, pageTurningSpeed));
         configTable.setModel(model);
     }
 
@@ -110,7 +116,7 @@ public class SettingPage implements IPage {
                 try {
                     if (saveConfig()) {
                         modified = false;
-                        UIManager.startPage.show();
+                        SwingUtilities.invokeLater(() -> UIManager.startPage.show());
                     }
                 } finally {
                     for (Component component : settingPanel.getContentPanel().getComponents()) {
@@ -170,6 +176,21 @@ public class SettingPage implements IPage {
         DataCache.readConfig.setKeyMap((String) configTable.getValueAt(3, 1), 1);
         DataCache.readConfig.setKeyMap((String) configTable.getValueAt(4, 1), 2);
         DataCache.readConfig.setKeyMap((String) configTable.getValueAt(5, 1), 3);
+        try {
+            int pageTurningSpeed = NumberUtil.parseInt((String) configTable.getValueAt(6, 1));
+            if (pageTurningSpeed < 1 || pageTurningSpeed > 60) {
+                throw new Exception();
+            } else {
+                DataCache.readConfig.setPageTurningSpeed(pageTurningSpeed);
+            }
+        } catch (Exception ex) {
+            SwingUtilities.invokeLater(() -> {
+                AlertMessagesUtil.showErrorDialog("错误", "自动翻译速度必须是一个1~60的数字");
+            });
+            return false;
+        }
+        DataCache.readConfig.setKeyMap((String) configTable.getValueAt(7, 1), 4);
+        DataCache.readConfig.setKeyMap((String) configTable.getValueAt(8, 1), 5);
         return true;
     }
 }
