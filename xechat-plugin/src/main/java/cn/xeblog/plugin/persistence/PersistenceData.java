@@ -22,16 +22,21 @@ public class PersistenceData {
     /**
      * 消息通知 1.正常通知 2.隐晦通知 3.关闭通知
      */
-    public int msgNotify;
+    private int msgNotify;
 
     /**
      * 历史命令列表
      */
-    public List<String> historyCommandList;
+    private List<String> historyCommandList;
 
     /**
      * 阅读持久化数据
      */
-    public ReadConfig readConfig;
+    private ReadConfig readConfig;
+
+    /**
+     * token
+     */
+    private String token;
 
 }

@@ -248,7 +248,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     }
 
     private void allocPokersMsg() {
-        int priority = RandomUtil.randomInt(3);
+        int priority = new Random().nextInt(3);
         List<List<Poker>> allocPokers = PokerUtil.allocPokers();
         List<String> playerList = userList;
         for (int i = 0; i < playerList.size(); i++) {

@@ -3,9 +3,11 @@ package cn.xeblog.server.action.handler;
 import cn.hutool.core.util.StrUtil;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.entity.game.GameDTO;
+import cn.xeblog.commons.entity.game.GameInviteResultDTO;
 import cn.xeblog.commons.entity.game.GameRoom;
 import cn.xeblog.commons.entity.game.GameRoomMsgDTO;
 import cn.xeblog.commons.enums.Game;
+import cn.xeblog.commons.enums.InviteStatus;
 import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.commons.enums.UserStatus;
 import cn.xeblog.server.action.ChannelAction;
@@ -27,6 +29,17 @@ public abstract class AbstractGameActionHandler<T extends GameDTO> extends Abstr
             gameRoom = GameRoomCache.getGameRoom(body.getRoomId());
         }
         if (gameRoom == null) {
+            if (body instanceof GameRoomMsgDTO) {
+                GameRoomMsgDTO gameRoomMsgDTO = (GameRoomMsgDTO) body;
+                if (gameRoomMsgDTO.getMsgType() == GameRoomMsgDTO.MsgType.PLAYER_INVITE_RESULT) {
+                    GameInviteResultDTO gameInviteResultDTO = (GameInviteResultDTO) gameRoomMsgDTO.getContent();
+                    if (gameInviteResultDTO.getStatus() == InviteStatus.TIMEOUT) {
+                        // 玩家邀请超时，原房间已经关闭，放弃处理
+                        return;
+                    }
+                }
+            }
+
             user.setStatus(UserStatus.FISHING);
             user.send(ResponseBuilder.build(null, new GameRoomMsgDTO(GameRoomMsgDTO.MsgType.GAME_ERROR, msg), MessageType.GAME_ROOM));
             ChannelAction.updateUserStatus(user);

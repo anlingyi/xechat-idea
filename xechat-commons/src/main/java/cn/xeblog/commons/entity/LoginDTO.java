@@ -24,4 +24,6 @@ public class LoginDTO implements Serializable {
 
     private String pluginVersion;
 
+    private String token;
+
 }

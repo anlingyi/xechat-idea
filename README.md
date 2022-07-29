@@ -1,6 +1,6 @@
 # XEChat-Idea
 
-> Version 1.6.0-beta1
+> Version 1.6.1-beta
 
 > 基于Netty的IDEA即时聊天插件：让你能够在IDEA里实现聊天、下棋、斗地主！(理论上支持JetBrains全系列开发工具🙂)
 
@@ -123,7 +123,13 @@ java -jar target/xechat-server-xxx.jar
 
 * **设置端口**：`-p {端口号}`
 * **设置敏感词文件**：`-swfile {文件路径}`
-* **设置和风天气 api key**：`-weather {和风api key}`
+* **设置和风天气**：`-weather {和风api key}`
+* **设置百度翻译**：`-fyAppId {appId} -fyAppKey {appKey}`
+* **设置ip2region文件**：`-ipfile {文件路径}`
+* **设置管理员令牌**：`-token {令牌}`
+* **指定外部配置文件**：`-path {文件路径}`
+
+具体的外部配置文件信息请看：`xechat-server/src/main/resources/config.setting`
 
 参考示例：
 
@@ -214,11 +220,10 @@ services:
     restart: always
     ports:
       - 1024:1024
-    environment:
-      - PARAMS=-p 1024 -swfile /xechat/sensitive-words.txt -weather {和风天气api key}
     volumes:
-      - /xechat/logs:/var/log/xechat-server
-      - /xechat/sensitive-words.txt:/xechat/sensitive-words.txt
+      - /home/xechat/logs:/var/log/xechat-server
+      - /home/xechat/config/config.setting:/home/xechat/config/config.setting
+      - /home/xechat/db:/home/xechat/db
 ```
 
 ## 公开你的鱼塘

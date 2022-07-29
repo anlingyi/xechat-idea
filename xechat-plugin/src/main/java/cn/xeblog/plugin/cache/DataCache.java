@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.cache;
 
+import cn.hutool.core.util.StrUtil;
 import cn.xeblog.commons.entity.OnlineServer;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.enums.UserStatus;
@@ -91,6 +92,29 @@ public class DataCache {
      */
     public static User getCurrentUser() {
         return getUser(username);
+    }
+
+    public static void addUser(User user) {
+        if (getUser(user.getUsername()) != null) {
+            return;
+        }
+
+        userMap.put(user.getUsername(), user);
+    }
+
+    public static void removeUser(User user) {
+        User origin = userMap.get(user.getUsername());
+        if (origin == null) {
+            return;
+        }
+
+        if (StrUtil.equals(origin.getId(), user.getId())) {
+            userMap.remove(user.getUsername());
+        }
+    }
+
+    public static int getOnlineUserTotal() {
+        return userMap.size();
     }
 
 }

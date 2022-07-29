@@ -1,12 +1,15 @@
 package cn.xeblog.plugin.action.handler.message;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.thread.GlobalThreadPool;
+import cn.xeblog.commons.constants.IpConstants;
+import cn.xeblog.commons.entity.IpRegion;
+import cn.xeblog.commons.entity.Response;
+import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.entity.UserMsgDTO;
 import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.plugin.action.ConsoleAction;
-import cn.xeblog.commons.entity.Response;
-import cn.xeblog.commons.entity.User;
 import cn.xeblog.plugin.annotation.DoMessage;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.enums.Style;
@@ -99,8 +102,7 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
                 imgLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
                 imgLabel.setForeground(StyleConstants.getForeground(Style.DEFAULT.get()));
                 ConsoleAction.atomicExec(() -> {
-                    ConsoleAction.renderText(String.format("[%s] %s(%s)：", response.getTime(), user.getUsername(),
-                            user.getStatus().alias()), Style.USER_NAME);
+                    renderName(response);
                     ConsoleAction.renderImageLabel(imgLabel);
                 });
             }
@@ -141,8 +143,7 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
             }
         } else {
             ConsoleAction.atomicExec(() -> {
-                ConsoleAction.renderText(String.format("[%s] %s(%s)：", response.getTime(), user.getUsername(),
-                        user.getStatus().alias()), Style.USER_NAME);
+                renderName(response);
                 boolean notified = body.hasUser(DataCache.username);
                 Style style = Style.DEFAULT;
                 String msg = (String) body.getContent();
@@ -156,4 +157,19 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
             });
         }
     }
+
+    private void renderName(Response<UserMsgDTO> response) {
+        User user = response.getUser();
+        IpRegion region = user.getRegion();
+        final String shortProvince = MapUtil.getStr(IpConstants.SHORT_PROVINCE, region.getProvince(), region.getCountry());
+        String roleDisplay = "";
+        if (user.getRole() == User.Role.ADMIN) {
+            roleDisplay = " ☆";
+        }
+
+        ConsoleAction.renderText(
+                String.format("[%s][%s] %s (%s)%s：", response.getTime(), shortProvince, user.getUsername(),
+                        user.getStatus().getName(), roleDisplay), Style.USER_NAME);
+    }
+
 }

@@ -12,7 +12,6 @@ import cn.xeblog.plugin.game.read.ui.AutoNewlineTextPane;
 import cn.xeblog.plugin.game.read.ui.HardReadWidget;
 import cn.xeblog.plugin.game.read.util.ChapterUtil;
 import cn.xeblog.plugin.game.read.util.KeyFormatUtil;
-import cn.xeblog.plugin.util.AlertMessagesUtil;
 import cn.xeblog.plugin.util.NotifyUtils;
 import com.intellij.ui.components.JBLoadingPanel;
 import com.intellij.ui.components.JBScrollPane;
@@ -57,11 +56,25 @@ public class ReadPage implements IPage {
     }
 
     public static ReadPage getInstance(Book book) {
-        if (UIManager.readPage != null && book.equals(UIManager.readPage.getBook())) {
-            return UIManager.readPage;
-        } else {
-            return new ReadPage(book);
+        ReadPage instance = UIManager.readPage;
+        if (instance != null) {
+            if (book.equals(UIManager.readPage.getBook())) {
+                return instance;
+            }
+
+            instance.cleanProcessor();
         }
+
+        return new ReadPage(book);
+    }
+
+    private void cleanProcessor() {
+        if (processor == null) {
+            return;
+        }
+
+        KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        manager.removeKeyEventPostProcessor(processor);
     }
 
     @Override
@@ -72,7 +85,6 @@ public class ReadPage implements IPage {
             readPanel.setBounds(10, 10, 350, 220);
         }
         UIManager.showPage(readPanel, 370, 220);
-
         readPanel.startLoading();
         ThreadUtil.execute(() -> {
             // 更新书籍进度
@@ -104,7 +116,6 @@ public class ReadPage implements IPage {
         try {
             book.generateChapter();
             chapterUtil = new ChapterUtil(book);
-
             // 章节标题
             title = new JLabel();
             title.setHorizontalAlignment(SwingConstants.CENTER);
@@ -281,6 +292,7 @@ public class ReadPage implements IPage {
         if (processor != null) {
             manager.removeKeyEventPostProcessor(processor);
         }
+
         processor = event -> {
             if (event.getID() != KeyEvent.KEY_PRESSED || !isShow) {
                 return false;

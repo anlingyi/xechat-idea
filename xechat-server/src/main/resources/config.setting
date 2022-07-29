@@ -1,0 +1,32 @@
+########## server配置 ##########
+[SERVER]
+# 端口
+port = 1024
+
+########## 敏感词配置 ##########
+[SENSITIVE_WORD]
+# 词库文件路径
+file = ${SW_FILE}
+
+########## 天气查询配置 ##########
+[WEATHER]
+# 和风天气 api key
+key = ${WEATHER_KEY}
+
+########## 翻译配置 ##########
+[TRANSLATION]
+# 百度翻译 app id
+appId = ${BD_APP_ID}
+# 百度翻译 app key
+appKey = ${BD_APP_KEY}
+
+########## ip查询配置 ##########
+[IP_SEARCH]
+# ip2region
+# 下载地址：https://gitee.com/lionsoul/ip2region/tree/master/data
+ip2Region_path = /home/xechat/db/ip2region.xdb
+
+########## 管理员配置 ##########
+[ADMIN]
+# 管理员令牌
+token = ${TOKEN}
