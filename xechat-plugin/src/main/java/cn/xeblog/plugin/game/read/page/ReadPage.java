@@ -102,11 +102,10 @@ public class ReadPage implements IPage {
                     chapterUtil = new ChapterUtil(book);
                     setText();
                 }
-                // 添加热键监听
-                addKeyEventPostProcessor();
-
-                readPanel.stopLoading();
-                isShow = true;
+                if (readPanel != null) {
+                    readPanel.stopLoading();
+                    isShow = true;
+                }
             });
         });
     }
@@ -141,6 +140,9 @@ public class ReadPage implements IPage {
             optPanel.add(getHomeButton());
             readPanel.add(optPanel, BorderLayout.SOUTH);
             readPanel.updateUI();
+
+            // 添加热键监听
+            addKeyEventPostProcessor();
         } catch (Exception e) {
             NotifyUtils.warn("", "章节目录解析失败！");
             readPanel = null;
