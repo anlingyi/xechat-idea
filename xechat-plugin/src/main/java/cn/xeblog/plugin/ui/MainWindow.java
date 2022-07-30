@@ -11,6 +11,7 @@ import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.enums.Command;
+import cn.xeblog.plugin.ui.component.EmojiWindow;
 import cn.xeblog.plugin.util.CommandHistoryUtils;
 import cn.xeblog.plugin.util.UploadUtils;
 import com.intellij.ui.components.JBList;
@@ -47,6 +48,10 @@ public class MainWindow {
 
     private boolean isProactive;
 
+
+    private JButton emojiButton;
+    private EmojiWindow emojiWindow;
+
     /**
      * 冻结时间
      */
@@ -82,6 +87,8 @@ public class MainWindow {
 
         Command.HELP.exec(null);
 
+        emojiButton.addActionListener(e -> emojiWindow.setVisible(!emojiWindow.isVisible()));
+
         contentArea.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -91,6 +98,7 @@ public class MainWindow {
                     // 阻止默认事件
                     e.consume();
                     sendMsg();
+                    hideEmojiWindow();
                 }
 
                 if (e.getKeyCode() == KeyEvent.VK_TAB && leftTopPanel.isVisible()) {
@@ -278,6 +286,7 @@ public class MainWindow {
                 }
             }
         });
+        emojiWindow = new EmojiWindow(emojiButton, contentArea);
     }
 
     private static final MainWindow MAIN_WINDOW = new MainWindow();
@@ -362,4 +371,7 @@ public class MainWindow {
         contentArea.setText("");
     }
 
+    private void hideEmojiWindow() {
+        emojiWindow.setVisible(false);
+    }
 }
