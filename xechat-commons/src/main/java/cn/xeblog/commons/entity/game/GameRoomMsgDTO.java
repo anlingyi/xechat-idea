@@ -49,6 +49,10 @@ public class GameRoomMsgDTO extends GameDTO {
          */
         GAME_START,
         /**
+         * 玩家已开始游戏
+         */
+        PLAYER_GAME_STARTED,
+        /**
          * 游戏结束
          */
         GAME_OVER,

@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author anlingyi
@@ -35,6 +36,11 @@ public abstract class GameRoomHandler implements GameRoomEventHandler {
      * 当前是否为房主
      */
     protected boolean isHomeowner;
+
+    /**
+     * 已开始游戏玩家计数
+     */
+    private AtomicInteger playerGameStartedCounter;
 
     /**
      * 创建游戏房间
@@ -136,11 +142,22 @@ public abstract class GameRoomHandler implements GameRoomEventHandler {
         MessageAction.send(msg, Action.GAME_ROOM);
     }
 
+    /**
+     * 玩家游戏已开始请求
+     */
+    public void playerGameStarted() {
+        GameRoomMsgDTO msg = new GameRoomMsgDTO();
+        msg.setRoomId(gameRoom.getId());
+        msg.setMsgType(GameRoomMsgDTO.MsgType.PLAYER_GAME_STARTED);
+        MessageAction.send(msg, Action.GAME_ROOM);
+    }
+
     @Override
     public void roomCreated(GameRoom gameRoom) {
-        this.gameRoom = gameRoom;
         this.timeoutTask = new HashMap<>();
         this.isHomeowner = true;
+        this.playerGameStartedCounter = new AtomicInteger(gameRoom.getNums());
+        roomOpened(gameRoom);
     }
 
     @Override
@@ -188,9 +205,22 @@ public abstract class GameRoomHandler implements GameRoomEventHandler {
     }
 
     @Override
+    public void playerGameStarted(User user) {
+        if (isHomeowner && playerGameStartedCounter.decrementAndGet() == 0) {
+            playerGameStartedCounter.set(gameRoom.getNums());
+            allPlayersGameStarted();
+        }
+    }
+
+    @Override
     public void gameEnded() {
 
     }
+
+    /**
+     * 房间内所有玩家已开始游戏
+     */
+    protected abstract void allPlayersGameStarted();
 
     private void cleanTask(User player) {
         Timer timer = timeoutTask.get(player.getId());

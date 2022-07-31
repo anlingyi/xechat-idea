@@ -226,18 +226,24 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         state = 1;
         showTips("请等待...");
 
-        int usersTotal = userList.size();
-        int nums = 3 - usersTotal;
-        boolean needRobots = nums > 0;
-        if (needRobots) {
+        if (userList.size() < 3) {
             showTips("正在加入机器人...");
         } else {
             showTips("等待发牌...");
         }
 
+        if (gameRoom == null) {
+            allPlayersGameStarted();
+        }
+    }
+
+    @Override
+    protected void allPlayersGameStarted() {
         if (isHomeowner) {
+            int usersTotal = userList.size();
+            int nums = 3 - usersTotal;
             invoke(() -> {
-                if (needRobots) {
+                if (nums > 0) {
                     List<String> joinedAIList = new ArrayList<>(aiPlayerList);
                     joinedAIList.removeAll(userList);
                     Collections.shuffle(joinedAIList);
@@ -247,7 +253,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                 } else {
                     allocPokersMsg();
                 }
-            }, 1800);
+            }, 500);
         }
     }
 
@@ -328,7 +334,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                 showGamePanel();
                 showTips("等待发牌...");
                 if (isHomeowner) {
-                    invoke(() -> allocPokersMsg(), 1500);
+                    invoke(() -> allocPokersMsg(), 500);
                 }
                 break;
             case ALLOC_POKER:

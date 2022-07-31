@@ -391,16 +391,9 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
     }
 
     @Override
-    public void roomCreated(GameRoom gameRoom) {
-        super.roomCreated(gameRoom);
-        invoke(() -> showGameRoomPanel());
-    }
-
-    @Override
     public void roomOpened(GameRoom gameRoom) {
         super.roomOpened(gameRoom);
-        this.gameRoom = gameRoom;
-        showGameRoomPanel();
+        invoke(() -> showGameRoomPanel());
     }
 
     @Override
@@ -453,13 +446,21 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
     @Override
     public void gameStarted(GameRoom gameRoom) {
         super.gameStarted(gameRoom);
-        invoke(() -> start());
+        invoke(() -> {
+            start();
+            playerGameStarted();
+        });
     }
 
     @Override
     public void gameEnded() {
         super.gameEnded();
         invoke(() -> showGameRoomPanel());
+    }
+
+    @Override
+    protected void allPlayersGameStarted() {
+
     }
 
     protected final void invoke(Runnable runnable) {

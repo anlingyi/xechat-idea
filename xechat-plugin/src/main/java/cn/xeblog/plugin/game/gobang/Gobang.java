@@ -859,6 +859,14 @@ public class Gobang extends AbstractGame<GobangDTO> {
     protected void start() {
         border = 14;
         initChessPanel();
+
+        if (gameRoom == null) {
+            allPlayersGameStarted();
+        }
+    }
+
+    @Override
+    protected void allPlayersGameStarted() {
         if (isHomeowner) {
             // 自旋等待一段时间，再发送游戏数据
             invoke(() -> {
@@ -867,7 +875,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
                 msg.setType(3 - randomType);
                 sendMsg(msg);
                 handle(new GobangDTO(0, 0, randomType));
-            }, 1200);
+            }, 500);
         }
     }
 
