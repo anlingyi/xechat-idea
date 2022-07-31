@@ -28,6 +28,11 @@ public class GameOverCommandHandler extends AbstractCommandHandler {
 
         String roomId = GameAction.getRoomId();
         if (roomId != null) {
+            if (!GameAction.playing()) {
+                Command.JOIN.exec("1");
+                return;
+            }
+
             GameRoomMsgDTO msg = new GameRoomMsgDTO();
             msg.setRoomId(roomId);
             msg.setMsgType(GameRoomMsgDTO.MsgType.PLAYER_LEFT);

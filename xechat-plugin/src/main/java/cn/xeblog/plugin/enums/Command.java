@@ -94,7 +94,11 @@ public enum Command {
         ConsoleAction.showErrorMsg();
     }
 
-    public void exec(String[] args) {
+    public void exec() {
+        exec(new String[0]);
+    }
+
+    public void exec(String... args) {
         if (args == null) {
             args = new String[0];
         }

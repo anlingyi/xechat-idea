@@ -59,7 +59,7 @@ public class StartPage implements IPage {
 
     private JButton getExitButton() {
         JButton exitButton = new JButton("退出阅读");
-        exitButton.addActionListener(e -> Command.GAME_OVER.exec(null));
+        exitButton.addActionListener(e -> Command.GAME_OVER.exec());
         return exitButton;
     }
 

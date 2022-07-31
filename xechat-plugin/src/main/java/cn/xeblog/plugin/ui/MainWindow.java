@@ -80,7 +80,7 @@ public class MainWindow {
         ConsoleAction.setPanel(leftPanel);
         ConsoleAction.setConsoleScroll(consoleScroll);
 
-        Command.HELP.exec(null);
+        Command.HELP.exec();
 
         contentArea.addKeyListener(new KeyAdapter() {
             @Override

@@ -90,7 +90,7 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
 
     protected JButton getExitButton() {
         JButton exitButton = new JButton("退出游戏");
-        exitButton.addActionListener(e -> Command.GAME_OVER.exec(null));
+        exitButton.addActionListener(e -> Command.GAME_OVER.exec());
         return exitButton;
     }
 
