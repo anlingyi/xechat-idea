@@ -2,12 +2,8 @@ package cn.xeblog.plugin.game.landlords;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.RandomUtil;
 import cn.xeblog.commons.entity.User;
-import cn.xeblog.commons.entity.game.landlords.AllocPokerDTO;
-import cn.xeblog.commons.entity.game.landlords.LandlordsGameDTO;
-import cn.xeblog.commons.entity.game.landlords.Poker;
-import cn.xeblog.commons.entity.game.landlords.PokerInfo;
+import cn.xeblog.commons.entity.game.landlords.*;
 import cn.xeblog.commons.enums.Game;
 import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.plugin.annotation.DoGame;
@@ -474,6 +470,9 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                         player.showTips(tips2);
                     }
                 } else {
+                    if (outPokerInfo.getPokerModel() == PokerModel.SHUN_ZI_SINGLE) {
+                        PokerUtil.sorted(outPokerInfo.getPokers(), false);
+                    }
                     String pokerModeInfo = getPokerDisplayModel(outPokerInfo);
                     if (isMe) {
                         showPlayerTips(pokerModeInfo);
