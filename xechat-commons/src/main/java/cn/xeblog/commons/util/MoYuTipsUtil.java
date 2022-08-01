@@ -122,10 +122,10 @@ public class MoYuTipsUtil {
         if (a > 6 && a < 12) {
             return "上午";
         }
-        if (a == 13) {
+        if (a == 12) {
             return "中午";
         }
-        if (a > 13 && a <= 18) {
+        if (a >= 13 && a <= 18) {
             return "下午";
         } else {
             return "晚上";
