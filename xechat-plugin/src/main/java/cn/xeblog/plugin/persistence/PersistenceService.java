@@ -33,7 +33,7 @@ public class PersistenceService implements PersistentStateComponent<PersistenceD
         data = state;
         DataCache.username = data.getUsername();
         DataCache.msgNotify = data.getMsgNotify();
-        DataCache.readConfig = state.getReadConfig() == null ? new ReadConfig() : state.getReadConfig();
+        DataCache.readConfig = ReadConfig.getInstance(state.getReadConfig());
         CommandHistoryUtils.setHistoryList(state.getHistoryCommandList());
     }
 

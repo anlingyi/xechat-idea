@@ -47,15 +47,13 @@ public class DirectoryPage implements IPage {
                 if (mouseEvent.getClickCount() == 2) {
                     int index = theList.locationToIndex(mouseEvent.getPoint());
                     if (index >= 0) {
-                        UIManager.readPage.updateProgress(index, false);
+                        UIManager.readPage.updateProgress(index, 2);
                         UIManager.readPage.show();
                     }
                 }
             }
         });
         directoryPanel.add(new JBScrollPane(chapterList), BorderLayout.CENTER);
-
-
     }
 
     private void refreshChapterData() {

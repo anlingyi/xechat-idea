@@ -28,28 +28,31 @@ public class ChapterUtil {
 
     /** 当前书籍 */
     private final Book book;
-    /** 困难模式 */
-    private final boolean isHard;
     /** 当前页索引 */
     private int pageIndex;
     /** 当前章节分页内容 */
-    private final List<String> contentPage;
+    private List<String> contentPage;
     /** Legado API */
     private LegadoApi legadoApi;
 
-    public ChapterUtil(Book book, boolean isHard) {
-        this(book, isHard, false);
+    public ChapterUtil(Book book) {
+        this(book, 0);
     }
 
-    public ChapterUtil(Book book, boolean isHard, boolean isLastPage) {
+    /**
+     * 章节工具类构造器
+     * @param book 书籍
+     * @param mode 模式，0：初始化；1：最后一页；2：第一页
+     */
+    public ChapterUtil(Book book, int mode) {
         this.book = book;
-        this.isHard = isHard;
         if (book.getType() == BookType.LEGADO) {
             this.legadoApi = new LegadoApi(DataCache.readConfig.getLegadoHost());
         }
 
         this.contentPage = pagination();
-        this.pageIndex = isLastPage ? this.contentPage.size() - 1 : 0;
+        this.pageIndex = getPageIndex(mode);
+        this.book.setChapterPos(this.pageIndex);
         saveBookProgress();
     }
 
@@ -57,6 +60,7 @@ public class ChapterUtil {
      * 当前页
      */
     public String currentPage() {
+        this.book.setChapterPos(this.pageIndex);
         return contentPage.get(pageIndex);
     }
 
@@ -67,6 +71,7 @@ public class ChapterUtil {
         if (++pageIndex >= contentPage.size()) {
             return "";
         }
+        saveBookProgress();
         return currentPage();
     }
 
@@ -77,7 +82,17 @@ public class ChapterUtil {
         if (--pageIndex < 0) {
             return "";
         }
+        saveBookProgress();
         return currentPage();
+    }
+
+    /**
+     * 模式切换
+     */
+    public void changeMode() {
+        int pos = pageIndexToPos();
+        this.contentPage = pagination();
+        this.pageIndex = posToPageIndex(pos);
     }
 
     /**
@@ -90,7 +105,7 @@ public class ChapterUtil {
             legadoBook.setName(book.getName());
             legadoBook.setAuthor(book.getAuthor());
             legadoBook.setDurChapterIndex(book.getChapterIndex());
-            legadoBook.setDurChapterPos(0);
+            legadoBook.setDurChapterPos(pageIndexToPos());
             legadoBook.setDurChapterTitle(this.book.getCurrentChapter().getTitle());
             legadoBook.setDurChapterTime(DateUtil.current());
             ThreadUtil.execute(() -> legadoApi.saveBookProgress(legadoBook));
@@ -103,13 +118,13 @@ public class ChapterUtil {
      */
     private List<String> pagination() {
         Chapter chapter = this.book.getCurrentChapter();
-        String content;
+        String content = "";
         if (this.book.getType() == BookType.LEGADO) {
             content = this.legadoApi.getBookContent(chapter.getBookUrl(), chapter.getIndex());
         } else {
             content = readText(chapter.getStartPointer(), chapter.getEndPointer());
         }
-        if (isHard) {
+        if (book.isHard()) {
             return hardPagination(content);
         } else {
             return easyPagination(content);
@@ -149,7 +164,7 @@ public class ChapterUtil {
     }
 
     private List<String> hardPagination(String content) {
-        content = StrUtil.removeAny(content, "\r", "\n");
+        // content = StrUtil.cleanBlank(content);
         return CollUtil.toList(StrUtil.split(content, DataCache.readConfig.getHardColumns()));
     }
 
@@ -172,5 +187,48 @@ public class ChapterUtil {
             NotifyUtils.warn("", "小说读取错误：" + e.getMessage());
         }
         return sb.toString();
+    }
+
+    /**
+     * 获取章节索引
+     * @param mode 模式，0：初始化；1：最后一页；2：第一页
+     * @return 章节索引
+     */
+    private int getPageIndex(int mode) {
+        switch (mode) {
+            // init
+            case 0:
+                Integer chapterPos = this.book.getChapterPos();
+                if (this.book.getType() == BookType.LEGADO) {
+                    chapterPos = posToPageIndex(chapterPos);
+                }
+                boolean valid = chapterPos != null && chapterPos >= 0 && chapterPos < this.contentPage.size();
+                return valid ? chapterPos : 0;
+            // last page
+            case 1:
+                return this.contentPage.size() - 1;
+            case 2:
+            default:
+                return 0;
+        }
+    }
+
+    private int pageIndexToPos() {
+        int pos = 0;
+        for (int i = 0; i < this.pageIndex; i++) {
+            pos += this.contentPage.get(i).length();
+        }
+        return pos + 1;
+    }
+
+    private int posToPageIndex(int pos) {
+        int tmpPos = 0;
+        for (int i = 0; i < this.contentPage.size(); i++) {
+            tmpPos += this.contentPage.get(i).length();
+            if (tmpPos > pos) {
+                return i;
+            }
+        }
+        return 0;
     }
 }

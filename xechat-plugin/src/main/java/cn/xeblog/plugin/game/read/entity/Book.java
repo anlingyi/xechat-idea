@@ -20,6 +20,8 @@ public class Book {
     private String author;
     private String url;
     private Integer chapterIndex;
+    private Integer chapterPos;
+    private Boolean hard = false;
     private List<Chapter> chapters;
     private BookType type;
     @OptionTag(converter = CharsetConverter.class)
@@ -56,6 +58,22 @@ public class Book {
 
     public void setChapterIndex(Integer chapterIndex) {
         this.chapterIndex = chapterIndex;
+    }
+
+    public Integer getChapterPos() {
+        return chapterPos;
+    }
+
+    public void setChapterPos(Integer chapterPos) {
+        this.chapterPos = chapterPos;
+    }
+
+    public Boolean isHard() {
+        return hard;
+    }
+
+    public void setHard(Boolean hard) {
+        this.hard = hard;
     }
 
     @Transient
