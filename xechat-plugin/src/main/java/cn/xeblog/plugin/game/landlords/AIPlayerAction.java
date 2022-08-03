@@ -126,12 +126,12 @@ public class AIPlayerAction extends PlayerAction {
                     break;
                 case PLAIN_MANNED:
                 case PLAIN_UNMANNED:
-                    canBomb |= true;
+                    canBomb = true;
                     out = getPlain(pokerInfo);
                     break;
                 case SHUN_ZI_PAIR:
                 case SHUN_ZI_SINGLE:
-                    canBomb |= true;
+                    canBomb = true;
                     out = getShunzi(pokerInfo);
                     break;
                 case BOMB:
@@ -140,10 +140,22 @@ public class AIPlayerAction extends PlayerAction {
                         out = PokerUtil.getPokerInfo(pokersMap.get(outValue));
                     }
                     break;
+                default:
+                    canBomb = true;
+                    break;
             }
 
-            if (out == null) {
-                if (canBomb && bombList.size() > 0) {
+            if (playerNode.getRole() == 1) {
+                if (playerNode.getPokerTotal() < 6) {
+                    canBomb = true;
+                }
+            } else if (playerNode.getPokerTotal() < 10 || playerNode.getNextPlayer().getPokerTotal() < 10
+                    || playerNode.getPrevPlayer().getPokerTotal() < 10) {
+                canBomb = true;
+            }
+
+            if (out == null && canBomb) {
+                if (bombList.size() > 0) {
                     out = PokerUtil.getPokerInfo(pokersMap.get(getMin(bombList)));
                 }
                 if (out == null && kingList.size() > 1) {
@@ -167,23 +179,29 @@ public class AIPlayerAction extends PlayerAction {
                 out = getPair();
             }
             if (out == null) {
-                out = getSingle();
+                boolean maxed = false;
+                if (playerNode.getNextPlayer().getRole() != playerNode.getRole()) {
+                    maxed = pokers.size() == 2 && singleList.size() == 2
+                            || playerNode.getNextPlayer().getPokerTotal() < 3;
+                }
+                out = getSingle(maxed);
             }
             if (out == null) {
                 out = PokerUtil.getPokerInfo(pokers);
             }
-            if (out == null && kingList.size() > 0) {
+            if (out == null && kingList.size() == 1) {
+                out = PokerUtil.getPokerInfo(pokersMap.get(kingList.get(0)));
+            }
+            if (out == null && bombList.size() > 0) {
+                out = PokerUtil.getPokerInfo(pokersMap.get(getMin(bombList)));
+            }
+            if (out == null) {
                 if (kingList.size() == 2) {
                     List<Poker> kingPoker = new ArrayList<>();
                     kingPoker.add(pokersMap.get(16).get(0));
                     kingPoker.add(pokersMap.get(17).get(0));
                     out = PokerUtil.getPokerInfo(kingPoker);
-                } else {
-                    out = PokerUtil.getPokerInfo(pokersMap.get(kingList.get(0)));
                 }
-            }
-            if (out == null && bombList.size() > 0) {
-                out = PokerUtil.getPokerInfo(pokersMap.get(getMin(bombList)));
             }
         }
 
@@ -587,7 +605,11 @@ public class AIPlayerAction extends PlayerAction {
     }
 
     public PokerInfo getSingle() {
-        int value = getMin(singleList);
+        return getSingle(false);
+    }
+
+    public PokerInfo getSingle(boolean maxed) {
+        int value = maxed ? getMax(singleList) : getMin(singleList);
         if (value == 0) {
             return null;
         }
@@ -596,6 +618,83 @@ public class AIPlayerAction extends PlayerAction {
     }
 
     public static void main(String[] args) {
+//        test1();
+        test2();
+    }
+
+    private static void test1() {
+        // 测试AI出小牌放队友走
+
+        PlayerNode playerNode = new PlayerNode();
+        playerNode.setPlayer("1");
+        playerNode.setRole(1);
+        PlayerNode playerNode2 = new PlayerNode();
+        playerNode2.setPlayer("2");
+        playerNode2.setRole(1);
+        // 队友只剩一张牌了
+        playerNode2.setPokerTotal(1);
+        PlayerNode playerNode3 = new PlayerNode();
+        playerNode3.setPlayer("3");
+        playerNode3.setRole(2);
+
+        playerNode.setPrevPlayer(playerNode3);
+        playerNode.setNextPlayer(playerNode2);
+        playerNode2.setPrevPlayer(playerNode);
+        playerNode2.setNextPlayer(playerNode3);
+        playerNode3.setPrevPlayer(playerNode2);
+        playerNode3.setNextPlayer(playerNode);
+
+        AIPlayerAction playerAction = new AIPlayerAction(playerNode);
+
+        List<Poker> pokers = new ArrayList<>();
+        pokers.add(new Poker(3, Poker.Suits.SPADE));
+        pokers.add(new Poker(6, Poker.Suits.CLUB));
+        pokers.add(new Poker(10, Poker.Suits.CLUB));
+        playerAction.setPokers(pokers);
+        playerAction.buildPokerModel();
+
+        // AI应该出最小的3放队友走
+        System.out.println(playerAction.outPoker(null, null));
+        ;
+    }
+
+    private static void test2() {
+        // 测试AI出大牌压下家地主
+
+        PlayerNode playerNode = new PlayerNode();
+        playerNode.setPlayer("1");
+        playerNode.setRole(1);
+        PlayerNode playerNode2 = new PlayerNode();
+        playerNode2.setPlayer("2");
+        playerNode2.setRole(2);
+        // 地主只剩1张牌了
+        playerNode2.setPokerTotal(1);
+        PlayerNode playerNode3 = new PlayerNode();
+        playerNode3.setPlayer("3");
+        playerNode3.setRole(1);
+
+        playerNode.setPrevPlayer(playerNode3);
+        playerNode.setNextPlayer(playerNode2);
+        playerNode2.setPrevPlayer(playerNode);
+        playerNode2.setNextPlayer(playerNode3);
+        playerNode3.setPrevPlayer(playerNode2);
+        playerNode3.setNextPlayer(playerNode);
+
+        AIPlayerAction playerAction = new AIPlayerAction(playerNode);
+
+        List<Poker> pokers = new ArrayList<>();
+        pokers.add(new Poker(3, Poker.Suits.SPADE));
+        pokers.add(new Poker(6, Poker.Suits.CLUB));
+        pokers.add(new Poker(10, Poker.Suits.CLUB));
+        playerAction.setPokers(pokers);
+        playerAction.buildPokerModel();
+
+        // AI应该出最大的10
+        System.out.println(playerAction.outPoker(null, null));
+        ;
+    }
+
+    private static void test() {
         List<List<Poker>> allocPokers = PokerUtil.allocPokers();
 
         PlayerNode playerNode = new PlayerNode();
