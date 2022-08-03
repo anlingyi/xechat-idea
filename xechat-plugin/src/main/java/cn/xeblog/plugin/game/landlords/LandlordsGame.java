@@ -40,6 +40,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     private JButton gameOverButton;
     private JButton outPokerButton;
     private JButton resetButton;
+    private JButton helpButton;
     private JButton notOutPokerButton;
     private JButton notCallScoreButton;
     private JButton callScoreButton;
@@ -60,6 +61,8 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     private Map<String, PlayerAction> aiPlayerActionMap;
 
     private List<String> userList;
+
+    private PlayerAction helpPlayerAction;
 
     static {
         aiPlayerList = new ArrayList<>();
@@ -349,6 +352,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                     controlRobot = false;
                     pokers = allocPokerList;
                     lastPokers = allocPokerDTO.getLastPokers();
+                    helpPlayerAction.setPokers(new ArrayList<>(pokers));
                     showTips(isHard ? "Confirming Master Machine..." : "正在确定地主...");
                 } else {
                     aiPlayerAction = aiPlayerActionMap.get(playerNode.getPlayer());
@@ -442,6 +446,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                     Player maxScorePlayer = playerMap.get(maxScorePlayerNode.getPlayer());
                     if (maxScorePlayerNode == currentPlayer) {
                         pokers.addAll(lastPokers);
+                        helpPlayerAction.setLastPokers(new ArrayList<>(lastPokers));
                         PokerUtil.sorted(pokers, true);
                         flushPlayerPanel(maxScorePlayer);
                         spinMoment(100);
@@ -771,10 +776,30 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                 selectedPokers.clear();
                 flushPlayerPanel(playerMap.get(currentPlayer.getPlayer()));
                 sendMsg(LandlordsGameDTO.MsgType.OUT_POKER, copy);
+                helpPlayerAction.setPokers(new ArrayList<>(pokers));
                 pokerInfo = null;
             }
         });
         playerTopPanel.add(outPokerButton);
+
+        helpButton = new JButton(isHard ? "Help!" : "提示");
+        helpButton.addActionListener(e -> {
+            selectedPokers.clear();
+            PlayerNode playerNode = null;
+            if (lastPlayer != null) {
+                playerNode = playerMap.get(lastPlayer).getPlayerNode();
+            }
+            pokerInfo = helpPlayerAction.getOutPoker(playerNode, lastPokerInfo);
+            boolean isOut = pokerInfo != null;
+            if (isOut) {
+                for (Poker poker : pokerInfo.getPokers()) {
+                    selectedPokers.add(poker);
+                }
+            }
+            flushPokers();
+            outPokerButton.setEnabled(isOut);
+        });
+        playerTopPanel.add(helpButton);
 
         playerTopPanel.updateUI();
     }
@@ -1006,6 +1031,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
 
             if (GameAction.getNickname().equals(node.getPlayer())) {
                 currentPlayer = node;
+                helpPlayerAction = new AIPlayerAction(currentPlayer);
             }
 
             if (aiPlayerActionMap.containsKey(node.getPlayer())) {
