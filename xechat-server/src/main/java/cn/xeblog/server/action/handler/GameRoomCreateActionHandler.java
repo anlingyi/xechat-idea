@@ -35,6 +35,7 @@ public class GameRoomCreateActionHandler extends AbstractActionHandler<CreateGam
 
         gameRoom.setGame(body.getGame());
         gameRoom.setNums(body.getNums());
+        gameRoom.setGameMode(body.getGameMode());
         gameRoom.setHomeowner(user);
         GameRoomCache.joinRoom(roomId, user);
         user.send(response);

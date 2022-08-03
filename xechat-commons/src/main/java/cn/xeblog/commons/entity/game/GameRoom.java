@@ -32,6 +32,11 @@ public class GameRoom implements Serializable {
     private int nums;
 
     /**
+     * 游戏模式
+     */
+    private String gameMode;
+
+    /**
      * 房主
      */
     private User homeowner;

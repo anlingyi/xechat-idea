@@ -26,4 +26,9 @@ public class CreateGameRoomDTO implements Serializable {
      */
     private int nums;
 
+    /**
+     * 游戏模式
+     */
+    private String gameMode;
+
 }

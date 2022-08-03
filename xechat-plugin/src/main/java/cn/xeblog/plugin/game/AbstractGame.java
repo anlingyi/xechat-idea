@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.game;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.util.StrUtil;
 import cn.xeblog.commons.entity.game.GameDTO;
@@ -95,8 +96,12 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
     }
 
     protected JButton getCreateRoomButton(List<Integer> numsList) {
+        return getCreateRoomButton(numsList, null);
+    }
+
+    protected JButton getCreateRoomButton(List<Integer> numsList, List<String> gameModeList) {
         JButton createGameRoomButton = new JButton("创建房间");
-        createGameRoomButton.addActionListener(e -> showCreateGameRoomPanel(numsList));
+        createGameRoomButton.addActionListener(e -> showCreateGameRoomPanel(numsList, gameModeList));
         return createGameRoomButton;
     }
 
@@ -106,8 +111,8 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         return exitButton;
     }
 
-    protected void showCreateGameRoomPanel(List<Integer> numsList) {
-        new CreateGameRoomDialog(numsList).show();
+    protected void showCreateGameRoomPanel(List<Integer> numsList, List<String> gameModeList) {
+        new CreateGameRoomDialog(numsList, gameModeList).show();
     }
 
     private static class CreateGameRoomDialog extends DialogWrapper {
@@ -115,10 +120,17 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         private JPanel main;
         private ComboBox numsBox;
         private List<Integer> numsList;
+        private List<String> gameModeList;
+        private ComboBox gameModeBox;
 
         CreateGameRoomDialog(List<Integer> numsList) {
+            this(numsList, null);
+        }
+
+        CreateGameRoomDialog(List<Integer> numsList, List<String> gameModeList) {
             super(true);
             this.numsList = numsList;
+            this.gameModeList = gameModeList;
 
             setTitle("创建房间");
             setResizable(false);
@@ -132,13 +144,32 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         protected @Nullable JComponent createCenterPanel() {
             main = new JPanel();
             main.setPreferredSize(new Dimension(200, 50));
+            Box vBox = Box.createVerticalBox();
+            main.add(vBox);
+
+            Box hBox = Box.createHorizontalBox();
+            vBox.add(hBox);
+
             JLabel label = new JLabel("房间人数：");
             label.setFont(new Font("", 1, 13));
-            main.add(label);
+            hBox.add(label);
 
             numsBox = new ComboBox();
             numsList.forEach(nums -> numsBox.addItem(nums));
-            main.add(numsBox);
+            hBox.add(numsBox);
+
+            if (CollUtil.isNotEmpty(gameModeList)) {
+                Box hBox2 = Box.createHorizontalBox();
+                vBox.add(hBox2);
+
+                JLabel gameModelLabel = new JLabel("游戏模式：");
+                gameModelLabel.setFont(new Font("", 1, 13));
+                hBox2.add(gameModelLabel);
+
+                gameModeBox = new ComboBox();
+                gameModeList.forEach(mode -> gameModeBox.addItem(mode));
+                hBox2.add(gameModeBox);
+            }
 
             return main;
         }
@@ -146,7 +177,11 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         @Override
         protected void doOKAction() {
             int nums = Integer.parseInt(numsBox.getSelectedItem().toString());
-            GameAction.getAction().createRoom(GameAction.getGame(), nums);
+            String gameMode = null;
+            if (gameModeBox != null) {
+                gameMode = gameModeBox.getSelectedItem().toString();
+            }
+            GameAction.getAction().createRoom(GameAction.getGame(), nums, gameMode);
             super.doOKAction();
         }
 
@@ -158,6 +193,7 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         mainPanel.setLayout(null);
         mainPanel.setMinimumSize(new Dimension(300, 200));
 
+        Box mainVBox = Box.createVerticalBox();
         JPanel panel = new JPanel();
         panel.setBounds(10, 10, 280, 500);
 
@@ -165,6 +201,16 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         titleLabel.setFont(new Font("", 1, 14));
         titleLabel.setForeground(new Color(239, 106, 106));
         panel.add(titleLabel);
+
+        String gameMode = gameRoom.getGameMode();
+        if (gameMode != null) {
+            Box hBox = Box.createHorizontalBox();
+            JLabel modeLabel = new JLabel(gameMode);
+            modeLabel.setFont(new Font("", 1, 13));
+            hBox.add(modeLabel);
+            mainVBox.add(Box.createVerticalStrut(10));
+            mainVBox.add(hBox);
+        }
 
         Box hBox = Box.createHorizontalBox();
         JLabel label1 = new JLabel("【房间玩家】");
@@ -248,7 +294,6 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
             hBox3.add(getExitButton());
         }
 
-        Box mainVBox = Box.createVerticalBox();
         mainVBox.add(Box.createVerticalStrut(20));
         mainVBox.add(hBox);
         mainVBox.add(Box.createVerticalStrut(10));

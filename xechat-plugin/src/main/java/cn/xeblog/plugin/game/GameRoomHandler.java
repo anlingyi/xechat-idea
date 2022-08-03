@@ -45,11 +45,12 @@ public abstract class GameRoomHandler implements GameRoomEventHandler {
     /**
      * 创建游戏房间
      *
-     * @param game 游戏
-     * @param nums 房间人数
+     * @param game     游戏
+     * @param nums     房间人数
+     * @param gameMode 游戏模式
      */
-    public void createRoom(Game game, int nums) {
-        MessageAction.send(new CreateGameRoomDTO(game, nums), Action.CREATE_GAME_ROOM);
+    public void createRoom(Game game, int nums, String gameMode) {
+        MessageAction.send(new CreateGameRoomDTO(game, nums, gameMode), Action.CREATE_GAME_ROOM);
     }
 
     /**

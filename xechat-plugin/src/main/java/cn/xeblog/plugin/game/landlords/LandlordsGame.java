@@ -129,24 +129,24 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     /**
      * 当前游戏模式
      */
-    private GameModel gameModel;
+    private GameMode gameMode;
 
     @AllArgsConstructor
     @Getter
-    private enum GameModel {
+    private enum GameMode {
         CLASSIC("经典模式"),
         NOT_SHUFFLED("不洗牌模式");
 
         private String name;
 
-        public static GameModel getModel(String name) {
-            for (GameModel model : values()) {
+        public static GameMode getMode(String name) {
+            for (GameMode model : values()) {
                 if (model.name.equals(name)) {
                     return model;
                 }
             }
 
-            return null;
+            return GameMode.CLASSIC;
         }
     }
 
@@ -214,9 +214,9 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         mainPanel.setLayout(null);
         mainPanel.setEnabled(true);
         mainPanel.setVisible(true);
-        mainPanel.setMinimumSize(new Dimension(150, 200));
+        mainPanel.setMinimumSize(new Dimension(150, 260));
         startPanel = new JPanel();
-        startPanel.setBounds(10, 10, 120, 200);
+        startPanel.setBounds(10, 10, 120, 260);
         mainPanel.add(startPanel);
 
         JLabel title = new JLabel("斗地主！");
@@ -232,20 +232,20 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         vBox.add(modelLabel);
 
         vBox.add(Box.createVerticalStrut(5));
-        ComboBox gameModelBox = new ComboBox();
-        gameModelBox.setPreferredSize(new Dimension(40, 30));
-        for (GameModel value : GameModel.values()) {
-            gameModelBox.addItem(value.getName());
+        ComboBox gameModeBox = new ComboBox();
+        gameModeBox.setPreferredSize(new Dimension(40, 30));
+        for (GameMode value : GameMode.values()) {
+            gameModeBox.addItem(value.getName());
         }
-        gameModel = GameModel.CLASSIC;
-        gameModelBox.setSelectedItem(gameModel.getName());
-        gameModelBox.addActionListener(l -> {
-            GameModel selectedGameModel = GameModel.getModel(gameModelBox.getSelectedItem().toString());
-            if (selectedGameModel != null) {
-                gameModel = selectedGameModel;
+        gameMode = GameMode.CLASSIC;
+        gameModeBox.setSelectedItem(gameMode.getName());
+        gameModeBox.addActionListener(l -> {
+            GameMode selectedGameMode = GameMode.getMode(gameModeBox.getSelectedItem().toString());
+            if (selectedGameMode != null) {
+                gameMode = selectedGameMode;
             }
         });
-        vBox.add(gameModelBox);
+        vBox.add(gameModeBox);
 
         vBox.add(Box.createVerticalStrut(20));
         vBox.add(getStartGameButton());
@@ -254,7 +254,13 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
             List<Integer> numsList = new ArrayList();
             numsList.add(2);
             numsList.add(3);
-            vBox.add(getCreateRoomButton(numsList));
+
+            List<String> gameModeList = new ArrayList<>();
+            for (GameMode mode : GameMode.values()) {
+                gameModeList.add(mode.getName());
+            }
+
+            vBox.add(getCreateRoomButton(numsList, gameModeList));
         }
         vBox.add(getExitButton());
 
@@ -265,6 +271,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     protected void start() {
         initValue();
         if (gameRoom != null) {
+            gameMode = GameMode.getMode(gameRoom.getGameMode());
             userList.addAll(gameRoom.getUsers().keySet());
         } else {
             userList.add(GameAction.getNickname());
@@ -308,7 +315,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
 
     private void allocPokersMsg() {
         int priority = new Random().nextInt(3);
-        List<List<Poker>> allocPokers = PokerUtil.allocPokers(gameModel == GameModel.CLASSIC);
+        List<List<Poker>> allocPokers = PokerUtil.allocPokers(gameMode == GameMode.CLASSIC);
         List<String> playerList = userList;
         for (int i = 0; i < playerList.size(); i++) {
             sendMsg(LandlordsGameDTO.MsgType.ALLOC_POKER, playerList.get(i),
