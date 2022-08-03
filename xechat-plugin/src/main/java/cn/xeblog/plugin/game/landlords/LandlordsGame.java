@@ -126,6 +126,30 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
      */
     private int maxScore;
 
+    /**
+     * 当前游戏模式
+     */
+    private GameModel gameModel;
+
+    @AllArgsConstructor
+    @Getter
+    private enum GameModel {
+        CLASSIC("经典模式"),
+        NOT_SHUFFLED("不洗牌模式");
+
+        private String name;
+
+        public static GameModel getModel(String name) {
+            for (GameModel model : values()) {
+                if (model.name.equals(name)) {
+                    return model;
+                }
+            }
+
+            return null;
+        }
+    }
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
@@ -203,7 +227,29 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         startPanel.add(vBox);
 
         vBox.add(Box.createVerticalStrut(20));
+        JLabel modelLabel = new JLabel("游戏模式：");
+        modelLabel.setFont(new Font("", 1, 13));
+        vBox.add(modelLabel);
+
+        vBox.add(Box.createVerticalStrut(5));
+        ComboBox gameModelBox = new ComboBox();
+        gameModelBox.setPreferredSize(new Dimension(40, 30));
+        for (GameModel value : GameModel.values()) {
+            gameModelBox.addItem(value.getName());
+        }
+        gameModel = GameModel.CLASSIC;
+        gameModelBox.setSelectedItem(gameModel.getName());
+        gameModelBox.addActionListener(l -> {
+            GameModel selectedGameModel = GameModel.getModel(gameModelBox.getSelectedItem().toString());
+            if (selectedGameModel != null) {
+                gameModel = selectedGameModel;
+            }
+        });
+        vBox.add(gameModelBox);
+
+        vBox.add(Box.createVerticalStrut(20));
         vBox.add(getStartGameButton());
+
         if (DataCache.isOnline) {
             List<Integer> numsList = new ArrayList();
             numsList.add(2);
@@ -262,7 +308,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
 
     private void allocPokersMsg() {
         int priority = new Random().nextInt(3);
-        List<List<Poker>> allocPokers = PokerUtil.allocPokers();
+        List<List<Poker>> allocPokers = PokerUtil.allocPokers(gameModel == GameModel.CLASSIC);
         List<String> playerList = userList;
         for (int i = 0; i < playerList.size(); i++) {
             sendMsg(LandlordsGameDTO.MsgType.ALLOC_POKER, playerList.get(i),
