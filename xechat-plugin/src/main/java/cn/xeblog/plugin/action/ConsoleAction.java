@@ -1,17 +1,23 @@
 package cn.xeblog.plugin.action;
 
+import cn.hutool.core.util.StrUtil;
 import cn.xeblog.plugin.entity.TextRender;
 import cn.xeblog.plugin.enums.Command;
 import cn.xeblog.plugin.enums.Style;
 import cn.xeblog.plugin.mode.ModeContext;
 import com.intellij.ide.BrowserUtil;
+
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.*;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author anlingyi
@@ -127,12 +133,71 @@ public class ConsoleAction {
         ConsoleAction.showSimpleMsg("请先登录！登录命令：" + Command.LOGIN.getCommand() + "，帮助命令：" + Command.HELP.getCommand());
     }
 
+    private static void bindPopupMenu() {
+        JPopupMenu jPopupMenu = new JPopupMenu("右键菜单");
+        console.setComponentPopupMenu(jPopupMenu);
+
+        JMenuItem copyItem = new JMenuItem("复制内容");
+        copyItem.addActionListener(ev -> {
+            String selectedText = console.getSelectedText();
+            if (StrUtil.isBlank(selectedText)) {
+                return;
+            }
+
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            StringSelection contents = new StringSelection(selectedText);
+            clipboard.setContents(contents, null);
+        });
+
+        JMenuItem searchItem = new JMenuItem("百度搜索");
+        searchItem.addActionListener(ev -> {
+            String selectedText = console.getSelectedText();
+            if (StrUtil.isBlank(selectedText)) {
+                return;
+            }
+
+            BrowserUtil.browse("https://www.baidu.com/s?wd=" + selectedText);
+        });
+
+        JMenuItem openUrlItem = new JMenuItem("打开网址");
+        openUrlItem.addActionListener(ev -> {
+            String selectedText = console.getSelectedText();
+            if (StrUtil.isBlank(selectedText)) {
+                return;
+            }
+
+            if (!selectedText.startsWith("http")) {
+                selectedText = "https://" + selectedText;
+            }
+
+            BrowserUtil.browse(selectedText);
+        });
+
+        jPopupMenu.add(copyItem);
+        jPopupMenu.add(searchItem);
+        jPopupMenu.add(openUrlItem);
+        jPopupMenu.addSeparator();
+
+        Map<String, Command> commandMap = new LinkedHashMap<>();
+        commandMap.put("快速登录", Command.LOGIN);
+        commandMap.put("退！退！退！", Command.LOGOUT);
+        commandMap.put("清屏", Command.CLEAN);
+        commandMap.put("帮助", Command.HELP);
+
+        commandMap.forEach((k, v) -> jPopupMenu.add(k).addActionListener(l -> {
+            ConsoleAction.showSimpleMsg(v.getCommand());
+            v.exec();
+        }));
+    }
+
     public static void setConsole(JTextPane console) {
         ConsoleAction.console = console;
         console.setEditorKit(new WarpEditorKit());
         SimpleAttributeSet simpleAttributeSet = new SimpleAttributeSet();
         StyleConstants.setLineSpacing(simpleAttributeSet, 0.2f);
         console.setParagraphAttributes(simpleAttributeSet, false);
+
+        bindPopupMenu();
     }
 
     public static void setPanel(JPanel panel) {
