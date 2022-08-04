@@ -34,8 +34,8 @@ public class StartPage implements IPage {
         vBox.add(Box.createVerticalStrut(20));
         vBox.add(getStartButton());
         vBox.add(getSettingButton());
-        vBox.add(getExitButton());
         vBox.add(getReadmeButton());
+        vBox.add(getExitButton());
         startPanel.add(vBox);
     }
 
