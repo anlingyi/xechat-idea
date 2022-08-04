@@ -4,7 +4,9 @@ import cn.hutool.core.util.StrUtil;
 import cn.xeblog.plugin.entity.TextRender;
 import cn.xeblog.plugin.enums.Command;
 import cn.xeblog.plugin.enums.Style;
+import cn.xeblog.plugin.listener.MainWindowInitializedEventListener;
 import cn.xeblog.plugin.mode.ModeContext;
+import cn.xeblog.plugin.ui.MainWindow;
 import com.intellij.ide.BrowserUtil;
 
 import javax.swing.*;
@@ -23,7 +25,7 @@ import java.util.Map;
  * @author anlingyi
  * @date 2020/6/1
  */
-public class ConsoleAction {
+public class ConsoleAction implements MainWindowInitializedEventListener {
 
     private static JTextPane console;
 
@@ -32,6 +34,20 @@ public class ConsoleAction {
     private static JScrollPane consoleScroll;
 
     private static boolean isNewLine;
+
+    @Override
+    public void afterInit(MainWindow mainWindow) {
+        console = mainWindow.getConsoleTextPane();
+        panel = mainWindow.getLeftPanel();
+        consoleScroll = mainWindow.getConsoleScrollPane();
+
+        console.setEditorKit(new WarpEditorKit());
+        SimpleAttributeSet simpleAttributeSet = new SimpleAttributeSet();
+        StyleConstants.setLineSpacing(simpleAttributeSet, 0.2f);
+        console.setParagraphAttributes(simpleAttributeSet, false);
+
+        bindPopupMenu();
+    }
 
     public static void updateUI() {
         SwingUtilities.invokeLater(() -> console.updateUI());
@@ -188,24 +204,6 @@ public class ConsoleAction {
             ConsoleAction.showSimpleMsg(v.getCommand());
             v.exec();
         }));
-    }
-
-    public static void setConsole(JTextPane console) {
-        ConsoleAction.console = console;
-        console.setEditorKit(new WarpEditorKit());
-        SimpleAttributeSet simpleAttributeSet = new SimpleAttributeSet();
-        StyleConstants.setLineSpacing(simpleAttributeSet, 0.2f);
-        console.setParagraphAttributes(simpleAttributeSet, false);
-
-        bindPopupMenu();
-    }
-
-    public static void setPanel(JPanel panel) {
-        ConsoleAction.panel = panel;
-    }
-
-    public static void setConsoleScroll(JScrollPane consoleScroll) {
-        ConsoleAction.consoleScroll = consoleScroll;
     }
 
     public static void showSystemMsg(String time, String msg) {
