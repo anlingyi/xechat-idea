@@ -8,6 +8,7 @@ import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.Game;
 import cn.xeblog.commons.enums.UserStatus;
+import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.cache.DataCache;
@@ -50,6 +51,11 @@ public abstract class AbstractGame<T extends GameDTO> extends AbstractPanelCompo
                 abstractGame.allPlayersGameStarted();
             }
         };
+    }
+
+    protected final void startGame() {
+        start();
+        ConsoleAction.gotoConsoleLow(true);
     }
 
     /**
@@ -519,7 +525,7 @@ public abstract class AbstractGame<T extends GameDTO> extends AbstractPanelCompo
     public void gameStarted(GameRoom gameRoom) {
         gameRoomHandler.gameStarted(gameRoom);
         invoke(() -> {
-            start();
+            startGame();
             gameRoomHandler.playerGameStarted();
         });
     }

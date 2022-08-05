@@ -133,9 +133,15 @@ public class ConsoleAction implements MainWindowInitializedEventListener {
     }
 
     public static void gotoConsoleLow() {
-        JScrollBar verticalScrollBar = consoleScroll.getVerticalScrollBar();
-        if (verticalScrollBar.getValue() + 20 < verticalScrollBar.getMaximum() - verticalScrollBar.getHeight()) {
-            return;
+        gotoConsoleLow(false);
+    }
+
+    public static void gotoConsoleLow(boolean forced) {
+        if (!forced) {
+            JScrollBar verticalScrollBar = consoleScroll.getVerticalScrollBar();
+            if (verticalScrollBar.getValue() + 20 < verticalScrollBar.getMaximum() - verticalScrollBar.getHeight()) {
+                return;
+            }
         }
 
         updateCaretPosition(-1);

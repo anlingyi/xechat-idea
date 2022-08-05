@@ -2,6 +2,7 @@ package cn.xeblog.plugin.tools;
 
 import cn.hutool.core.thread.GlobalThreadPool;
 import cn.xeblog.commons.util.ThreadUtils;
+import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.enums.Command;
 import cn.xeblog.plugin.ui.MainWindow;
 import com.intellij.openapi.application.ApplicationManager;
@@ -19,8 +20,13 @@ public abstract class AbstractPanelComponent {
     public AbstractPanelComponent(boolean initialized) {
         this.mainPanel = MainWindow.getInstance().getRightPanel();
         if (initialized) {
-            init();
+            initialized();
         }
+    }
+
+    private void initialized() {
+        init();
+        ConsoleAction.gotoConsoleLow(true);
     }
 
     /**
