@@ -25,6 +25,7 @@ public abstract class AbstractPanelComponent {
     }
 
     private void initialized() {
+        initMainPanel();
         init();
         ConsoleAction.gotoConsoleLow(true);
     }
@@ -64,6 +65,14 @@ public abstract class AbstractPanelComponent {
 
     protected void spinMoment(long millis) {
         ThreadUtils.spinMoment(millis);
+    }
+
+    protected void initMainPanel() {
+        mainPanel.removeAll();
+        mainPanel.setLayout(null);
+        mainPanel.setPreferredSize(null);
+        mainPanel.setEnabled(true);
+        mainPanel.setVisible(true);
     }
 
 }

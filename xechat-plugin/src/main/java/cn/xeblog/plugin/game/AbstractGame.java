@@ -68,7 +68,8 @@ public abstract class AbstractGame<T extends GameDTO> extends AbstractPanelCompo
      *
      * @param body 数据内容
      */
-    public abstract void handle(T body);
+    public void handle(T body) {
+    }
 
 
     protected void allPlayersGameStarted() {
