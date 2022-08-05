@@ -2,7 +2,7 @@ package cn.xeblog.plugin.persistence;
 
 import cn.xeblog.commons.constants.Commons;
 import cn.xeblog.plugin.cache.DataCache;
-import cn.xeblog.plugin.game.read.ReadConfig;
+import cn.xeblog.plugin.tools.read.ReadConfig;
 import cn.xeblog.plugin.util.CommandHistoryUtils;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;

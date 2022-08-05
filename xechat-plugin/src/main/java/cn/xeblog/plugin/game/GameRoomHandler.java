@@ -6,7 +6,6 @@ import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.Game;
 import cn.xeblog.commons.enums.InviteStatus;
 import cn.xeblog.plugin.action.ConsoleAction;
-import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.cache.DataCache;
 
@@ -158,7 +157,6 @@ public abstract class GameRoomHandler implements GameRoomEventHandler {
         this.timeoutTask = new HashMap<>();
         this.isHomeowner = true;
         this.playerGameStartedCounter = new AtomicInteger(gameRoom.getNums());
-        roomOpened(gameRoom);
     }
 
     @Override

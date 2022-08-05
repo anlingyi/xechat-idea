@@ -1,6 +1,6 @@
 package cn.xeblog.plugin.persistence;
 
-import cn.xeblog.plugin.game.read.ReadConfig;
+import cn.xeblog.plugin.tools.read.ReadConfig;
 import lombok.Data;
 
 import java.util.List;

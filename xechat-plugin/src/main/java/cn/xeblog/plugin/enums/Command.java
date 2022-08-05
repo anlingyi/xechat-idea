@@ -40,7 +40,13 @@ public enum Command {
         }
     },
     JOIN("join", "加入游戏 | 拒绝邀请：此命令后加任意字符"),
-    GAME_OVER("over", "结束游戏"),
+    OPEN("open") {
+        @Override
+        public String getDesc() {
+            return "打开工具，" + this.getCommand() + " [{工具编号}]";
+        }
+    },
+    OVER("over", "结束游戏 | 工具"),
     SHOW_MODE("showMode", "查看模式选项"),
     MODE("mode") {
         @Override

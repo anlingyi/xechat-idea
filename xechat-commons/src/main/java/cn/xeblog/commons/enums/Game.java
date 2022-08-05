@@ -13,8 +13,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum Game {
     GOBANG("五子棋", false),
-    LANDLORDS("斗地主", false),
-    READ("阅读", false);
+    LANDLORDS("斗地主", false);
 
     /**
      * 游戏名称

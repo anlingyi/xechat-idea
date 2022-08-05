@@ -3,6 +3,7 @@ package cn.xeblog.plugin.game.landlords;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.xeblog.commons.entity.User;
+import cn.xeblog.commons.entity.game.GameRoom;
 import cn.xeblog.commons.entity.game.landlords.*;
 import cn.xeblog.commons.enums.Game;
 import cn.xeblog.plugin.action.GameAction;
@@ -270,6 +271,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     @Override
     protected void start() {
         initValue();
+        GameRoom gameRoom = getRoom();
         if (gameRoom != null) {
             gameMode = GameMode.getMode(gameRoom.getGameMode());
             userList.addAll(gameRoom.getUsers().keySet());
@@ -295,7 +297,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
 
     @Override
     protected void allPlayersGameStarted() {
-        if (isHomeowner) {
+        if (isHomeowner()) {
             int usersTotal = userList.size();
             int nums = 3 - usersTotal;
             invoke(() -> {
@@ -336,7 +338,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         dto.setMsgType(msgType);
         dto.setPlayer(player);
         dto.setData(data);
-        if (gameRoom != null) {
+        if (getRoom() != null) {
             sendMsg(dto);
         }
         invoke(() -> handle(dto));
@@ -378,6 +380,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
             nextPlayer = playerMap.get(nextPlayerNode.getPlayer());
             aiPlayerAction = aiPlayerActionMap.get(nextPlayerNode.getPlayer());
         }
+        boolean isHomeowner = isHomeowner();
         boolean isMe = playerNode == currentPlayer;
         boolean controlRobot = isHomeowner && aiPlayerAction != null;
         boolean isHard = isHard();
@@ -580,7 +583,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         String roleName = role == 1 ? (isHard ? "Slave" : "农民") : (isHard ? "Master" : "地主");
         state = role == currentPlayer.getRole() ? 5 : 4;
         showTips(roleName + (isHard ? " Victory!" : "胜利！"));
-        if (gameRoom != null) {
+        if (getRoom() != null) {
             gameOverButton.setVisible(true);
         }
     }
@@ -642,7 +645,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         mainTopPanel.add(titleLabel);
 
         JPanel mainBottomPanel = new JPanel();
-        if (gameRoom == null) {
+        if (getRoom() == null) {
             backButton = getBackButton();
             mainBottomPanel.add(backButton);
         }
@@ -1054,7 +1057,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         button.addActionListener(e -> {
             button.setEnabled(false);
             invoke(() -> {
-                isHomeowner = true;
+                setHomeowner(true);
                 start();
                 button.setEnabled(true);
             }, 100);

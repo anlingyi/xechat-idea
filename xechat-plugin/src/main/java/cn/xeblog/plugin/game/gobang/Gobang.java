@@ -1,7 +1,6 @@
 package cn.xeblog.plugin.game.gobang;
 
 import cn.hutool.core.thread.GlobalThreadPool;
-import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.enums.Game;
@@ -242,7 +241,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
         } else {
             put = true;
             gameMode = GameMode.ONLINE;
-            gameRoom.getUsers().forEach((k, v) -> {
+            getRoom().getUsers().forEach((k, v) -> {
                 if (!v.getUsername().equals(player)) {
                     nextPlayer = v.getUsername();
                     return;
@@ -860,14 +859,14 @@ public class Gobang extends AbstractGame<GobangDTO> {
         border = 14;
         initChessPanel();
 
-        if (gameRoom == null) {
+        if (getRoom() == null) {
             allPlayersGameStarted();
         }
     }
 
     @Override
     protected void allPlayersGameStarted() {
-        if (isHomeowner) {
+        if (isHomeowner()) {
             // 自旋等待一段时间，再发送游戏数据
             invoke(() -> {
                 int randomType = new Random().nextInt(2) + 1;
