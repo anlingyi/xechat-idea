@@ -196,9 +196,10 @@ public class ConsoleAction implements MainWindowInitializedEventListener {
 
         Map<String, Command> commandMap = new LinkedHashMap<>();
         commandMap.put("快速登录", Command.LOGIN);
+        commandMap.put("加入游戏", Command.JOIN);
+        commandMap.put("清者自清", Command.CLEAN);
+        commandMap.put("需要帮助！", Command.HELP);
         commandMap.put("退！退！退！", Command.LOGOUT);
-        commandMap.put("清屏", Command.CLEAN);
-        commandMap.put("帮助", Command.HELP);
 
         commandMap.forEach((k, v) -> jPopupMenu.add(k).addActionListener(l -> {
             ConsoleAction.showSimpleMsg(v.getCommand());
