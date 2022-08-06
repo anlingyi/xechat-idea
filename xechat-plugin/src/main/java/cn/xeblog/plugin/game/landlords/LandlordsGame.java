@@ -1124,12 +1124,20 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         super.playerLeft(player);
         if (state > 0 && state < 4) {
             state = 4;
+            String msg = "游戏结束！" + player.getUsername() + "逃跑了~";
+            String tips = "溜了~";
+
             if (isHard()) {
-                String msg = "Debugging is over. The " + playerMap.get(player.getUsername()).getPlayerNode().getAlias() + " has been offline";
-                showTips(msg);
-            } else {
-                showTips("游戏结束！" + player.getUsername() + "逃跑了~");
+                msg = "Debugging is over. The " + playerMap.get(player.getUsername()).getPlayerNode().getAlias() + " has been offline";
+                tips = "Offline~";
             }
+
+            showTips(msg);
+            Player leftPlayer = playerMap.get(player.getUsername());
+            if (leftPlayer != null) {
+                leftPlayer.showTips(tips);
+            }
+
             gameOverButton.setVisible(true);
         }
     }
