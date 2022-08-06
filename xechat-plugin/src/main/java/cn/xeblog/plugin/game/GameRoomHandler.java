@@ -157,6 +157,7 @@ public abstract class GameRoomHandler implements GameRoomEventHandler {
         this.timeoutTask = new HashMap<>();
         this.isHomeowner = true;
         this.playerGameStartedCounter = new AtomicInteger(gameRoom.getNums());
+        roomOpened(gameRoom);
     }
 
     @Override

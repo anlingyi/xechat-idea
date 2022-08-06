@@ -50,6 +50,12 @@ public abstract class AbstractGame<T extends GameDTO> extends AbstractPanelCompo
             protected void allPlayersGameStarted() {
                 abstractGame.allPlayersGameStarted();
             }
+
+            @Override
+            public void roomOpened(GameRoom gameRoom) {
+                super.roomOpened(gameRoom);
+                invoke(abstractGame::showGameRoomPanel);
+            }
         };
     }
 
@@ -72,6 +78,9 @@ public abstract class AbstractGame<T extends GameDTO> extends AbstractPanelCompo
     }
 
 
+    /**
+     * 房间内所有玩家都已开始游戏后处理
+     */
     protected void allPlayersGameStarted() {
 
     }
@@ -466,13 +475,11 @@ public abstract class AbstractGame<T extends GameDTO> extends AbstractPanelCompo
     @Override
     public void roomCreated(GameRoom gameRoom) {
         gameRoomHandler.roomCreated(gameRoom);
-        roomOpened(gameRoom);
     }
 
     @Override
     public void roomOpened(GameRoom gameRoom) {
         gameRoomHandler.roomOpened(gameRoom);
-        invoke(() -> showGameRoomPanel());
     }
 
     @Override
