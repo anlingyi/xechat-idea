@@ -66,7 +66,7 @@ public class SettingPage implements IPage {
         model.addColumn("名称", new String[]{
                 "Legado Host", "困难模式单行字数",
                 "上一页热键", "下一页热键", "老板键", "恢复键",
-                "自动翻译速度(秒)", "自动翻译开始", "自动翻页停止"
+                "自动翻页速度(秒)", "自动翻页开始", "自动翻页停止"
         });
         String[] values = new String[2];
         values[0] = DataCache.readConfig.getLegadoHost();
