@@ -543,7 +543,7 @@ public class AIPlayerAction extends PlayerAction {
                 maxShunziPokerValues = shunziPokerValues;
             }
             if (shunzi == 1) {
-                if (maxShunzi > 4) {
+                if (maxShunzi > 4 || !isSingle && maxShunzi > 2) {
                     break;
                 }
 
@@ -571,7 +571,11 @@ public class AIPlayerAction extends PlayerAction {
             }
         }
 
-        if (isSingle && maxShunzi < 5 || maxShunzi < 3) {
+        if (isSingle) {
+            if (maxShunzi < 5) {
+                return null;
+            }
+        } else if (maxShunzi < 3) {
             return null;
         }
 
