@@ -43,6 +43,19 @@ public class PokerUtil {
     }
 
     /**
+     * 不洗牌
+     *
+     * @param pokers
+     */
+    public static void notShuffle(List<Poker> pokers) {
+        int size = pokers.size();
+        Random random = new Random();
+        Collections.rotate(pokers, random.nextInt(size));
+        Collections.rotate(pokers, random.nextInt(size));
+        Collections.rotate(pokers, random.nextInt(size));
+    }
+
+    /**
      * 排序
      *
      * @param pokers
@@ -80,10 +93,25 @@ public class PokerUtil {
      * @return
      */
     public static List<List<Poker>> allocPokers() {
+        return allocPokers(true);
+    }
+
+    /**
+     * 分配扑克牌
+     *
+     * @param shuffled 是否洗牌
+     * @return
+     */
+    public static List<List<Poker>> allocPokers(boolean shuffled) {
         int handTotal = 17;
         List<List<Poker>> list = new ArrayList<>(4);
         List<Poker> deck = genPokers();
-        shuffle(deck);
+        if (shuffled) {
+            shuffle(deck);
+        } else {
+            notShuffle(deck);
+        }
+
         List<Poker> player1 = new ArrayList<>(handTotal);
         List<Poker> player2 = new ArrayList<>(handTotal);
         List<Poker> player3 = new ArrayList<>(handTotal);
@@ -92,9 +120,11 @@ public class PokerUtil {
         list.add(player3);
 
         int index = 0;
-        for (int i = 0; i < handTotal; i++) {
+        Integer[] allocBases = {2, 4, 4, 6, 1};
+        for (Integer base : allocBases) {
             for (int j = 0; j < list.size(); j++) {
-                list.get(j).add(deck.get(index++));
+                list.get(j).addAll(deck.subList(index, index + base));
+                index += base;
             }
         }
 
@@ -282,6 +312,24 @@ public class PokerUtil {
     }
 
     public static void main(String[] args) {
+//        testPokerInfo();
+        List<List<Poker>> pokerList = allocPokers(false);
+        System.out.println("玩家1-手牌 -> " + pokerList.get(0));
+        System.out.println("玩家2-手牌 -> " + pokerList.get(1));
+        System.out.println("玩家3-手牌 -> " + pokerList.get(2));
+        System.out.println("底牌 -> " + pokerList.get(3));
+    }
+
+    private static void testGetPokerInfo(List<Poker> pokers, PokerModel pokerModel) {
+        PokerInfo pokerInfo = getPokerInfo(pokers);
+        System.out.println(pokerInfo);
+        if ((pokerInfo == null && pokerModel != null)
+                || (pokerInfo != null && pokerInfo.getPokerModel() != pokerModel)) {
+            throw new RuntimeException("不匹配！");
+        }
+    }
+
+    private static void testPokerInfo() {
         // 四带两对
         List<Poker> pokers = new ArrayList<>();
         pokers.add(new Poker(15, Poker.Suits.HEART));
@@ -465,15 +513,6 @@ public class PokerUtil {
         pokers18.add(new Poker(7, Poker.Suits.SPADE));
         pokers18.add(new Poker(7, Poker.Suits.SPADE));
         testGetPokerInfo(pokers18, null);
-    }
-
-    private static void testGetPokerInfo(List<Poker> pokers, PokerModel pokerModel) {
-        PokerInfo pokerInfo = getPokerInfo(pokers);
-        System.out.println(pokerInfo);
-        if ((pokerInfo == null && pokerModel != null)
-                || (pokerInfo != null && pokerInfo.getPokerModel() != pokerModel)) {
-            throw new RuntimeException("不匹配！");
-        }
     }
 
 }

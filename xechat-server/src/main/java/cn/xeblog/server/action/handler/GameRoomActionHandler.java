@@ -53,6 +53,9 @@ public class GameRoomActionHandler extends AbstractGameActionHandler<GameRoomMsg
             case GAME_OVER:
                 user.send(ResponseBuilder.build(user, body, MessageType.GAME_ROOM));
                 break;
+            case PLAYER_GAME_STARTED:
+                gameRoom.getHomeowner().send(ResponseBuilder.build(user, body, MessageType.GAME_ROOM));
+                break;
         }
     }
 

@@ -57,6 +57,17 @@ public abstract class PlayerAction {
      * @return null表示不出牌
      */
     protected PokerInfo outPoker(PlayerNode outPlayer, PokerInfo pokerInfo) {
+        PokerInfo out = getOutPoker(outPlayer, pokerInfo);
+        if (out == null) {
+            return null;
+        }
+
+        this.pokers.removeAll(out.getPokers());
+
+        return out;
+    }
+
+    protected PokerInfo getOutPoker(PlayerNode outPlayer, PokerInfo pokerInfo) {
         if (outPlayer != null && outPlayer == playerNode) {
             outPlayer = null;
             pokerInfo = null;
@@ -68,8 +79,6 @@ public abstract class PlayerAction {
         }
 
         out.setPokers(new ArrayList<>(out.getPokers()));
-        this.pokers.removeAll(out.getPokers());
-
         return out;
     }
 

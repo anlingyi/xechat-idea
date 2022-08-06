@@ -1,19 +1,18 @@
 package cn.xeblog.plugin.game;
 
-import cn.hutool.core.thread.GlobalThreadPool;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xeblog.commons.entity.game.GameDTO;
 import cn.xeblog.commons.entity.game.GameRoom;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.enums.Action;
+import cn.xeblog.commons.enums.Game;
 import cn.xeblog.commons.enums.UserStatus;
-import cn.xeblog.commons.util.ThreadUtils;
+import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.plugin.action.MessageAction;
 import cn.xeblog.plugin.cache.DataCache;
-import cn.xeblog.plugin.enums.Command;
-import cn.xeblog.plugin.ui.MainWindow;
-import com.intellij.openapi.application.ApplicationManager;
+import cn.xeblog.plugin.tools.AbstractPanelComponent;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.components.JBScrollPane;
@@ -32,9 +31,7 @@ import java.util.List;
  * @author anlingyi
  * @date 2020/8/31
  */
-public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
-
-    protected final JPanel mainPanel;
+public abstract class AbstractGame<T extends GameDTO> extends AbstractPanelComponent implements GameRoomEventHandler {
 
     private JPanel gameUserPanel;
     private JPanel onlineUserListPanel;
@@ -43,17 +40,29 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
 
     private JTextField searchUserField;
 
+    private GameRoomHandler gameRoomHandler;
+
     public AbstractGame() {
-        this.mainPanel = MainWindow.getInstance().getRightPanel();
-        if (GameAction.isProactive()) {
-            init();
-        }
+        super(GameAction.isProactive());
+        AbstractGame abstractGame = this;
+        this.gameRoomHandler = new GameRoomHandler() {
+            @Override
+            protected void allPlayersGameStarted() {
+                abstractGame.allPlayersGameStarted();
+            }
+
+            @Override
+            public void roomOpened(GameRoom gameRoom) {
+                super.roomOpened(gameRoom);
+                invoke(abstractGame::showGameRoomPanel);
+            }
+        };
     }
 
-    /**
-     * 游戏初始化
-     */
-    protected abstract void init();
+    protected final void startGame() {
+        start();
+        ConsoleAction.gotoConsoleLow(true);
+    }
 
     /**
      * 游戏开始
@@ -65,7 +74,44 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
      *
      * @param body 数据内容
      */
-    public abstract void handle(T body);
+    public void handle(T body) {
+    }
+
+
+    /**
+     * 房间内所有玩家都已开始游戏后处理
+     */
+    protected void allPlayersGameStarted() {
+
+    }
+
+    /**
+     * 获取游戏房间
+     *
+     * @return
+     */
+    public GameRoom getRoom() {
+        return gameRoomHandler.gameRoom;
+    }
+
+    /**
+     * 创建游戏房间
+     *
+     * @param game     游戏
+     * @param nums     人数
+     * @param gameMode 模式
+     */
+    private void createRoom(Game game, int nums, String gameMode) {
+        gameRoomHandler.createRoom(game, nums, gameMode);
+    }
+
+    protected boolean isHomeowner() {
+        return gameRoomHandler.isHomeowner;
+    }
+
+    protected boolean setHomeowner(boolean isHomeowner) {
+        return gameRoomHandler.isHomeowner = isHomeowner;
+    }
 
     /**
      * 发送游戏数据
@@ -73,41 +119,34 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
      * @param body 数据内容
      */
     protected void sendMsg(GameDTO body) {
-        body.setRoomId(gameRoom.getId());
+        body.setRoomId(getRoom().getId());
         MessageAction.send(body, Action.GAME);
     }
 
-    /**
-     * 游戏结束
-     */
-    public void over() {
-        invoke(() -> {
-            mainPanel.setVisible(false);
-            mainPanel.removeAll();
-            mainPanel.updateUI();
-        });
-    }
-
     protected JButton getExitButton() {
-        JButton exitButton = new JButton("退出游戏");
-        exitButton.addActionListener(e -> Command.GAME_OVER.exec(null));
+        JButton exitButton = super.getExitButton();
+        exitButton.setText("退出游戏");
         return exitButton;
     }
 
     protected JButton getCreateRoomButton(List<Integer> numsList) {
+        return getCreateRoomButton(numsList, null);
+    }
+
+    protected JButton getCreateRoomButton(List<Integer> numsList, List<String> gameModeList) {
         JButton createGameRoomButton = new JButton("创建房间");
-        createGameRoomButton.addActionListener(e -> showCreateGameRoomPanel(numsList));
+        createGameRoomButton.addActionListener(e -> showCreateGameRoomPanel(numsList, gameModeList));
         return createGameRoomButton;
     }
 
     protected JButton getGameOverButton() {
         JButton exitButton = new JButton("游戏结束");
-        exitButton.addActionListener(e -> gameOver());
+        exitButton.addActionListener(e -> gameRoomHandler.gameOver());
         return exitButton;
     }
 
-    protected void showCreateGameRoomPanel(List<Integer> numsList) {
-        new CreateGameRoomDialog(numsList).show();
+    protected void showCreateGameRoomPanel(List<Integer> numsList, List<String> gameModeList) {
+        new CreateGameRoomDialog(numsList, gameModeList).show();
     }
 
     private static class CreateGameRoomDialog extends DialogWrapper {
@@ -115,10 +154,17 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         private JPanel main;
         private ComboBox numsBox;
         private List<Integer> numsList;
+        private List<String> gameModeList;
+        private ComboBox gameModeBox;
 
         CreateGameRoomDialog(List<Integer> numsList) {
+            this(numsList, null);
+        }
+
+        CreateGameRoomDialog(List<Integer> numsList, List<String> gameModeList) {
             super(true);
             this.numsList = numsList;
+            this.gameModeList = gameModeList;
 
             setTitle("创建房间");
             setResizable(false);
@@ -132,13 +178,32 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         protected @Nullable JComponent createCenterPanel() {
             main = new JPanel();
             main.setPreferredSize(new Dimension(200, 50));
+            Box vBox = Box.createVerticalBox();
+            main.add(vBox);
+
+            Box hBox = Box.createHorizontalBox();
+            vBox.add(hBox);
+
             JLabel label = new JLabel("房间人数：");
             label.setFont(new Font("", 1, 13));
-            main.add(label);
+            hBox.add(label);
 
             numsBox = new ComboBox();
             numsList.forEach(nums -> numsBox.addItem(nums));
-            main.add(numsBox);
+            hBox.add(numsBox);
+
+            if (CollUtil.isNotEmpty(gameModeList)) {
+                Box hBox2 = Box.createHorizontalBox();
+                vBox.add(hBox2);
+
+                JLabel gameModelLabel = new JLabel("游戏模式：");
+                gameModelLabel.setFont(new Font("", 1, 13));
+                hBox2.add(gameModelLabel);
+
+                gameModeBox = new ComboBox();
+                gameModeList.forEach(mode -> gameModeBox.addItem(mode));
+                hBox2.add(gameModeBox);
+            }
 
             return main;
         }
@@ -146,7 +211,11 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         @Override
         protected void doOKAction() {
             int nums = Integer.parseInt(numsBox.getSelectedItem().toString());
-            GameAction.getAction().createRoom(GameAction.getGame(), nums);
+            String gameMode = null;
+            if (gameModeBox != null) {
+                gameMode = gameModeBox.getSelectedItem().toString();
+            }
+            GameAction.getAction().createRoom(GameAction.getGame(), nums, gameMode);
             super.doOKAction();
         }
 
@@ -158,13 +227,25 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         mainPanel.setLayout(null);
         mainPanel.setMinimumSize(new Dimension(300, 200));
 
+        Box mainVBox = Box.createVerticalBox();
         JPanel panel = new JPanel();
         panel.setBounds(10, 10, 280, 500);
 
+        GameRoom gameRoom = getRoom();
         JLabel titleLabel = new JLabel("欢迎进入【" + gameRoom.getGame().getName() + "】游戏房间~");
         titleLabel.setFont(new Font("", 1, 14));
         titleLabel.setForeground(new Color(239, 106, 106));
         panel.add(titleLabel);
+
+        String gameMode = gameRoom.getGameMode();
+        if (gameMode != null) {
+            Box hBox = Box.createHorizontalBox();
+            JLabel modeLabel = new JLabel(gameMode);
+            modeLabel.setFont(new Font("", 1, 13));
+            hBox.add(modeLabel);
+            mainVBox.add(Box.createVerticalStrut(10));
+            mainVBox.add(hBox);
+        }
 
         Box hBox = Box.createHorizontalBox();
         JLabel label1 = new JLabel("【房间玩家】");
@@ -179,7 +260,7 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (readyLabel.isEnabled()) {
-                    playerReady();
+                    gameRoomHandler.playerReady();
                 }
             }
         });
@@ -229,18 +310,18 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
         vBox2.add(onlineUserMainPanel);
 
         Box hBox3 = Box.createHorizontalBox();
-        if (isHomeowner) {
+        if (isHomeowner()) {
             startGameButton = new JButton("开始游戏");
             startGameButton.setEnabled(false);
             startGameButton.addActionListener(e -> {
-                gameStart();
+                gameRoomHandler.gameStart();
                 startGameButton.setEnabled(false);
             });
             hBox3.add(startGameButton);
 
             JButton closeRoomButton = new JButton("关闭房间");
             closeRoomButton.addActionListener(e -> {
-                closeRoom();
+                gameRoomHandler.closeRoom();
                 init();
             });
             hBox3.add(closeRoomButton);
@@ -248,7 +329,6 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
             hBox3.add(getExitButton());
         }
 
-        Box mainVBox = Box.createVerticalBox();
         mainVBox.add(Box.createVerticalStrut(20));
         mainVBox.add(hBox);
         mainVBox.add(Box.createVerticalStrut(10));
@@ -279,6 +359,7 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
     }
 
     private void flushOnlineUsers() {
+        GameRoom gameRoom = getRoom();
         if (gameRoom == null) {
             return;
         }
@@ -319,7 +400,7 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
             JLabel label = new JLabel(user.getUsername() + "(" + user.getStatus().alias() + ")");
             label.setFont(new Font("", 0, 13));
             userPanel.add(label);
-            if (isHomeowner && user.getStatus() == UserStatus.FISHING && !gameRoom.isOvered()) {
+            if (isHomeowner() && user.getStatus() == UserStatus.FISHING && !gameRoom.isOvered()) {
                 JLabel inviteLabel = new JLabel("邀请");
                 inviteLabel.setFont(new Font("", 1, 12));
                 inviteLabel.setForeground(new Color(93, 187, 70));
@@ -328,7 +409,7 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         if (inviteLabel.isEnabled()) {
-                            invitePlayer(user.getUsername());
+                            gameRoomHandler.invitePlayer(user.getUsername());
                             inviteLabel.setEnabled(false);
                             inviteLabel.setText("已邀请");
                         }
@@ -344,6 +425,7 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
     }
 
     private void flushGameRoomUsers() {
+        GameRoom gameRoom = getRoom();
         if (gameRoom == null) {
             return;
         }
@@ -392,21 +474,18 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
 
     @Override
     public void roomCreated(GameRoom gameRoom) {
-        super.roomCreated(gameRoom);
-        invoke(() -> showGameRoomPanel());
+        gameRoomHandler.roomCreated(gameRoom);
     }
 
     @Override
     public void roomOpened(GameRoom gameRoom) {
-        super.roomOpened(gameRoom);
-        this.gameRoom = gameRoom;
-        showGameRoomPanel();
+        gameRoomHandler.roomOpened(gameRoom);
     }
 
     @Override
     public void roomClosed() {
-        super.roomClosed();
-        if (isHomeowner) {
+        gameRoomHandler.roomClosed();
+        if (isHomeowner()) {
             GameAction.setRoomId(null);
             invoke(() -> init());
         } else {
@@ -416,7 +495,7 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
 
     @Override
     public void playerJoined(User player) {
-        super.playerJoined(player);
+        gameRoomHandler.playerJoined(player);
         invoke(() -> {
             flushGameRoomUsers();
             flushOnlineUsers();
@@ -425,7 +504,7 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
 
     @Override
     public void playerLeft(User player) {
-        super.playerLeft(player);
+        gameRoomHandler.playerLeft(player);
         invoke(() -> {
             flushGameRoomUsers();
             flushOnlineUsers();
@@ -434,13 +513,13 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
 
     @Override
     public void playerInviteFailed(User player) {
-        super.playerInviteFailed(player);
+        gameRoomHandler.playerInviteFailed(player);
         invoke(() -> flushOnlineUsers());
     }
 
     @Override
     public void playerReadied(User player) {
-        super.playerReadied(player);
+        gameRoomHandler.playerReadied(player);
         invoke(() -> {
             if (player.getUsername().equals(GameAction.getNickname())) {
                 readyLabel.setEnabled(false);
@@ -452,29 +531,22 @@ public abstract class AbstractGame<T extends GameDTO> extends GameRoomHandler {
 
     @Override
     public void gameStarted(GameRoom gameRoom) {
-        super.gameStarted(gameRoom);
-        invoke(() -> start());
+        gameRoomHandler.gameStarted(gameRoom);
+        invoke(() -> {
+            startGame();
+            gameRoomHandler.playerGameStarted();
+        });
     }
 
     @Override
     public void gameEnded() {
-        super.gameEnded();
+        gameRoomHandler.gameEnded();
         invoke(() -> showGameRoomPanel());
     }
 
-    protected final void invoke(Runnable runnable) {
-        ApplicationManager.getApplication().invokeLater(runnable);
-    }
-
-    protected final void invoke(Runnable runnable, long millis) {
-        GlobalThreadPool.execute(() -> {
-            spinMoment(millis);
-            invoke(runnable);
-        });
-    }
-
-    protected void spinMoment(long millis) {
-        ThreadUtils.spinMoment(millis);
+    @Override
+    public void playerGameStarted(User user) {
+        gameRoomHandler.playerGameStarted(user);
     }
 
 }

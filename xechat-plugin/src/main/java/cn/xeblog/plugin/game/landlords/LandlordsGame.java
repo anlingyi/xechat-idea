@@ -2,12 +2,9 @@ package cn.xeblog.plugin.game.landlords;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.RandomUtil;
 import cn.xeblog.commons.entity.User;
-import cn.xeblog.commons.entity.game.landlords.AllocPokerDTO;
-import cn.xeblog.commons.entity.game.landlords.LandlordsGameDTO;
-import cn.xeblog.commons.entity.game.landlords.Poker;
-import cn.xeblog.commons.entity.game.landlords.PokerInfo;
+import cn.xeblog.commons.entity.game.GameRoom;
+import cn.xeblog.commons.entity.game.landlords.*;
 import cn.xeblog.commons.enums.Game;
 import cn.xeblog.plugin.action.GameAction;
 import cn.xeblog.plugin.annotation.DoGame;
@@ -44,6 +41,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     private JButton gameOverButton;
     private JButton outPokerButton;
     private JButton resetButton;
+    private JButton helpButton;
     private JButton notOutPokerButton;
     private JButton notCallScoreButton;
     private JButton callScoreButton;
@@ -64,6 +62,8 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     private Map<String, PlayerAction> aiPlayerActionMap;
 
     private List<String> userList;
+
+    private PlayerAction helpPlayerAction;
 
     static {
         aiPlayerList = new ArrayList<>();
@@ -126,6 +126,30 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
      * 最大叫分
      */
     private int maxScore;
+
+    /**
+     * 当前游戏模式
+     */
+    private GameMode gameMode;
+
+    @AllArgsConstructor
+    @Getter
+    private enum GameMode {
+        CLASSIC("经典模式"),
+        NOT_SHUFFLED("不洗牌模式");
+
+        private String name;
+
+        public static GameMode getMode(String name) {
+            for (GameMode model : values()) {
+                if (model.name.equals(name)) {
+                    return model;
+                }
+            }
+
+            return GameMode.CLASSIC;
+        }
+    }
 
     @Data
     @AllArgsConstructor
@@ -191,9 +215,9 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         mainPanel.setLayout(null);
         mainPanel.setEnabled(true);
         mainPanel.setVisible(true);
-        mainPanel.setMinimumSize(new Dimension(150, 200));
+        mainPanel.setMinimumSize(new Dimension(150, 260));
         startPanel = new JPanel();
-        startPanel.setBounds(10, 10, 120, 200);
+        startPanel.setBounds(10, 10, 120, 260);
         mainPanel.add(startPanel);
 
         JLabel title = new JLabel("斗地主！");
@@ -204,12 +228,40 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         startPanel.add(vBox);
 
         vBox.add(Box.createVerticalStrut(20));
+        JLabel modelLabel = new JLabel("游戏模式：");
+        modelLabel.setFont(new Font("", 1, 13));
+        vBox.add(modelLabel);
+
+        vBox.add(Box.createVerticalStrut(5));
+        ComboBox gameModeBox = new ComboBox();
+        gameModeBox.setPreferredSize(new Dimension(40, 30));
+        for (GameMode value : GameMode.values()) {
+            gameModeBox.addItem(value.getName());
+        }
+        gameMode = GameMode.CLASSIC;
+        gameModeBox.setSelectedItem(gameMode.getName());
+        gameModeBox.addActionListener(l -> {
+            GameMode selectedGameMode = GameMode.getMode(gameModeBox.getSelectedItem().toString());
+            if (selectedGameMode != null) {
+                gameMode = selectedGameMode;
+            }
+        });
+        vBox.add(gameModeBox);
+
+        vBox.add(Box.createVerticalStrut(20));
         vBox.add(getStartGameButton());
+
         if (DataCache.isOnline) {
             List<Integer> numsList = new ArrayList();
             numsList.add(2);
             numsList.add(3);
-            vBox.add(getCreateRoomButton(numsList));
+
+            List<String> gameModeList = new ArrayList<>();
+            for (GameMode mode : GameMode.values()) {
+                gameModeList.add(mode.getName());
+            }
+
+            vBox.add(getCreateRoomButton(numsList, gameModeList));
         }
         vBox.add(getExitButton());
 
@@ -219,7 +271,9 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     @Override
     protected void start() {
         initValue();
+        GameRoom gameRoom = getRoom();
         if (gameRoom != null) {
+            gameMode = GameMode.getMode(gameRoom.getGameMode());
             userList.addAll(gameRoom.getUsers().keySet());
         } else {
             userList.add(GameAction.getNickname());
@@ -230,26 +284,40 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         state = 1;
         showTips("请等待...");
 
-        int usersTotal = userList.size();
-        if (isHomeowner) {
-            spinMoment(100);
+        if (userList.size() < 3) {
+            showTips("正在加入机器人...");
+        } else {
+            showTips("等待发牌...");
+        }
+
+        if (gameRoom == null) {
+            allPlayersGameStarted();
+        }
+    }
+
+    @Override
+    protected void allPlayersGameStarted() {
+        if (isHomeowner()) {
+            int usersTotal = userList.size();
             int nums = 3 - usersTotal;
-            if (nums > 0) {
-                List<String> joinedAIList = new ArrayList<>(aiPlayerList);
-                joinedAIList.removeAll(userList);
-                Collections.shuffle(joinedAIList);
-                List<String> aiList = joinedAIList.subList(0, nums);
-                aiList.forEach(ai -> aiPlayerActionMap.put(ai, null));
-                sendMsg(LandlordsGameDTO.MsgType.JOIN_ROBOTS, GameAction.getNickname(), new ArrayList<>(aiList));
-            } else {
-                allocPokersMsg();
-            }
+            invoke(() -> {
+                if (nums > 0) {
+                    List<String> joinedAIList = new ArrayList<>(aiPlayerList);
+                    joinedAIList.removeAll(userList);
+                    Collections.shuffle(joinedAIList);
+                    List<String> aiList = joinedAIList.subList(0, nums);
+                    aiList.forEach(ai -> aiPlayerActionMap.put(ai, null));
+                    sendMsg(LandlordsGameDTO.MsgType.JOIN_ROBOTS, GameAction.getNickname(), new ArrayList<>(aiList));
+                } else {
+                    allocPokersMsg();
+                }
+            }, 500);
         }
     }
 
     private void allocPokersMsg() {
         int priority = new Random().nextInt(3);
-        List<List<Poker>> allocPokers = PokerUtil.allocPokers();
+        List<List<Poker>> allocPokers = PokerUtil.allocPokers(gameMode == GameMode.CLASSIC);
         List<String> playerList = userList;
         for (int i = 0; i < playerList.size(); i++) {
             sendMsg(LandlordsGameDTO.MsgType.ALLOC_POKER, playerList.get(i),
@@ -270,7 +338,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         dto.setMsgType(msgType);
         dto.setPlayer(player);
         dto.setData(data);
-        if (gameRoom != null) {
+        if (getRoom() != null) {
             sendMsg(dto);
         }
         invoke(() -> handle(dto));
@@ -312,6 +380,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
             nextPlayer = playerMap.get(nextPlayerNode.getPlayer());
             aiPlayerAction = aiPlayerActionMap.get(nextPlayerNode.getPlayer());
         }
+        boolean isHomeowner = isHomeowner();
         boolean isMe = playerNode == currentPlayer;
         boolean controlRobot = isHomeowner && aiPlayerAction != null;
         boolean isHard = isHard();
@@ -324,8 +393,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                 showGamePanel();
                 showTips("等待发牌...");
                 if (isHomeowner) {
-                    spinMoment(100);
-                    allocPokersMsg();
+                    invoke(() -> allocPokersMsg(), 500);
                 }
                 break;
             case ALLOC_POKER:
@@ -340,6 +408,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                     controlRobot = false;
                     pokers = allocPokerList;
                     lastPokers = allocPokerDTO.getLastPokers();
+                    helpPlayerAction.setPokers(new ArrayList<>(pokers));
                     showTips(isHard ? "Confirming Master Machine..." : "正在确定地主...");
                 } else {
                     aiPlayerAction = aiPlayerActionMap.get(playerNode.getPlayer());
@@ -433,6 +502,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                     Player maxScorePlayer = playerMap.get(maxScorePlayerNode.getPlayer());
                     if (maxScorePlayerNode == currentPlayer) {
                         pokers.addAll(lastPokers);
+                        helpPlayerAction.setLastPokers(new ArrayList<>(lastPokers));
                         PokerUtil.sorted(pokers, true);
                         flushPlayerPanel(maxScorePlayer);
                         spinMoment(100);
@@ -467,6 +537,9 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                         player.showTips(tips2);
                     }
                 } else {
+                    if (outPokerInfo.getPokerModel() == PokerModel.SHUN_ZI_SINGLE) {
+                        PokerUtil.sorted(outPokerInfo.getPokers(), false);
+                    }
                     String pokerModeInfo = getPokerDisplayModel(outPokerInfo);
                     if (isMe) {
                         showPlayerTips(pokerModeInfo);
@@ -510,7 +583,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         String roleName = role == 1 ? (isHard ? "Slave" : "农民") : (isHard ? "Master" : "地主");
         state = role == currentPlayer.getRole() ? 5 : 4;
         showTips(roleName + (isHard ? " Victory!" : "胜利！"));
-        if (gameRoom != null) {
+        if (getRoom() != null) {
             gameOverButton.setVisible(true);
         }
     }
@@ -572,7 +645,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         mainTopPanel.add(titleLabel);
 
         JPanel mainBottomPanel = new JPanel();
-        if (gameRoom == null) {
+        if (getRoom() == null) {
             backButton = getBackButton();
             mainBottomPanel.add(backButton);
         }
@@ -759,10 +832,30 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                 selectedPokers.clear();
                 flushPlayerPanel(playerMap.get(currentPlayer.getPlayer()));
                 sendMsg(LandlordsGameDTO.MsgType.OUT_POKER, copy);
+                helpPlayerAction.setPokers(new ArrayList<>(pokers));
                 pokerInfo = null;
             }
         });
         playerTopPanel.add(outPokerButton);
+
+        helpButton = new JButton(isHard ? "Help!" : "提示");
+        helpButton.addActionListener(e -> {
+            selectedPokers.clear();
+            PlayerNode playerNode = null;
+            if (lastPlayer != null) {
+                playerNode = playerMap.get(lastPlayer).getPlayerNode();
+            }
+            pokerInfo = helpPlayerAction.getOutPoker(playerNode, lastPokerInfo);
+            boolean isOut = pokerInfo != null;
+            if (isOut) {
+                for (Poker poker : pokerInfo.getPokers()) {
+                    selectedPokers.add(poker);
+                }
+            }
+            flushPokers();
+            outPokerButton.setEnabled(isOut);
+        });
+        playerTopPanel.add(helpButton);
 
         playerTopPanel.updateUI();
     }
@@ -964,7 +1057,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         button.addActionListener(e -> {
             button.setEnabled(false);
             invoke(() -> {
-                isHomeowner = true;
+                setHomeowner(true);
                 start();
                 button.setEnabled(true);
             }, 100);
@@ -994,6 +1087,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
 
             if (GameAction.getNickname().equals(node.getPlayer())) {
                 currentPlayer = node;
+                helpPlayerAction = new AIPlayerAction(currentPlayer);
             }
 
             if (aiPlayerActionMap.containsKey(node.getPlayer())) {
@@ -1030,12 +1124,20 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         super.playerLeft(player);
         if (state > 0 && state < 4) {
             state = 4;
+            String msg = "游戏结束！" + player.getUsername() + "逃跑了~";
+            String tips = "溜了~";
+
             if (isHard()) {
-                String msg = "Debugging is over. The " + playerMap.get(player.getUsername()).getPlayerNode().getAlias() + " has been offline";
-                showTips(msg);
-            } else {
-                showTips("游戏结束！" + player.getUsername() + "逃跑了~");
+                msg = "Debugging is over. The " + playerMap.get(player.getUsername()).getPlayerNode().getAlias() + " has been offline";
+                tips = "Offline~";
             }
+
+            showTips(msg);
+            Player leftPlayer = playerMap.get(player.getUsername());
+            if (leftPlayer != null) {
+                leftPlayer.showTips(tips);
+            }
+
             gameOverButton.setVisible(true);
         }
     }

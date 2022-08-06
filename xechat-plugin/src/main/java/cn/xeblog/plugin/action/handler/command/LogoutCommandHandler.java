@@ -22,7 +22,7 @@ public class LogoutCommandHandler extends AbstractCommandHandler {
 
         if (GameAction.playing()) {
             // 结束游戏
-            Command.GAME_OVER.exec(args);
+            Command.OVER.exec(args);
         }
 
         ConsoleAction.showSimpleMsg("正在退出中...");

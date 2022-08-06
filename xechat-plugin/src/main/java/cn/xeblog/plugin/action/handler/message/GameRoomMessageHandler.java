@@ -40,6 +40,9 @@ public class GameRoomMessageHandler extends AbstractGameMessageHandler<GameRoomM
             case GAME_START:
                 gameStart(response);
                 break;
+            case PLAYER_GAME_STARTED:
+                playerGameStarted(response);
+                break;
             case GAME_OVER:
                 gameOver(response);
                 break;
@@ -49,6 +52,12 @@ public class GameRoomMessageHandler extends AbstractGameMessageHandler<GameRoomM
             case ROOM_CLOSE:
                 roomClosed(response);
                 break;
+        }
+    }
+
+    private void playerGameStarted(Response<GameRoomMsgDTO> response) {
+        if (GameAction.playing()) {
+            GameAction.getAction().playerGameStarted(response.getUser());
         }
     }
 

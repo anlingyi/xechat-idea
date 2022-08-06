@@ -46,7 +46,7 @@ public class PlayerNode {
     }
 
     public int minusPoker(int total) {
-        this.pokerTotal -= total;
+        this.pokerTotal -= Math.min(total, this.pokerTotal);
         return this.pokerTotal;
     }
 

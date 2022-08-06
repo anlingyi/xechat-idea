@@ -4,6 +4,8 @@ import cn.xeblog.commons.util.ProtostuffUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.util.ReferenceCountUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
@@ -13,6 +15,7 @@ import java.util.List;
  * @author anlingyi
  * @date 2021/8/28 6:11 下午
  */
+@Slf4j
 public class ProtostuffDecoder extends ByteToMessageDecoder {
 
     private final Class clazz;
@@ -36,8 +39,16 @@ public class ProtostuffDecoder extends ByteToMessageDecoder {
             } else {
                 // 读取完整的数据
                 byte[] data = new byte[length];
-                byteBuf.readRetainedSlice(length).readBytes(data);
-                list.add(ProtostuffUtils.deserialize(data, clazz));
+                ByteBuf body = null;
+                try {
+                    body = byteBuf.readRetainedSlice(length);
+                    body.readBytes(data);
+                    list.add(ProtostuffUtils.deserialize(data, clazz));
+                } catch (Exception e) {
+                    log.error("解码异常", e);
+                } finally {
+                    ReferenceCountUtil.release(body);
+                }
             }
         }
     }

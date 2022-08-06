@@ -64,6 +64,13 @@ public interface GameRoomEventHandler {
     void gameStarted(GameRoom gameRoom);
 
     /**
+     * 玩家游戏已开始
+     *
+     * @param user
+     */
+    void playerGameStarted(User user);
+
+    /**
      * 游戏已结束
      */
     void gameEnded();

@@ -1,23 +1,31 @@
 package cn.xeblog.plugin.action;
 
+import cn.hutool.core.util.StrUtil;
 import cn.xeblog.plugin.entity.TextRender;
 import cn.xeblog.plugin.enums.Command;
 import cn.xeblog.plugin.enums.Style;
+import cn.xeblog.plugin.listener.MainWindowInitializedEventListener;
 import cn.xeblog.plugin.mode.ModeContext;
+import cn.xeblog.plugin.ui.MainWindow;
 import com.intellij.ide.BrowserUtil;
+
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.*;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author anlingyi
  * @date 2020/6/1
  */
-public class ConsoleAction {
+public class ConsoleAction implements MainWindowInitializedEventListener {
 
     private static JTextPane console;
 
@@ -26,6 +34,20 @@ public class ConsoleAction {
     private static JScrollPane consoleScroll;
 
     private static boolean isNewLine;
+
+    @Override
+    public void afterInit(MainWindow mainWindow) {
+        console = mainWindow.getConsoleTextPane();
+        panel = mainWindow.getLeftPanel();
+        consoleScroll = mainWindow.getConsoleScrollPane();
+
+        console.setEditorKit(new WarpEditorKit());
+        SimpleAttributeSet simpleAttributeSet = new SimpleAttributeSet();
+        StyleConstants.setLineSpacing(simpleAttributeSet, 0.2f);
+        console.setParagraphAttributes(simpleAttributeSet, false);
+
+        bindPopupMenu();
+    }
 
     public static void updateUI() {
         SwingUtilities.invokeLater(() -> console.updateUI());
@@ -111,9 +133,15 @@ public class ConsoleAction {
     }
 
     public static void gotoConsoleLow() {
-        JScrollBar verticalScrollBar = consoleScroll.getVerticalScrollBar();
-        if (verticalScrollBar.getValue() + 20 < verticalScrollBar.getMaximum() - verticalScrollBar.getHeight()) {
-            return;
+        gotoConsoleLow(false);
+    }
+
+    public static void gotoConsoleLow(boolean forced) {
+        if (!forced) {
+            JScrollBar verticalScrollBar = consoleScroll.getVerticalScrollBar();
+            if (verticalScrollBar.getValue() + 20 < verticalScrollBar.getMaximum() - verticalScrollBar.getHeight()) {
+                return;
+            }
         }
 
         updateCaretPosition(-1);
@@ -127,20 +155,62 @@ public class ConsoleAction {
         ConsoleAction.showSimpleMsg("请先登录！登录命令：" + Command.LOGIN.getCommand() + "，帮助命令：" + Command.HELP.getCommand());
     }
 
-    public static void setConsole(JTextPane console) {
-        ConsoleAction.console = console;
-        console.setEditorKit(new WarpEditorKit());
-        SimpleAttributeSet simpleAttributeSet = new SimpleAttributeSet();
-        StyleConstants.setLineSpacing(simpleAttributeSet, 0.2f);
-        console.setParagraphAttributes(simpleAttributeSet, false);
-    }
+    private static void bindPopupMenu() {
+        JPopupMenu jPopupMenu = new JPopupMenu("右键菜单");
+        console.setComponentPopupMenu(jPopupMenu);
 
-    public static void setPanel(JPanel panel) {
-        ConsoleAction.panel = panel;
-    }
+        JMenuItem copyItem = new JMenuItem("复制内容");
+        copyItem.addActionListener(ev -> {
+            String selectedText = console.getSelectedText();
+            if (StrUtil.isBlank(selectedText)) {
+                return;
+            }
 
-    public static void setConsoleScroll(JScrollPane consoleScroll) {
-        ConsoleAction.consoleScroll = consoleScroll;
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            StringSelection contents = new StringSelection(selectedText);
+            clipboard.setContents(contents, null);
+        });
+
+        JMenuItem searchItem = new JMenuItem("百度搜索");
+        searchItem.addActionListener(ev -> {
+            String selectedText = console.getSelectedText();
+            if (StrUtil.isBlank(selectedText)) {
+                return;
+            }
+
+            BrowserUtil.browse("https://www.baidu.com/s?wd=" + selectedText);
+        });
+
+        JMenuItem openUrlItem = new JMenuItem("打开网址");
+        openUrlItem.addActionListener(ev -> {
+            String selectedText = console.getSelectedText();
+            if (StrUtil.isBlank(selectedText)) {
+                return;
+            }
+
+            if (!selectedText.startsWith("http")) {
+                selectedText = "https://" + selectedText;
+            }
+
+            BrowserUtil.browse(selectedText);
+        });
+
+        jPopupMenu.add(copyItem);
+        jPopupMenu.add(searchItem);
+        jPopupMenu.add(openUrlItem);
+        jPopupMenu.addSeparator();
+
+        Map<String, Command> commandMap = new LinkedHashMap<>();
+        commandMap.put("快速登录", Command.LOGIN);
+        commandMap.put("加入游戏", Command.JOIN);
+        commandMap.put("清者自清", Command.CLEAN);
+        commandMap.put("需要帮助！", Command.HELP);
+        commandMap.put("退！退！退！", Command.LOGOUT);
+
+        commandMap.forEach((k, v) -> jPopupMenu.add(k).addActionListener(l -> {
+            ConsoleAction.showSimpleMsg(v.getCommand());
+            v.exec();
+        }));
     }
 
     public static void showSystemMsg(String time, String msg) {
