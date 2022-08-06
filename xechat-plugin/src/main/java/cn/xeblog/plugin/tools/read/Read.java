@@ -27,4 +27,12 @@ public class Read extends AbstractTool {
         UIManager.startPage.show();
     }
 
+    @Override
+    public void over() {
+        super.over();
+        ReadPage readPage = UIManager.readPage;
+        if (readPage != null) {
+            readPage.dispose();
+        }
+    }
 }

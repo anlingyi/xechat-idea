@@ -377,4 +377,9 @@ public class ReadPage implements IPage {
         UIManager.bookshelfPage.show();
         isShow = false;
     }
+
+    public void dispose() {
+        hardReadWidget.dispose();
+    }
+
 }
