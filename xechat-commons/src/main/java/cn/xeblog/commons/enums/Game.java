@@ -14,7 +14,11 @@ import lombok.Getter;
 public enum Game {
     GOBANG("五子棋", false),
     LANDLORDS("斗地主", false),
-    NON_GLUTTONOUS_SNAKE("不贪吃蛇", false);
+    NON_GLUTTONOUS_SNAKE("不贪吃蛇111", false),
+    CHINESE_CHESS("中国象棋", false),
+    TEST("TEST", false),
+
+    ;
 
     /**
      * 游戏名称
