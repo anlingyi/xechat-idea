@@ -15,6 +15,7 @@ public enum Game {
     GOBANG("五子棋", false),
     LANDLORDS("斗地主", false),
     NON_GLUTTONOUS_SNAKE("不贪吃蛇", false),
+    GAME_2048("2048", false),
     SUDOKU("数独", false);
 
     /**
