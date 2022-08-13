@@ -4,6 +4,8 @@ import java.util.Optional;
 import java.util.Random;
 
 /**
+ * 来源：https://github.com/a11n/sudoku
+ * <p>
  * A Solver is capable of solving a given Sudoku {@link Grid}.
  */
 public class Solver {

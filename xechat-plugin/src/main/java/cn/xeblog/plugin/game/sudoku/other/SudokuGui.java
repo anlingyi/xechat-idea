@@ -199,7 +199,7 @@ public class SudokuGui extends JPanel implements ActionListener {
 
                 // 将待检查的位置数据替换为0 假装正要填下 进行自检
                 cell.setValue(0);
-                if (!checkGrid.isValidValueForCell(cell, checkValue)) {
+                if (checkValue == -1 || !checkGrid.isValidValueForCell(cell, checkValue) && checkValue != solutionInts[row][column]) {
                     errorCount++;
                 }
                 cell.setValue(checkValue);

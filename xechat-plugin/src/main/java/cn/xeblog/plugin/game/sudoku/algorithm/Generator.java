@@ -3,6 +3,8 @@ package cn.xeblog.plugin.game.sudoku.algorithm;
 import java.util.Random;
 
 /**
+ * 来源：https://github.com/a11n/sudoku
+ * <p>
  * A Generator to generate random Sudoku {@link Grid} instances.
  */
 public class Generator {
