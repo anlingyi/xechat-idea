@@ -29,8 +29,8 @@ public class BrowserUI extends JPanel {
     private WindowMode windowMode;
 
     private enum WindowMode {
-        SMALL("小", UserAgent.IPHONE, 200, 250),
-        MEDIUM("大", UserAgent.IPAD, 400, 300);
+        SMALL("S", UserAgent.IPHONE, 200, 250),
+        MEDIUM("M", UserAgent.IPAD, 400, 300);
 
         @Getter
         String name;
@@ -172,9 +172,7 @@ public class BrowserUI extends JPanel {
 
             @Override
             public void onBeforeClose() {
-                SwingUtilities.invokeLater(() -> {
-                    init();
-                });
+                SwingUtilities.invokeLater(() -> init());
             }
         });
     }
