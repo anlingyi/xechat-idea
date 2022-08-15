@@ -33,9 +33,9 @@ public class SudokuGui extends JPanel implements ActionListener {
     // 数据模块
     private final JTextField[][] chessBoard = new JTextField[9][9];
 
-    public SudokuGui(Level level, int width, int height) {
+    public SudokuGui(Level level, PanelSize panelSize) {
         initData(level);
-        initJPanel(width, height);
+        initJPanel(panelSize);
         repaint();
     }
 
@@ -68,8 +68,8 @@ public class SudokuGui extends JPanel implements ActionListener {
 
     }
 
-    private void initJPanel(int width, int height) {
-        this.setPreferredSize(new Dimension(width, height));
+    private void initJPanel(PanelSize panelSize) {
+        this.setPreferredSize(new Dimension(panelSize.getTableWidth(), panelSize.getTableHeight()));
         this.setLayout(new GridLayout(9, 9));
         this.setVisible(true);
 
@@ -81,7 +81,7 @@ public class SudokuGui extends JPanel implements ActionListener {
                 this.add(jTextField);
 
                 jTextField.setVisible(true);
-                jTextField.setFont(new Font("", Font.BOLD, 18));
+                jTextField.setFont(new Font("", Font.BOLD, panelSize.getFontSize()));
                 jTextField.setHorizontalAlignment(JTextField.CENTER);
                 setBackgroundColor(i, j);
 

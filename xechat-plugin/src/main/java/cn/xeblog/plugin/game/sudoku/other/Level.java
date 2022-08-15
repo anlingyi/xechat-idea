@@ -1,7 +1,10 @@
 package cn.xeblog.plugin.game.sudoku.other;
 
+import com.intellij.openapi.ui.ComboBox;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.awt.*;
 
 /**
  * 功能描述: 困难等级
@@ -28,5 +31,15 @@ public enum Level {
             }
         }
         return Level.EASY;
+    }
+
+    public ComboBox<String> getComboBox(Dimension dimension) {
+        ComboBox<String> comboBox = new ComboBox<>();
+        comboBox.setPreferredSize(dimension);
+        for (Level value : Level.values()) {
+            comboBox.addItem(value.getMemo());
+        }
+        comboBox.setSelectedItem(this.getMemo());
+        return comboBox;
     }
 }
