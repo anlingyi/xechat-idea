@@ -14,10 +14,21 @@ import java.awt.*;
 @DoTool(Tools.BROWSER)
 public class Browser extends AbstractTool {
 
+    private BrowserUI browserUI;
+
     @Override
     protected void init() {
+        this.browserUI = new BrowserUI();
         mainPanel.setLayout(new BorderLayout());
-        mainPanel.add(new BrowserUI());
+        mainPanel.add(this.browserUI, BorderLayout.CENTER);
+    }
+
+    @Override
+    public void over() {
+        super.over();
+        if (browserUI != null) {
+            this.browserUI.close();
+        }
     }
 
 }
