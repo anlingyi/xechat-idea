@@ -31,6 +31,17 @@ public class Solver {
 
         if (!solvable) {
             throw new IllegalStateException("The provided grid is not solvable.");
+        } else {
+            // 2022年8月16日 算法可能会出现 有多个空值的情况 填补空值
+            int size = grid.getSize();
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    Grid.Cell cell = grid.getCell(i, j);
+                    if (cell.getValue() == 0) {
+                        setEmptyValue(grid, cell);
+                    }
+                }
+            }
         }
     }
 
@@ -63,6 +74,20 @@ public class Solver {
         }
 
         return values;
+    }
+
+    /**
+     * 功能描述: 处理算法未完成的空值
+     *
+     * @author ☆程序员鼓励师☆
+     * @date 2022/8/16 10:41
+     */
+    public void setEmptyValue(Grid grid, Grid.Cell cell) {
+        for (int value : values) {
+            if (value != EMPTY && grid.isValidValueForCell(cell, value)) {
+                cell.setValue(value);
+            }
+        }
     }
 
 }

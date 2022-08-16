@@ -1,11 +1,13 @@
 package cn.xeblog.plugin.game.sudoku;
 
+import cn.hutool.core.thread.ThreadUtil;
 import cn.xeblog.commons.enums.Game;
 import cn.xeblog.plugin.annotation.DoGame;
 import cn.xeblog.plugin.game.AbstractGame;
 import cn.xeblog.plugin.game.sudoku.other.Level;
 import cn.xeblog.plugin.game.sudoku.other.PanelSize;
 import cn.xeblog.plugin.game.sudoku.other.SudokuGui;
+import com.google.common.collect.Lists;
 import com.intellij.openapi.ui.ComboBox;
 
 import javax.swing.*;
@@ -23,6 +25,13 @@ public class Sudoku extends AbstractGame {
 
     private Level level;
     private PanelSize panelSize;
+
+    // 提示按钮
+    private JButton tips;
+    // 提交按钮
+    private JButton commit;
+    // 再来一局按钮
+    private JButton another;
 
     @Override
     protected void init() {
@@ -82,27 +91,35 @@ public class Sudoku extends AbstractGame {
         JPanel bottomPanel = getBottomPanel(sudokuGui);
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
         mainPanel.updateUI();
+
+        // 解密  困难以上模式解密可能会比较耗时，异步解密后开启按钮操作
+        ThreadUtil.execAsync(() -> sudokuGui.doSolution(Lists.newArrayList(commit, tips, another)));
     }
 
     // 创建按钮面板
     private JPanel getBottomPanel(SudokuGui sudokuGui) {
-        JPanel commit = new JPanel();
-        commit.add(sudokuGui.getCommitJButton());
-        commit.add(sudokuGui.getTipsJButton());
+        commit = sudokuGui.getCommitJButton();
+        tips = sudokuGui.getTipsJButton();
+        another = getStartJButton("再来一局");
+        another.setEnabled(false);
 
-        JPanel tips = new JPanel();
-        tips.add(getStartJButton("再来一局"));
-        tips.add(getMenuJButton());
+        JPanel buttonPanel1 = new JPanel();
+        buttonPanel1.add(commit);
+        buttonPanel1.add(tips);
+
+        JPanel buttonPanel2 = new JPanel();
+        buttonPanel2.add(another);
+        buttonPanel2.add(getMenuJButton());
 
         JPanel buttonPanel = new JPanel();
         if (PanelSize.MIN == panelSize) {
             buttonPanel.setLayout(new BorderLayout());
-            buttonPanel.add(commit, BorderLayout.NORTH);
-            buttonPanel.add(tips, BorderLayout.CENTER);
+            buttonPanel.add(buttonPanel1, BorderLayout.NORTH);
+            buttonPanel.add(buttonPanel2, BorderLayout.CENTER);
         } else {
             buttonPanel.setLayout(new FlowLayout());
-            buttonPanel.add(commit);
-            buttonPanel.add(tips);
+            buttonPanel.add(buttonPanel1);
+            buttonPanel.add(buttonPanel2);
         }
 
         return buttonPanel;
