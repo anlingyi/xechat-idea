@@ -1,5 +1,7 @@
 package cn.xeblog.plugin.game.sudoku.other;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.TimeInterval;
 import cn.hutool.core.util.StrUtil;
 import cn.xeblog.plugin.game.sudoku.algorithm.Generator;
 import cn.xeblog.plugin.game.sudoku.algorithm.Grid;
@@ -12,6 +14,7 @@ import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 /**
  * 功能描述: 数独UI页面
@@ -42,30 +45,23 @@ public class SudokuGui extends JPanel implements ActionListener {
     private void initData(Level level) {
         // 题面
         puzzleInts = new Generator().generate(level.getBlank()).toArray();
+    }
+
+    public void doSolution(List<JButton> buttonList) {
+        TimeInterval timer = DateUtil.timer();
 
         // 题解
         Grid grid = Grid.of(puzzleInts);
         new Solver().solve(grid);
         solutionInts = grid.toArray();
 
-        // 上面的算法可能会出现 有个空值的情况
-        boolean flag = false;
-        out:
-        for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 9; j++) {
-                if (solutionInts[i][j] == 0) {
-                    flag = true;
-                    break out;
-                }
-            }
-        }
+        //System.out.println("算法耗时[" + timer.interval() + "]ms");
 
-        // 如果出现空值，就换个算法去生成一套数据，这个略微比上面的算法耗时   Tips: 另外，也可以不用另一套，把上面出现的空值补上就好了
-        if (flag) {
-            CustomSolver.dfs(puzzleInts, 0, 0);
-            solutionInts = CustomSolver.result;
-        }
-
+        // 刷新按钮
+        buttonList.forEach(b -> {
+            b.setEnabled(true);
+            b.repaint();
+        });
     }
 
     private void initJPanel(PanelSize panelSize) {
@@ -137,6 +133,7 @@ public class SudokuGui extends JPanel implements ActionListener {
 
     public JButton getCommitJButton() {
         JButton commit = new JButton("提交");
+        commit.setEnabled(false);
         commit.addActionListener(e -> {
             getCheckInts();
             int errorCount = checkSelfValues(checkGrid);
@@ -167,6 +164,7 @@ public class SudokuGui extends JPanel implements ActionListener {
 
     public JButton getTipsJButton() {
         JButton tips = new JButton("提示");
+        tips.setEnabled(false);
         tips.addActionListener(e -> {
             getCheckInts();
             int[][] checkInts = checkGrid.toArray();
