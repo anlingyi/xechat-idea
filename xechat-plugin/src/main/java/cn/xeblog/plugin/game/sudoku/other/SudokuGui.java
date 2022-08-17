@@ -2,7 +2,9 @@ package cn.xeblog.plugin.game.sudoku.other;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.TimeInterval;
+import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.xeblog.commons.util.ThreadUtils;
 import cn.xeblog.plugin.game.sudoku.algorithm.Generator;
 import cn.xeblog.plugin.game.sudoku.algorithm.Grid;
 import cn.xeblog.plugin.game.sudoku.algorithm.Solver;
@@ -14,7 +16,10 @@ import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.util.List;
+import java.util.*;
 
 /**
  * 功能描述: 数独UI页面
@@ -33,12 +38,15 @@ public class SudokuGui extends JPanel implements ActionListener {
     // 输入字符串最大长度
     private final int maxLength = 1;
 
+    // 缓存下所有格子的初始化背景色
+    private final Map<String, Color> colorMap = new HashMap<>(81);
+
     // 数据模块
     private final JTextField[][] chessBoard = new JTextField[9][9];
 
-    public SudokuGui(Level level, PanelSize panelSize) {
+    public SudokuGui(Level level, PanelSize panelSize, RealTimeTip realTimeTip) {
         initData(level);
-        initJPanel(panelSize);
+        initJPanel(panelSize, realTimeTip);
         repaint();
     }
 
@@ -64,7 +72,7 @@ public class SudokuGui extends JPanel implements ActionListener {
         });
     }
 
-    private void initJPanel(PanelSize panelSize) {
+    private void initJPanel(PanelSize panelSize, RealTimeTip realTimeTip) {
         this.setPreferredSize(new Dimension(panelSize.getTableWidth(), panelSize.getTableHeight()));
         this.setLayout(new GridLayout(9, 9));
         this.setVisible(true);
@@ -84,12 +92,19 @@ public class SudokuGui extends JPanel implements ActionListener {
                 // 文本填入处理
                 jTextField.setDocument(generatePlainDocument());
 
+                // 实时检测
+                if (realTimeTip.isEnabled()) {
+                    jTextField.addFocusListener(generateFocusListener(i, j));
+                }
+
                 if (puzzleInts[i][j] == 0) {
                     jTextField.setForeground(Color.gray);
                 } else {
                     jTextField.setText(Integer.toString(puzzleInts[i][j]));
                     jTextField.setFocusable(false); // 设置是否可获得焦点
                 }
+
+                colorMap.put(i + "" + j, jTextField.getForeground());
             }
         }
     }
@@ -135,7 +150,7 @@ public class SudokuGui extends JPanel implements ActionListener {
         JButton commit = new JButton("提交");
         commit.setEnabled(false);
         commit.addActionListener(e -> {
-            getCheckInts();
+            refreshCheckInts();
             int errorCount = checkSelfValues(checkGrid);
             if (errorCount > 0) {
                 String failureInfo = "很遗憾，你填错了" + errorCount + "个格子！";
@@ -149,7 +164,7 @@ public class SudokuGui extends JPanel implements ActionListener {
     }
 
     // 用户解题数据
-    private void getCheckInts() {
+    private void refreshCheckInts() {
         for (int row = 0; row < 9; row++) {
             for (int column = 0; column < 9; column++) {
                 String text = chessBoard[row][column].getText();
@@ -166,7 +181,7 @@ public class SudokuGui extends JPanel implements ActionListener {
         JButton tips = new JButton("提示");
         tips.setEnabled(false);
         tips.addActionListener(e -> {
-            getCheckInts();
+            refreshCheckInts();
             int[][] checkInts = checkGrid.toArray();
 
             for (int row = 0; row < 9; row++) {
@@ -176,6 +191,8 @@ public class SudokuGui extends JPanel implements ActionListener {
                         chessBoard[row][column].setForeground(new Color(253, 106, 104));
                         chessBoard[row][column].setText(Integer.toString(solutionInts[row][column]));
                     }
+                    // 刷新背景色
+                    colorMap.put(row + "" + column, chessBoard[row][column].getForeground());
                 }
             }
         });
@@ -211,4 +228,77 @@ public class SudokuGui extends JPanel implements ActionListener {
 
     }
 
+    /**
+     * 判断是否合法
+     *
+     * @param board  数据集
+     * @param row    行索引
+     * @param column 列索引
+     * @param val    校验待的数
+     */
+    public Set<String> getConflictSet(int[][] board, int row, int column, int val) {
+        Set<String> conflictSet = new HashSet<>();
+        // 列校验
+        for (int i = 0; i < 9; i++) {
+            if (board[i][column] == val) conflictSet.add(i + "-" + column);
+        }
+        // 行校验
+        for (int j = 0; j < 9; j++) {
+            if (board[row][j] == val) conflictSet.add(row + "-" + j);
+        }
+        // 3 * 3 单元校验
+        for (int x = row / 3 * 3, i = x; i < x + 3; i++) {
+            for (int y = column / 3 * 3, j = y; j < y + 3; j++) {
+                if (board[i][j] == val) conflictSet.add(i + "-" + j);
+            }
+        }
+
+        // 不标记当前位置
+        // conflictSet.remove(row + "-" + column);
+        return conflictSet;
+    }
+
+    // 添加离焦监听 失去焦点后检测当前值是否冲突
+    private FocusListener generateFocusListener(int row, int column) {
+        return new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                JTextField jTextField = (JTextField) e.getComponent();
+                checkValue(row, column, jTextField.getText());
+            }
+        };
+    }
+
+    // 校验当前填的值是否有冲突，冲突就高亮处理
+    private void checkValue(int row, int column, String text) {
+        if ("".equals(text)) {
+            return;
+        }
+
+        refreshCheckInts();
+        Set<String> conflictSet = getConflictSet(checkGrid.toArray(), row, column, Integer.parseInt(text));
+
+        // 冲突上色
+        conflictSet.forEach(s -> {
+            String[] xy = s.split("-");
+            JTextField jTextField = chessBoard[Integer.parseInt(xy[0])][Integer.parseInt(xy[1])];
+            jTextField.setForeground(new Color(243, 208, 5));
+            jTextField.repaint();
+        });
+
+        // 还原成原来的颜色
+        ThreadUtil.execAsync(() -> {
+            ThreadUtils.spinMoment(3000);
+            conflictSet.forEach(s -> {
+                String[] xy = s.split("-");
+                JTextField jTextField = chessBoard[Integer.parseInt(xy[0])][Integer.parseInt(xy[1])];
+                jTextField.setForeground(colorMap.get(s));
+                jTextField.repaint();
+            });
+        });
+    }
 }
