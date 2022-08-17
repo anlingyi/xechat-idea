@@ -6,6 +6,7 @@ import cn.xeblog.plugin.annotation.DoGame;
 import cn.xeblog.plugin.game.AbstractGame;
 import cn.xeblog.plugin.game.sudoku.other.Level;
 import cn.xeblog.plugin.game.sudoku.other.PanelSize;
+import cn.xeblog.plugin.game.sudoku.other.RealTimeTip;
 import cn.xeblog.plugin.game.sudoku.other.SudokuGui;
 import com.google.common.collect.Lists;
 import com.intellij.openapi.ui.ComboBox;
@@ -25,6 +26,7 @@ public class Sudoku extends AbstractGame {
 
     private Level level;
     private PanelSize panelSize;
+    private RealTimeTip realTimeTip;
 
     // 提示按钮
     private JButton tips;
@@ -39,10 +41,11 @@ public class Sudoku extends AbstractGame {
         initMainPanel();
         level = Level.EASY;
         panelSize = PanelSize.MIN;
+        realTimeTip = RealTimeTip.DIS_ENABLE;
 
         mainPanel.setMinimumSize(new Dimension(150, 300));
         JPanel menuJPanel = new JPanel();
-        menuJPanel.setBounds(10, 10, 120, 300);
+        menuJPanel.setBounds(10, 10, 100, 330);
         mainPanel.add(menuJPanel);
 
         JLabel title = new JLabel("摸鱼数独");
@@ -52,12 +55,14 @@ public class Sudoku extends AbstractGame {
         Box vBox = Box.createVerticalBox();
         menuJPanel.add(vBox);
 
+        Dimension selectDimension = new Dimension(30, 30);
+
         vBox.add(Box.createVerticalStrut(20));
         JLabel levelLabel = new JLabel("难度选择：");
         levelLabel.setFont(new Font("", Font.BOLD, 13));
         vBox.add(levelLabel);
         vBox.add(Box.createVerticalStrut(5));
-        ComboBox<String> gameLevelBox = level.getComboBox(new Dimension(40, 30));
+        ComboBox<String> gameLevelBox = level.getComboBox(selectDimension);
         gameLevelBox.addActionListener(l -> level = Level.getLevel(Objects.requireNonNull(gameLevelBox.getSelectedItem()).toString()));
         vBox.add(gameLevelBox);
 
@@ -66,11 +71,20 @@ public class Sudoku extends AbstractGame {
         sizeLabel.setFont(new Font("", Font.BOLD, 13));
         vBox.add(sizeLabel);
         vBox.add(Box.createVerticalStrut(5));
-        ComboBox<String> gameSizeBox = panelSize.getComboBox(new Dimension(40, 30));
+        ComboBox<String> gameSizeBox = panelSize.getComboBox(selectDimension);
         gameSizeBox.addActionListener(l -> panelSize = PanelSize.getPanelSize(Objects.requireNonNull(gameSizeBox.getSelectedItem()).toString()));
         vBox.add(gameSizeBox);
 
-        vBox.add(Box.createVerticalStrut(20));
+        vBox.add(Box.createVerticalStrut(10));
+        JLabel tipLabel = new JLabel("实时提示：");
+        tipLabel.setFont(new Font("", Font.BOLD, 13));
+        vBox.add(tipLabel);
+        vBox.add(Box.createVerticalStrut(5));
+        ComboBox<String> tipSelectBox = realTimeTip.getComboBox(selectDimension);
+        tipSelectBox.addActionListener(l -> realTimeTip = RealTimeTip.getRealTimeTip(Objects.requireNonNull(tipSelectBox.getSelectedItem()).toString()));
+        vBox.add(tipSelectBox);
+
+        vBox.add(Box.createVerticalStrut(10));
         vBox.add(getStartJButton("开始解题"));
         vBox.add(getExitButton());
 
@@ -86,7 +100,7 @@ public class Sudoku extends AbstractGame {
         mainPanel.setLayout(new BorderLayout());
         mainPanel.add(Box.createVerticalStrut(10), BorderLayout.NORTH);
         mainPanel.add(Box.createHorizontalStrut(10), BorderLayout.EAST);
-        SudokuGui sudokuGui = new SudokuGui(level, panelSize);
+        SudokuGui sudokuGui = new SudokuGui(level, panelSize, realTimeTip);
         mainPanel.add(sudokuGui, BorderLayout.CENTER);
         JPanel bottomPanel = getBottomPanel(sudokuGui);
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
