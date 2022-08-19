@@ -86,8 +86,10 @@ public class BrowserUI extends JPanel {
         Component browserUI = browserService.getUI();
         Dimension browserDimension = new Dimension(width, height);
         if (windowMode == WindowMode.SMALL) {
+            browserUI.setMinimumSize(null);
             browserUI.setPreferredSize(browserDimension);
         } else {
+            browserUI.setPreferredSize(null);
             browserUI.setMinimumSize(browserDimension);
         }
 
