@@ -45,7 +45,10 @@ public class JcefBrowserService implements BrowserService {
                 return new CefResourceRequestHandlerAdapter() {
                     @Override
                     public boolean onBeforeResourceLoad(CefBrowser browser, CefFrame frame, CefRequest request) {
-                        request.setHeaderByName("User-Agent", userAgent.getValue(), true);
+                        String ua = userAgent.getValue();
+                        if (ua != null) {
+                            request.setHeaderByName("User-Agent", ua, true);
+                        }
                         return false;
                     }
                 };

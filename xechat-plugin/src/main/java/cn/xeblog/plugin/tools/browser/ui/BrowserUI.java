@@ -28,15 +28,18 @@ public class BrowserUI extends JPanel {
 
     private WindowMode windowMode;
 
+    private UserAgent userAgent;
+
+    private Component browserUI;
+
+    private JTextField urlField;
+
     private enum WindowMode {
-        SMALL("S", UserAgent.IPHONE, 200, 250),
-        MEDIUM("M", UserAgent.IPAD, 400, 300);
+        SMALL("S", 200, 250),
+        MEDIUM("M", 400, 300);
 
         @Getter
         String name;
-
-        @Getter
-        UserAgent userAgent;
 
         @Getter
         int width;
@@ -44,9 +47,8 @@ public class BrowserUI extends JPanel {
         @Getter
         int height;
 
-        WindowMode(String name, UserAgent userAgent, int width, int height) {
+        WindowMode(String name, int width, int height) {
             this.name = name;
-            this.userAgent = userAgent;
             this.width = width;
             this.height = height;
         }
@@ -63,14 +65,12 @@ public class BrowserUI extends JPanel {
 
     public BrowserUI() {
         this.windowMode = WindowMode.SMALL;
-        init();
+        this.userAgent = UserAgent.IPHONE;
+        initPanel();
     }
 
-    private void init() {
+    private void initPanel() {
         removeAll();
-
-        int width = this.windowMode.getWidth();
-        int height = this.windowMode.getHeight();
 
         String url = HOME_PAGE;
         if (lastUrl != null) {
@@ -81,35 +81,14 @@ public class BrowserUI extends JPanel {
             this.browserService.close();
         }
         this.browserService = new JcefBrowserService(url);
-        this.browserService.setUserAgent(windowMode.getUserAgent());
+        this.browserService.setUserAgent(userAgent);
 
-        Component browserUI = browserService.getUI();
-        Dimension browserDimension = new Dimension(width, height);
-        if (windowMode == WindowMode.SMALL) {
-            browserUI.setMinimumSize(null);
-            browserUI.setPreferredSize(browserDimension);
-        } else {
-            browserUI.setPreferredSize(null);
-            browserUI.setMinimumSize(browserDimension);
-        }
-
-        JTextField urlField = new JTextField(url);
-        urlField.setPreferredSize(new Dimension(width * 2 / 3, 30));
+        browserUI = browserService.getUI();
+        urlField = new JTextField(url);
+        resize();
 
         Dimension buttonDimension = new Dimension(50, 25);
         Box hbox = Box.createHorizontalBox();
-
-        ComboBox windowModeBox = new ComboBox();
-        windowModeBox.setPreferredSize(buttonDimension);
-        for (WindowMode mode : WindowMode.values()) {
-            windowModeBox.addItem(mode.getName());
-        }
-        windowModeBox.setSelectedItem(windowMode.getName());
-        windowModeBox.addItemListener(l -> {
-            windowMode = WindowMode.getMode(l.getItem().toString());
-            init();
-        });
-        hbox.add(windowModeBox);
 
         JButton exitButton = new JButton("✕");
         exitButton.setToolTipText("退出");
@@ -145,9 +124,43 @@ public class BrowserUI extends JPanel {
         JPanel urlPanel = new JPanel();
         urlPanel.add(hbox);
 
+        Box h2Box = Box.createHorizontalBox();
+        h2Box.add(new JLabel("Window："));
+        ComboBox windowModeBox = new ComboBox();
+        windowModeBox.setPreferredSize(buttonDimension);
+        for (WindowMode mode : WindowMode.values()) {
+            windowModeBox.addItem(mode.getName());
+        }
+        windowModeBox.setSelectedItem(windowMode.getName());
+        windowModeBox.addItemListener(l -> {
+            windowMode = WindowMode.getMode(l.getItem().toString());
+            resize();
+            updateUI();
+        });
+        h2Box.add(windowModeBox);
+
+        h2Box.add(Box.createHorizontalStrut(5));
+        h2Box.add(new JLabel("UA："));
+        ComboBox uaBox = new ComboBox();
+        uaBox.setPreferredSize(new Dimension(100, 30));
+        for (UserAgent userAgent : UserAgent.values()) {
+            uaBox.addItem(userAgent.getName());
+        }
+        uaBox.setSelectedItem(userAgent.getName());
+        uaBox.addItemListener(l -> {
+            userAgent = UserAgent.getUserAgent(l.getItem().toString());
+            browserService.setUserAgent(userAgent);
+            browserService.reload();
+        });
+        h2Box.add(uaBox);
+
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.add(h2Box);
+
         setLayout(new BorderLayout());
         add(urlPanel, BorderLayout.NORTH);
         add(browserUI, BorderLayout.CENTER);
+        add(bottomPanel, BorderLayout.SOUTH);
         add(Box.createHorizontalStrut(10), BorderLayout.EAST);
 
         updateUI();
@@ -174,9 +187,26 @@ public class BrowserUI extends JPanel {
 
             @Override
             public void onBeforeClose() {
-                SwingUtilities.invokeLater(() -> init());
+                SwingUtilities.invokeLater(() -> initPanel());
             }
         });
+    }
+
+    private void resize() {
+        int width = this.windowMode.getWidth();
+        int height = this.windowMode.getHeight();
+
+        urlField.setPreferredSize(new Dimension(width * 2 / 3, 30));
+        urlField.updateUI();
+
+        Dimension browserDimension = new Dimension(width, height);
+        browserUI.setMinimumSize(null);
+        browserUI.setPreferredSize(null);
+        if (windowMode == WindowMode.SMALL) {
+            browserUI.setPreferredSize(browserDimension);
+        } else {
+            browserUI.setMinimumSize(browserDimension);
+        }
     }
 
     public void close() {
