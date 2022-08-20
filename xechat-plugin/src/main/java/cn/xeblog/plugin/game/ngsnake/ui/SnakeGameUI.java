@@ -2,6 +2,7 @@ package cn.xeblog.plugin.game.ngsnake.ui;
 
 import cn.xeblog.plugin.game.ngsnake.model.*;
 import cn.xeblog.plugin.game.ngsnake.model.Point;
+import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,6 +16,12 @@ import java.util.Random;
  * @date 2022/8/2 3:51 PM
  */
 public class SnakeGameUI extends JPanel implements ActionListener {
+
+    /**
+     * 是否允许穿墙
+     */
+    @Setter
+    private boolean pierced;
 
     /**
      * 宽度
@@ -239,8 +246,8 @@ public class SnakeGameUI extends JPanel implements ActionListener {
         do {
             inSnakeBody = false;
             // 随机坐标
-            x = new Random().nextInt(this.width / Pill.width - 1);
-            y = new Random().nextInt(this.height / Pill.height - 1);
+            x = new Random().nextInt(this.width / Pill.width);
+            y = new Random().nextInt(this.height / Pill.height);
 
             // 需要跳过蛇身坐标
             int sx = x * Snake.width;
@@ -380,7 +387,23 @@ public class SnakeGameUI extends JPanel implements ActionListener {
                     }
                 }
 
-                if (isHitWall || isBiting) {
+                if (pierced) {
+                    // 穿墙
+                    if (head.x > maxWidth) {
+                        head.x = 0;
+                    }
+                    if (head.x < 0) {
+                        head.x = maxWidth;
+                    }
+                    if (head.y > maxHeight) {
+                        head.y = 0;
+                    }
+                    if (head.y < 0) {
+                        head.y = maxHeight;
+                    }
+                }
+
+                if (isBiting || !pierced && isHitWall) {
                     // 游戏失败
                     this.state = 2;
                     this.stop = true;
