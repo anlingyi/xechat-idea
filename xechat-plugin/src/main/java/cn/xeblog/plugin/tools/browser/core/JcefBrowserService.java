@@ -116,6 +116,11 @@ public class JcefBrowserService implements BrowserService {
     }
 
     @Override
+    public void setZoomLevel(double value) {
+        this.cefBrowser.setZoomLevel(value);
+    }
+
+    @Override
     public void close() {
         this.client.dispose();
         this.jbCefBrowser.dispose();

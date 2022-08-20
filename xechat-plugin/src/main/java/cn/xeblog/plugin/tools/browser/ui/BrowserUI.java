@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.tools.browser.ui;
 
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xeblog.plugin.enums.Command;
 import cn.xeblog.plugin.tools.browser.core.BrowserEventListener;
@@ -153,6 +154,24 @@ public class BrowserUI extends JPanel {
             browserService.reload();
         });
         h2Box.add(uaBox);
+
+        h2Box.add(Box.createHorizontalStrut(5));
+        h2Box.add(new JLabel("Zoom："));
+        JTextField zoomLevelField = new JTextField("0.0");
+        zoomLevelField.setPreferredSize(new Dimension(50, 30));
+        zoomLevelField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    String value = zoomLevelField.getText();
+                    if (NumberUtil.isNumber(value)) {
+                        double zoom = Double.parseDouble(value);
+                        browserService.setZoomLevel(zoom);
+                    }
+                }
+            }
+        });
+        h2Box.add(zoomLevelField);
 
         JPanel bottomPanel = new JPanel();
         bottomPanel.add(h2Box);
