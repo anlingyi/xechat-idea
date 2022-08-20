@@ -64,7 +64,7 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
         }
 
         boolean isReconnect = body.isReconnected();
-        String username = body.getUsername();
+        String username = body.getUsername().replaceAll("\\s*|\t|\r|\n", "");
         if (UserCache.existUsername(username)) {
             ctx.writeAndFlush(ResponseBuilder.system("[" + username + "]昵称重复！"));
             ctx.close();

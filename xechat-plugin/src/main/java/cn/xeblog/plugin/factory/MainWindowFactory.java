@@ -1,6 +1,7 @@
 package cn.xeblog.plugin.factory;
 
 import cn.hutool.core.thread.GlobalThreadPool;
+import cn.xeblog.commons.util.ThreadUtils;
 import cn.xeblog.plugin.action.InputAction;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.ui.MainWindow;
@@ -30,8 +31,8 @@ public class MainWindowFactory implements ToolWindowFactory {
             @Override
             public void ancestorAdded(AncestorEvent event) {
                 GlobalThreadPool.execute(() -> {
-                    while (!InputAction.restCursor()) {
-                    }
+                    ThreadUtils.spinMoment(800);
+                    InputAction.restCursor();
                 });
             }
         });

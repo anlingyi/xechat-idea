@@ -2,6 +2,7 @@ package cn.xeblog.plugin.game.ngsnake.ui;
 
 import cn.xeblog.plugin.game.ngsnake.model.*;
 import cn.xeblog.plugin.game.ngsnake.model.Point;
+import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,6 +16,12 @@ import java.util.Random;
  * @date 2022/8/2 3:51 PM
  */
 public class SnakeGameUI extends JPanel implements ActionListener {
+
+    /**
+     * 是否允许穿墙
+     */
+    @Setter
+    private boolean pierced;
 
     /**
      * 宽度
@@ -239,8 +246,8 @@ public class SnakeGameUI extends JPanel implements ActionListener {
         do {
             inSnakeBody = false;
             // 随机坐标
-            x = new Random().nextInt(this.width / Pill.width - 1);
-            y = new Random().nextInt(this.height / Pill.height - 1);
+            x = new Random().nextInt(this.width / Pill.width);
+            y = new Random().nextInt(this.height / Pill.height);
 
             // 需要跳过蛇身坐标
             int sx = x * Snake.width;
@@ -252,7 +259,6 @@ public class SnakeGameUI extends JPanel implements ActionListener {
                 }
             }
         } while (inSnakeBody);
-
 
         this.pill = new Pill(x, y, pillType);
     }
@@ -333,6 +339,42 @@ public class SnakeGameUI extends JPanel implements ActionListener {
             // 移动蛇
             this.snake.move(this.direction);
             Point head = this.snake.getHead();
+
+            // 判断蛇有没有咬到自己或是撞墙
+            int maxWidth = this.width - this.snake.width;
+            int maxHeight = this.height - this.snake.height;
+            boolean isHitWall = head.x > maxWidth || head.x < 0 || head.y > maxHeight || head.y < 0;
+
+            if (isHitWall && pierced) {
+                // 穿墙
+                if (head.x > maxWidth) {
+                    head.x = 0;
+                }
+                if (head.x < 0) {
+                    head.x = maxWidth;
+                }
+                if (head.y > maxHeight) {
+                    head.y = 0;
+                }
+                if (head.y < 0) {
+                    head.y = maxHeight;
+                }
+            }
+
+            boolean isBiting = false;
+            for (int i = this.snake.size() - 1; i > 0; i--) {
+                if (head.equals(this.snake.body.get(i))) {
+                    isBiting = true;
+                    break;
+                }
+            }
+
+            if (isBiting || !pierced && isHitWall) {
+                // 游戏失败
+                this.state = 2;
+                this.stop = true;
+            }
+
             if (head.equals(this.pill.point)) {
                 // 吃药了
                 isAte = true;
@@ -364,26 +406,6 @@ public class SnakeGameUI extends JPanel implements ActionListener {
                         // 加速
                         this.timer.setDelay(curSpeed - 10);
                     }
-                }
-            }
-
-            if (state == 0) {
-                // 判断蛇有没有咬到自己或是撞墙
-                int maxWidth = this.width - this.snake.width;
-                int maxHeight = this.height - this.snake.height;
-                boolean isHitWall = head.x > maxWidth || head.x < 0 || head.y > maxHeight || head.y < 0;
-                boolean isBiting = false;
-                for (int i = this.snake.size() - 1; i > 0; i--) {
-                    if (head.equals(this.snake.body.get(i))) {
-                        isBiting = true;
-                        break;
-                    }
-                }
-
-                if (isHitWall || isBiting) {
-                    // 游戏失败
-                    this.state = 2;
-                    this.stop = true;
                 }
             }
         }
