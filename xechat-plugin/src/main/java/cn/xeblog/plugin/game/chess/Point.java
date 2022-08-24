@@ -19,7 +19,7 @@ public class Point {
      */
     int y;
     /**
-     * 棋子类型 1.黑 2.白
+     * 棋子类型 1.红 2.黑
      */
     int type;
     /**
@@ -33,8 +33,13 @@ public class Point {
         this.type = type;
     }
 
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
     @Override
     public String toString() {
-        return (type == 1 ? "黑" : "白") + "[" + x + "," + y + ']';
+        return (type == 1 ? "红" : "黑") + "[" + x + "," + y + ']';
     }
 }

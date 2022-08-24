@@ -1,6 +1,8 @@
 package cn.xeblog.plugin.game.chess;
 
 
+import cn.xeblog.commons.entity.game.chess.ChessDTO;
+
 import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
@@ -18,7 +20,7 @@ public class GameLogic {
 	int Maxdepth = 2;
 	
 	/** 电脑AI要走的位置 */
-	Map<String, String> mapAiChess = new HashMap<String, String>();
+	Map<String, String> mapAiChess = new HashMap<>();
 	
 	public GameLogic(GamePanel _gamePanel)
 	{
@@ -60,60 +62,11 @@ public class GameLogic {
 		 
 		return row;
 	}
-
-	/**
-	 * 功能：判断下一步是红棋下还是黑棋下<br>
-	 */
-	private int getNextChessColor()
-	{
-		int chessColor = -1;
-		
-		//得到上一步信息
-		if(this.gamePanel.listChess.size() > 0)
-		{
-			Map<String, String> mapLast = this.gamePanel.listChess.get(this.gamePanel.listChess.size() - 1);
-			if(Integer.parseInt(mapLast.get("color")) == this.gamePanel.BLACKCHESS)
-			{
-				chessColor = this.gamePanel.REDCHESS;
-			}
-			else
-			{
-				chessColor = this.gamePanel.BLACKCHESS;
-			}
-		}
-		else
-		{
-			if(this.gamePanel.fightType == 0)	//人机对战
-			{
-				if(this.gamePanel.playFirst == 1)	//玩家先手
-				{
-					chessColor = this.gamePanel.chessColor;
-				}
-				else	//电脑先手（这是不想赢啊）
-				{
-					if(this.gamePanel.chessColor == this.gamePanel.BLACKCHESS)
-					{
-						chessColor = this.gamePanel.REDCHESS;
-					}
-					else
-					{
-						chessColor = this.gamePanel.BLACKCHESS;
-					}
-				}
-			}
-			else	//人人对战
-			{
-				chessColor = this.gamePanel.chessColor;
-			}
-		}
-		
-		return chessColor;
-	}
 	
 	/**
 	 * 功能：将军提示<br>
 	 */
-	private void check()
+	void check()
 	{
 		//全体循环，不知道将哪头的军
 		for(int i=0;i<this.gamePanel.mapChess.length;i++)
@@ -143,7 +96,7 @@ public class GameLogic {
 	 * 参数：_newColumn -> 目标列位置<br>
 	 * 备注：点空位或对方棋子上，已方棋子略<br>
 	 */
-	private boolean isAbleToMove(Map<String, String> _mapChess, int _newRow, int _newColumn)
+	boolean isAbleToMove(Map<String, String> _mapChess, int _newRow, int _newColumn)
 	{
 		int oldRow = -1;		//移动前行位置
 		int oldColulmn = -1;	//移动前列位置
@@ -440,7 +393,7 @@ public class GameLogic {
 		oldRow = Integer.parseInt(mapLast.get("oldRow"));
 		oldColumn = Integer.parseInt(mapLast.get("oldColumn"));
 		
-		if(this.gamePanel.fightType == 0)	//人机对战（只有玩家才会悔棋，电脑才不会这么耍赖）
+		if(this.gamePanel.chineseChess.fightType == 0)	//人机对战（只有玩家才会悔棋，电脑才不会这么耍赖）
 		{
 			//人机要同时悔2步棋，所以要得到倒数第二步棋信息
 			if(this.gamePanel.listChess.size() < 2)
@@ -560,7 +513,7 @@ public class GameLogic {
 		int blackScore = 0;	//黑棋评估分数
 		
 		//判断该谁下棋
-		int nextColor = this.getNextChessColor();
+		int nextColor = gamePanel.getNextChessColor();
 
 		//所有棋子循环
 		for(int m=0;m<this.gamePanel.mapChess.length;m++)
@@ -919,7 +872,7 @@ public class GameLogic {
 		}
 
 		//生成每一步走法
-		int nextColor = this.getNextChessColor();
+		int nextColor = gamePanel.getNextChessColor();
 		
 		System.out.println("nextColor="+nextColor);
 		
@@ -1034,9 +987,9 @@ public class GameLogic {
 	/**
 	 * 功能：判断游戏是否结束<br>
 	 */
-	private boolean gameOver()
+	boolean gameOver()
 	{
-		if(this.gamePanel.fightType == 0)	//人机对战
+		if(this.gamePanel.chineseChess.fightType == 0)	//人机对战
 		{
 			if("T".equals(this.gamePanel.mapChess[4].get("dead")))	//黑将被吃
 			{
@@ -1083,7 +1036,7 @@ public class GameLogic {
 	/**
 	 * 功能：棋子移动到新位置<br>
 	 */
-	private void moveTo(Map<String, String> _mapChess, int _newRow, int _newColumn)
+	void moveTo(Map<String, String> _mapChess, int _newRow, int _newColumn)
 	{
 		//判断是移动还是吃子
 		int newIndex = this.gamePanel.chessBoradState[_newRow][_newColumn];
@@ -1114,183 +1067,128 @@ public class GameLogic {
 	/**
 	 * 功能：鼠标单击事件<br>
 	 */
-	public void mouseClicked(MouseEvent e)
-	{
-		if(this.gamePanel.isGameOver){return;}
-		
-		if(e.getButton() == MouseEvent.BUTTON1)		//鼠标左键点击
+	public void mouseClicked(MouseEvent e) {
+		if (this.gamePanel.isGameOver) {
+			return;
+		}
+
+		if (e.getButton() == MouseEvent.BUTTON1)        //鼠标左键点击
 		{
-			if(e.getSource() == this.gamePanel.labelChessBorad)		//点击到棋盘上
+			if (e.getSource() == this.gamePanel.labelChessBorad)        //点击到棋盘上
 			{
 				//第一次点击无效
-				if(this.gamePanel.isFirstClick){return;}
+				if (this.gamePanel.isFirstClick) {
+					return;
+				}
 
 				//判断位置（将X与Y由像素改为相应的行列坐标）
 				int row = this.getRow(e.getY());
 				int column = this.getColumn(e.getX());
-				if(row >= 0 && row < 10 && column >= 0 && column < 9)		//第二次点击
+				if (row >= 0 && row < 10 && column >= 0 && column < 9)        //第二次点击
 				{
 					//要移动棋子了
-					if(this.isAbleToMove(this.gamePanel.firstClickChess,row,column))
-					{
-						this.moveTo(this.gamePanel.firstClickChess,row,column);
-						//取消移动路线图
-						this.gamePanel.listMove.clear();
-						//落子指示器
-						this.gamePanel.mapPointerChess.put("row",row);
-						this.gamePanel.mapPointerChess.put("column",column);
-						this.gamePanel.mapPointerChess.put("show",1);
-						//更新提示
-						if(Integer.parseInt(gamePanel.firstClickChess.get("color")) == this.gamePanel.BLACKCHESS)
-						{
-							this.gamePanel.jlb_redStateText.setText("思考中");
-							this.gamePanel.jlb_blackStateText.setText("已下完");
-						}
-						else
-						{
-							this.gamePanel.jlb_redStateText.setText("已下完");
-							this.gamePanel.jlb_blackStateText.setText("思考中");
-						}
-						this.gamePanel.repaint();
-						
-						//判断是否将军
-						this.check();
-						
-						//如果是人机对战，机器要回应啊
-						if(this.gamePanel.fightType == 0)	//人机对战
-						{
-							this.computerPlay();
-							if(this.gamePanel.computerChess == this.gamePanel.BLACKCHESS)
-							{
-								this.gamePanel.jlb_blackStateText.setText("已下完");
-								this.gamePanel.jlb_redStateText.setText("思考中");
-							}
-							else
-							{
-								this.gamePanel.jlb_redStateText.setText("已下完");
-								this.gamePanel.jlb_blackStateText.setText("思考中");
-							}
-							//判断游戏是否结束
-							if(this.gameOver())
-							{
-								this.gamePanel.isGameOver = true;
-								this.gamePanel.setComponentState(false);
-								this.gamePanel.jlb_blackStateText.setText("已结束");
-								this.gamePanel.jlb_redStateText.setText("已结束");
-								return;
-							}
-						}
+					if (this.isAbleToMove(this.gamePanel.firstClickChess, row, column)) {
+						System.out.println("thisIsTheKeyboard---------------");
+						this.gamePanel.setChess(new Point(row, column));
 					}
 				}
-				else
-				{
-					return;
-				}
-			}
-			else	//点到棋子上
+			} else    //点到棋子上
 			{
-				JLabel label = (JLabel)e.getSource();
+				JLabel label = (JLabel) e.getSource();
 				int index = Integer.parseInt(label.getName());
 				int row = Integer.parseInt(this.gamePanel.mapChess[index].get("newRow"));
 				int column = Integer.parseInt(this.gamePanel.mapChess[index].get("newColumn"));
 				//判断第几次点击
-				if(this.gamePanel.isFirstClick)		//第一次（必须点击到该下棋方的棋子上）
+				if (this.gamePanel.isFirstClick)        //第一次（必须点击到该下棋方的棋子上）
 				{
-					if(Integer.parseInt(this.gamePanel.mapChess[index].get("color")) != this.getNextChessColor()){return;}
+					if (Integer.parseInt(this.gamePanel.mapChess[index].get("color")) != gamePanel.getNextChessColor()) {
+						return;
+					}
 					//画个落子指示器并记录下第一次点击对象
-					this.gamePanel.mapPointerChess.put("row",row);
-					this.gamePanel.mapPointerChess.put("column",column);
-					this.gamePanel.mapPointerChess.put("show",1);
+					this.gamePanel.mapPointerChess.put("row", row);
+					this.gamePanel.mapPointerChess.put("column", column);
+					this.gamePanel.mapPointerChess.put("show", 1);
 					this.gamePanel.mapPointerChess.put("color", Integer.parseInt(this.gamePanel.mapChess[index].get("color")));
 					this.gamePanel.firstClickChess = this.gamePanel.mapChess[index];
 					this.gamePanel.isFirstClick = false;
+					System.out.println("thisIsTheChessPiece---（clickOnThePlayerSPawnForTheFirstTime）------------");
 					this.gamePanel.repaint();
-					
-					if(Integer.parseInt(this.gamePanel.mapChess[index].get("color")) == this.gamePanel.BLACKCHESS)
-					{
+
+					if (Integer.parseInt(this.gamePanel.mapChess[index].get("color")) == this.gamePanel.BLACKCHESS) {
 						this.gamePanel.jlb_redStateText.setText("等待中");
 						this.gamePanel.jlb_blackStateText.setText("已选棋");
-					}
-					else
-					{
+					} else {
 						this.gamePanel.jlb_redStateText.setText("已选棋");
 						this.gamePanel.jlb_blackStateText.setText("等待中");
 					}
 					//显示移动路线图
 					this.getMoveRoute(this.gamePanel.firstClickChess);
+					System.out.println("thisIsTheChessPiece---（clickOnThePlayerSPawnForTheFirstTime）（again?）------------");
 					this.gamePanel.repaint();
-					
-				}
-				else	//第二次点击
+
+				} else    //第二次点击
 				{
 					//点击到该下棋方的棋子上则还算是第一次
-					if(Integer.parseInt(this.gamePanel.mapChess[index].get("color")) == this.getNextChessColor())
-					{
-						this.gamePanel.mapPointerChess.put("row",row);
-						this.gamePanel.mapPointerChess.put("column",column);
-						this.gamePanel.mapPointerChess.put("show",1);
+					if (Integer.parseInt(this.gamePanel.mapChess[index].get("color")) == gamePanel.getNextChessColor()) {
+						this.gamePanel.mapPointerChess.put("row", row);
+						this.gamePanel.mapPointerChess.put("column", column);
+						this.gamePanel.mapPointerChess.put("show", 1);
 						this.gamePanel.firstClickChess = this.gamePanel.mapChess[index];
 						this.gamePanel.isFirstClick = false;
-						this.getMoveRoute(this.gamePanel.firstClickChess);		//显示移动路线图
+						this.getMoveRoute(this.gamePanel.firstClickChess);        //显示移动路线图
+						System.out.println("thisIsTheChessPiece---（clickingOnThePlayerSPieceIsTheFirstTime）------------");
 						this.gamePanel.repaint();
-						
-					}
-					else	//要吃棋子了
+
+					} else    //要吃棋子了
 					{
-						if(this.isAbleToMove(this.gamePanel.firstClickChess,row,column))	//这个可以吃
+						if (this.isAbleToMove(this.gamePanel.firstClickChess, row, column))    //这个可以吃
 						{
-							this.moveTo(this.gamePanel.firstClickChess,row,column);
+							this.moveTo(this.gamePanel.firstClickChess, row, column);
 							//取消移动路线图
 							this.gamePanel.listMove.clear();
 							//落子指示器
-							this.gamePanel.mapPointerChess.put("row",row);
-							this.gamePanel.mapPointerChess.put("column",column);
-							this.gamePanel.mapPointerChess.put("show",1);
-							if(Integer.parseInt(gamePanel.firstClickChess.get("color")) == this.gamePanel.BLACKCHESS)
-							{
+							this.gamePanel.mapPointerChess.put("row", row);
+							this.gamePanel.mapPointerChess.put("column", column);
+							this.gamePanel.mapPointerChess.put("show", 1);
+							if (Integer.parseInt(gamePanel.firstClickChess.get("color")) == this.gamePanel.BLACKCHESS) {
 								this.gamePanel.jlb_redStateText.setText("思考中");
 								this.gamePanel.jlb_blackStateText.setText("已下完");
-							}
-							else
-							{
+							} else {
 								this.gamePanel.jlb_redStateText.setText("已下完");
 								this.gamePanel.jlb_blackStateText.setText("思考中");
 							}
+							System.out.println("thisIsTheChessPiece---（goingToEatChessPieces）------------");
+
 							this.gamePanel.repaint();
-							
+
 							//判断是否将军
 							this.check();
 						}
-						
+
 						//判断游戏是否结束
-						if(this.gameOver())
-						{
+						if (this.gameOver()) {
 							this.gamePanel.isGameOver = true;
 							this.gamePanel.setComponentState(false);
 							this.gamePanel.jlb_blackStateText.setText("已结束");
 							this.gamePanel.jlb_redStateText.setText("已结束");
 							return;
 						}
-						
+
 						//判断双方是否战平（这个不行啊）
-						
+
 						//如果是人机对战，机器要回应啊
-						if(this.gamePanel.fightType == 0)	//人机对战
+						if (this.gamePanel.chineseChess.fightType == 0)    //人机对战
 						{
 							this.computerPlay();
-							if(this.gamePanel.computerChess == this.gamePanel.BLACKCHESS)
-							{
+							if (this.gamePanel.computerChess == this.gamePanel.BLACKCHESS) {
 								this.gamePanel.jlb_blackStateText.setText("已下完");
 								this.gamePanel.jlb_redStateText.setText("思考中");
-							}
-							else
-							{
+							} else {
 								this.gamePanel.jlb_redStateText.setText("已下完");
 								this.gamePanel.jlb_blackStateText.setText("思考中");
 							}
 							//判断游戏是否结束
-							if(this.gameOver())
-							{
+							if (this.gameOver()) {
 								this.gamePanel.isGameOver = true;
 								this.gamePanel.setComponentState(false);
 								this.gamePanel.jlb_blackStateText.setText("已结束");
@@ -1302,9 +1200,8 @@ public class GameLogic {
 				}
 			}
 		}
-
 	}
-	
+
 	/**
 	 * 功能：鼠标移动事件<br>
 	 */
@@ -1348,7 +1245,7 @@ public class GameLogic {
 				if(this.gamePanel.isFirstClick)
 				{
 					//下棋方显示移动显示器，非下棋方不显示移动指示器
-					if(Integer.parseInt(this.gamePanel.mapChess[index].get("color")) == this.getNextChessColor())
+					if(Integer.parseInt(this.gamePanel.mapChess[index].get("color")) == gamePanel.getNextChessColor())
 					{
 						this.gamePanel.mapPointerMove.put("row",row);
 						this.gamePanel.mapPointerMove.put("column",column);
@@ -1378,6 +1275,5 @@ public class GameLogic {
 		}
 		
 	}
-	
 	
 }

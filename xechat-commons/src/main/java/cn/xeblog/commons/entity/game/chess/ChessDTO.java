@@ -18,6 +18,11 @@ public class ChessDTO extends GameDTO {
 
     private int x;
     private int y;
+
+    /** 对战方式：1-人人 0-人机 */
     private int type;
+
+    /** 先手：1-我方先手 2-对方先手 */
+    private int playFirst;
 
 }
