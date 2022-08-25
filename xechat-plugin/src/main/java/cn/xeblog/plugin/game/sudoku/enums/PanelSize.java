@@ -1,4 +1,4 @@
-package cn.xeblog.plugin.game.sudoku.other;
+package cn.xeblog.plugin.game.sudoku.enums;
 
 import com.intellij.openapi.ui.ComboBox;
 import lombok.AllArgsConstructor;
