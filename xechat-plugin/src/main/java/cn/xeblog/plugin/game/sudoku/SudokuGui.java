@@ -1,4 +1,4 @@
-package cn.xeblog.plugin.game.sudoku.other;
+package cn.xeblog.plugin.game.sudoku;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.TimeInterval;
@@ -8,6 +8,10 @@ import cn.xeblog.commons.util.ThreadUtils;
 import cn.xeblog.plugin.game.sudoku.algorithm.Generator;
 import cn.xeblog.plugin.game.sudoku.algorithm.Grid;
 import cn.xeblog.plugin.game.sudoku.algorithm.Solver;
+import cn.xeblog.plugin.game.sudoku.enums.Level;
+import cn.xeblog.plugin.game.sudoku.enums.PanelSize;
+import cn.xeblog.plugin.game.sudoku.enums.RealTimeTip;
+import cn.xeblog.plugin.game.sudoku.enums.Theme;
 
 import javax.swing.*;
 import javax.swing.text.AttributeSet;
@@ -28,6 +32,8 @@ import java.util.*;
  * @date 2022/8/12 11:34
  */
 public class SudokuGui extends JPanel implements ActionListener {
+    // 主题
+    private Theme theme;
 
     // 题面
     private int[][] puzzleInts;
@@ -44,7 +50,8 @@ public class SudokuGui extends JPanel implements ActionListener {
     // 数据模块
     private final JTextField[][] chessBoard = new JTextField[9][9];
 
-    public SudokuGui(Level level, PanelSize panelSize, RealTimeTip realTimeTip) {
+    public SudokuGui(Level level, PanelSize panelSize, RealTimeTip realTimeTip, Theme theme) {
+        this.theme = theme;
         initData(level);
         initJPanel(panelSize, realTimeTip);
         repaint();
@@ -98,8 +105,9 @@ public class SudokuGui extends JPanel implements ActionListener {
                 }
 
                 if (puzzleInts[i][j] == 0) {
-                    jTextField.setForeground(Color.gray);
+                    jTextField.setForeground(theme.getPuzzleForeground());
                 } else {
+                    jTextField.setForeground(theme.getSolutionForeground());
                     jTextField.setText(Integer.toString(puzzleInts[i][j]));
                     jTextField.setFocusable(false); // 设置是否可获得焦点
                 }
@@ -140,15 +148,14 @@ public class SudokuGui extends JPanel implements ActionListener {
     private void setBackgroundColor(int row, int col) {
         // 设置九宫格的背景颜色 贴近深色系统  // TODO: 2022/8/12 后面可以升级兼容浅色系统
         if ((row / 3 == 0 && col / 3 == 0) || (row / 3 == 1 && col / 3 == 1) || (row / 3 == 2 && col / 3 == 2) || (row / 3 == 0 && col / 3 == 2) || (row / 3 == 2 && col / 3 == 0)) {
-            chessBoard[row][col].setBackground(new Color(60, 63, 65));
+            chessBoard[row][col].setBackground(theme.getBackgroundColorUnit1());
         } else {
-            chessBoard[row][col].setBackground(new Color(68, 72, 74));
+            chessBoard[row][col].setBackground(theme.getBackgroundColorUnit2());
         }
     }
 
     public JButton getCommitJButton() {
         JButton commit = new JButton("提交");
-        commit.setEnabled(false);
         commit.addActionListener(e -> {
             refreshCheckInts();
             int errorCount = checkSelfValues(checkGrid);
@@ -179,7 +186,6 @@ public class SudokuGui extends JPanel implements ActionListener {
 
     public JButton getTipsJButton() {
         JButton tips = new JButton("提示");
-        tips.setEnabled(false);
         tips.addActionListener(e -> {
             refreshCheckInts();
             int[][] checkInts = checkGrid.toArray();
@@ -188,7 +194,7 @@ public class SudokuGui extends JPanel implements ActionListener {
                 for (int column = 0; column < 9; column++) {
                     // 如果chessBoard内的文本与答案不相同
                     if (checkInts[row][column] != solutionInts[row][column]) {
-                        chessBoard[row][column].setForeground(new Color(253, 106, 104));
+                        chessBoard[row][column].setForeground(theme.getTipForegroundResult());
                         chessBoard[row][column].setText(Integer.toString(solutionInts[row][column]));
                     }
                     // 刷新背景色
@@ -286,7 +292,7 @@ public class SudokuGui extends JPanel implements ActionListener {
         conflictSet.forEach(s -> {
             String[] xy = s.split("-");
             JTextField jTextField = chessBoard[Integer.parseInt(xy[0])][Integer.parseInt(xy[1])];
-            jTextField.setForeground(new Color(243, 208, 5));
+            jTextField.setForeground(theme.getTipForegroundReal());
             jTextField.repaint();
         });
 
