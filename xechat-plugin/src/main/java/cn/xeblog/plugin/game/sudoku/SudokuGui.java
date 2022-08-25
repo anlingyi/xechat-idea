@@ -33,8 +33,7 @@ import java.util.*;
  */
 public class SudokuGui extends JPanel implements ActionListener {
     // 主题
-    private Theme theme;
-
+    private final Theme theme;
     // 题面
     private int[][] puzzleInts;
     // 题解
@@ -198,7 +197,7 @@ public class SudokuGui extends JPanel implements ActionListener {
                         chessBoard[row][column].setText(Integer.toString(solutionInts[row][column]));
                     }
                     // 刷新背景色
-                    colorMap.put(row + "" + column, chessBoard[row][column].getForeground());
+                    colorMap.put(row + "-" + column, chessBoard[row][column].getForeground());
                 }
             }
         });
@@ -260,7 +259,10 @@ public class SudokuGui extends JPanel implements ActionListener {
         }
 
         // 不标记当前位置
-        // conflictSet.remove(row + "-" + column);
+        if (conflictSet.size() == 1) {
+            conflictSet.remove(row + "-" + column);
+        }
+
         return conflictSet;
     }
 
