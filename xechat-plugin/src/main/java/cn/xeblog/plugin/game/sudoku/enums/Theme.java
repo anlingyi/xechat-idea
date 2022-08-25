@@ -15,19 +15,20 @@ import java.awt.*;
 @Getter
 @AllArgsConstructor
 public enum Theme {
-    DARCULA("Darcula", new Color(60, 63, 65), new Color(68, 72, 74), new Color(155, 152, 152), new Color(210, 208, 208), new Color(243, 208, 5), new Color(253, 106, 104)),
+    DARK("DARK", new Color(60, 63, 65), new Color(68, 72, 74), new Color(155, 152, 152), new Color(210, 208, 208), new Color(243, 208, 5), new Color(253, 106, 104)),
+    LIGHT("LIGHT", new Color(242, 242, 242), new Color(242, 240, 219), new Color(64, 182, 224), new Color(17, 16, 16), new Color(238, 5, 207), new Color(227, 43, 61)),
     ;
 
-    String name;
+    final String name;
     // 九宫格单元背景色
-    Color backgroundColorUnit1;
-    Color backgroundColorUnit2;
+    final Color backgroundColorUnit1;
+    final Color backgroundColorUnit2;
     // 前景色
-    Color puzzleForeground;
-    Color solutionForeground;
+    final Color puzzleForeground;
+    final Color solutionForeground;
     // 提示颜色
-    Color tipForegroundReal;
-    Color tipForegroundResult;
+    final Color tipForegroundReal;
+    final Color tipForegroundResult;
 
     public static Theme getTheme(String name) {
         for (Theme theme : values()) {
@@ -35,7 +36,7 @@ public enum Theme {
                 return theme;
             }
         }
-        return Theme.DARCULA;
+        return Theme.DARK;
     }
 
     public ComboBox<String> getComboBox(Dimension dimension) {

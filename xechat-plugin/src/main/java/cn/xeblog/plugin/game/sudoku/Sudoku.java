@@ -43,7 +43,7 @@ public class Sudoku extends AbstractGame {
         level = Level.EASY;
         panelSize = PanelSize.MIN;
         realTimeTip = RealTimeTip.DIS_ENABLE;
-        theme = Theme.DARCULA;
+        theme = Theme.DARK;
 
         mainPanel.setMinimumSize(new Dimension(150, 300));
         JPanel menuJPanel = new JPanel();
