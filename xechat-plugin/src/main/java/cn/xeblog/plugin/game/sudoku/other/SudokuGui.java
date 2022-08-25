@@ -104,7 +104,7 @@ public class SudokuGui extends JPanel implements ActionListener {
                     jTextField.setFocusable(false); // 设置是否可获得焦点
                 }
 
-                colorMap.put(i + "" + j, jTextField.getForeground());
+                colorMap.put(i + "-" + j, jTextField.getForeground());
             }
         }
     }
