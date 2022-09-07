@@ -179,7 +179,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	{
 		try
 		{
-			URL resource = this.getClass().getResource("/images/chess/fish/chessboard2.png");
+			URL resource = this.getClass().getResource("/images/chess/chessboard3.png");
 			ImageIcon chessboard = new ImageIcon(resource);
 			//棋盘图片
 			this.imageIconChessBoard = new ImageIcon(chessboard.getImage().getScaledInstance(this.panelChess.getWidth(),this.panelChess.getHeight(), Image.SCALE_SMOOTH));	//缩放图片来适应标签大小
