@@ -7,10 +7,12 @@ import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 功能：游戏逻辑<br>
  * 作者：我是小木鱼（Lag）<br>
+ * 作者：Hao.<br>
  */
 public class GameLogic {
 	/** 游戏面板 */
@@ -66,27 +68,34 @@ public class GameLogic {
 	/**
 	 * 功能：将军提示<br>
 	 */
-	void check()
+	boolean check()
 	{
+		boolean flag = false;
 		//全体循环，不知道将哪头的军
-		for(int i=0;i<this.gamePanel.mapChess.length;i++)
-		{
+		for(int i=0;i<this.gamePanel.mapChess.length;i++) {
 			this.getMoveRoute(this.gamePanel.mapChess[i]);
-			for(int j=0;j<this.gamePanel.listMove.size();j++)
-			{
+			for(int j=0;j<this.gamePanel.listMove.size();j++) {
 				Map<String, Integer> map = this.gamePanel.listMove.get(j);
 				int index = this.gamePanel.chessBoradState[map.get("row")][map.get("column")];
-				if(index != -1 && "king".equals(this.gamePanel.mapChess[index].get("type")))
-				{
-					JOptionPane.showMessageDialog(null,"将军，十万火急！");
+				if(index != -1 && "king".equals(this.gamePanel.mapChess[index].get("type"))) {
+					if(gamePanel.chineseChess.chessCache.currentPlayer == ChessCache.Player.BLACK){
+						this.gamePanel.jlb_redStateText.setText("将军");
+						this.gamePanel.jlb_blackStateText.setText("将军");
+					}else{
+						this.gamePanel.jlb_redStateText.setText("将军");
+						this.gamePanel.jlb_blackStateText.setText("将军");
+					}
+					flag = true;
 					break;
 				}
+			}
+			if(flag){
+				break;
 			}
 		}
 		this.gamePanel.listMove.clear();
 		this.gamePanel.repaint();
-		
-
+		return flag;
 	}
 	
 	/**
@@ -331,7 +340,7 @@ public class GameLogic {
 	/**
 	 * 功能：悔棋具体步骤<br>
 	 */
-	private void undoStep()
+	void undoStep()
 	{
 		if(this.gamePanel.isGameOver){return;}
 		if(this.gamePanel.listChess.size() < 1){return;}
@@ -373,85 +382,35 @@ public class GameLogic {
 		}
 		this.gamePanel.listChess.remove(this.gamePanel.listChess.size() - 1);
 	}
-	
-	
+
 	/**
 	 * 功能：悔棋<br>
 	 */
-	public boolean undo()
+	public void undo()
 	{
-		int index,color,oldRow,oldColumn;
-		Map<String, String> mapLast = null;
-		
-		if(this.gamePanel.isGameOver){return false;}
-		if(this.gamePanel.listChess.size() < 1){return false;}
+		if(this.gamePanel.isGameOver){return;}
 
-		//得到最后一步棋信息
-		mapLast = this.gamePanel.listChess.get(this.gamePanel.listChess.size() - 1);
-		index = Integer.parseInt(mapLast.get("index"));
-		color = Integer.parseInt(mapLast.get("color"));
-		oldRow = Integer.parseInt(mapLast.get("oldRow"));
-		oldColumn = Integer.parseInt(mapLast.get("oldColumn"));
-		
-		if(this.gamePanel.chineseChess.fightType == 0)	//人机对战（只有玩家才会悔棋，电脑才不会这么耍赖）
-		{
-			//人机要同时悔2步棋，所以要得到倒数第二步棋信息
-			if(this.gamePanel.listChess.size() < 2)
-			{
-				JOptionPane.showMessageDialog(null,"禁止悔棋！","提示", JOptionPane.INFORMATION_MESSAGE);
-				return false;
+		Map<String, String> mapLast = this.gamePanel.listChess.get(this.gamePanel.listChess.size() - 2);
+		int index = Integer.parseInt(mapLast.get("index"));
+		int color = Integer.parseInt(mapLast.get("color"));
+		int oldRow = Integer.parseInt(mapLast.get("oldRow"));
+		int oldColumn = Integer.parseInt(mapLast.get("oldColumn"));
+
+		if (gamePanel.chineseChess.chessCache.currentMode == ChessCache.Mode.OFFLINE) {
+			gamePanel.blackUndoNum--;
+			gamePanel.redUndoNum--;
+		}else{
+			if(gamePanel.chineseChess.chessCache.currentPlayer == ChessCache.Player.BLACK){
+				gamePanel.blackUndoNum--;
+			} else {
+				gamePanel.redUndoNum--;
 			}
-			mapLast = this.gamePanel.listChess.get(this.gamePanel.listChess.size() - 2);
-			index = Integer.parseInt(mapLast.get("index"));
-			color = Integer.parseInt(mapLast.get("color"));
-			oldRow = Integer.parseInt(mapLast.get("oldRow"));
-			oldColumn = Integer.parseInt(mapLast.get("oldColumn"));
-			
-			//判断玩家是否可以悔棋
-			if(this.gamePanel.chessColor == this.gamePanel.BLACKCHESS)		//玩家执黑
-			{
-				if(this.gamePanel.blackUndoNum == 0)
-				{
-					JOptionPane.showMessageDialog(null,"黑棋的悔棋次数已经全部用完了！","提示", JOptionPane.INFORMATION_MESSAGE);
-					return false;
-				}
-				this.gamePanel.blackUndoNum--;
-			}
-			else
-			{
-				if(this.gamePanel.redUndoNum == 0)
-				{
-					JOptionPane.showMessageDialog(null,"红棋的悔棋次数已经全部用完了！","提示", JOptionPane.INFORMATION_MESSAGE);
-					return false;
-				}
-				this.gamePanel.redUndoNum--;
-			}
-			this.undoStep();	//电脑悔一步
-			this.undoStep();	//玩家悔一步
 		}
-		else
-		{
-			//判断是否可以悔棋
-			if(color == this.gamePanel.REDCHESS)
-			{
-				if(this.gamePanel.redUndoNum == 0)
-				{
-					JOptionPane.showMessageDialog(null,"红棋的悔棋次数已经全部用完了！","提示", JOptionPane.INFORMATION_MESSAGE);
-					return false;
-				}
-				this.gamePanel.redUndoNum--;
-			}
-			else
-			{
-				if(this.gamePanel.blackUndoNum == 0)
-				{
-					JOptionPane.showMessageDialog(null,"黑棋的悔棋次数已经全部用完了！","提示", JOptionPane.INFORMATION_MESSAGE);
-					return false;
-				}
-				this.gamePanel.blackUndoNum--;
-			}
-			this.undoStep();	//玩家悔一步
-		}
+
+
+		// 后退两步
+		this.undoStep();
+		this.undoStep();
 
 		//重新生成落子指示器
 		this.gamePanel.mapPointerChess.put("row",oldRow);
@@ -467,24 +426,29 @@ public class GameLogic {
 		//更新提示
 		this.gamePanel.jlb_blackUndoText.setText("剩"+gamePanel.blackUndoNum+"次");
 		this.gamePanel.jlb_redUndoText.setText("剩"+gamePanel.redUndoNum+"次");
-		if(color == this.gamePanel.REDCHESS)
+		if(color == ChessCache.Player.RED.getValue())
 		{
-			this.gamePanel.jlb_redStateText.setText("已下完");
-			this.gamePanel.jlb_blackStateText.setText("已选棋");
+			this.gamePanel.jlb_redStateText.setText("悔棋中");
+			this.gamePanel.jlb_blackStateText.setText("已下完");
 		}
 		else
 		{
-			this.gamePanel.jlb_redStateText.setText("已选棋");
-			this.gamePanel.jlb_blackStateText.setText("已下完");
+			this.gamePanel.jlb_redStateText.setText("已下完");
+			this.gamePanel.jlb_blackStateText.setText("悔棋中");
+		}
+
+		if(gamePanel.chineseChess.chessCache.currentMode == ChessCache.Mode.ONLINE){
+			this.gamePanel.chineseChess.send(new Point(ChessDTO.Option.UNDO));
 		}
 
 		//刷新
 		this.gamePanel.repaint();
-		
 
-		return true;
+		if (!gamePanel.canRepent()) {
+			this.gamePanel.jb_undo.setEnabled(false);
+		}
 	}
-	
+
 	/**
 	 * 功能：对当前局面进行估分<br>
 	 * 备注：若电脑下的棋则（电脑分-玩家分），反之（玩家分-电脑分）<br>
@@ -531,7 +495,7 @@ public class GameLogic {
 			//加基础分
 			if("rook".equals(type))				//车
 			{
-				if(color == this.gamePanel.BLACKCHESS)
+				if(color == ChessCache.Player.BLACK.getValue())
 				{
 					blackScore = blackScore + BASE_ROOK;
 				}
@@ -542,7 +506,7 @@ public class GameLogic {
 			}
 			else if("horse".equals(type))		//马
 			{
-				if(color == this.gamePanel.BLACKCHESS)
+				if(color == ChessCache.Player.BLACK.getValue())
 				{
 					blackScore = blackScore + BASE_HORSE;
 				}
@@ -553,7 +517,7 @@ public class GameLogic {
 			}
 			else if("elephant".equals(type))		//象相
 			{
-				if(color == this.gamePanel.BLACKCHESS)
+				if(color == ChessCache.Player.BLACK.getValue())
 				{
 					blackScore = blackScore + BASE_ELEPHANT;
 				}
@@ -564,7 +528,7 @@ public class GameLogic {
 			}
 			else if("guard".equals(type))		//士仕
 			{
-				if(color == this.gamePanel.BLACKCHESS)
+				if(color == ChessCache.Player.BLACK.getValue())
 				{
 					blackScore = blackScore + BASE_GUARD;
 				}
@@ -575,7 +539,7 @@ public class GameLogic {
 			}
 			else if("king".equals(type))		//将帅
 			{
-				if(color == this.gamePanel.BLACKCHESS)
+				if(color == ChessCache.Player.BLACK.getValue())
 				{
 					blackScore = blackScore + BASE_KING;
 				}
@@ -586,7 +550,7 @@ public class GameLogic {
 			}
 			else if("cannon".equals(type))		//炮
 			{
-				if(color == this.gamePanel.BLACKCHESS)
+				if(color == ChessCache.Player.BLACK.getValue())
 				{
 					blackScore = blackScore + BASE_CANNON;
 				}
@@ -597,7 +561,7 @@ public class GameLogic {
 			}
 			else if("soldier".equals(type))		//卒兵
 			{
-				if(color == this.gamePanel.BLACKCHESS)
+				if(color == ChessCache.Player.BLACK.getValue())
 				{
 					blackScore = blackScore + BASE_SOLDIER;
 				}
@@ -654,7 +618,7 @@ public class GameLogic {
 
 					}
 				}
-				if(color == this.gamePanel.BLACKCHESS)
+				if(color == ChessCache.Player.BLACK.getValue())
 				{
 					blackScore = blackScore + riverScore;
 				}
@@ -674,7 +638,7 @@ public class GameLogic {
 						//加适应分
 						if("rook".equals(type))				//车
 						{
-							if(color == this.gamePanel.BLACKCHESS)
+							if(color == ChessCache.Player.BLACK.getValue())
 							{
 								blackScore = blackScore + FLEXIBLE_ROOK;
 							}
@@ -685,7 +649,7 @@ public class GameLogic {
 						}
 						else if("horse".equals(type))		//马
 						{
-							if(color == this.gamePanel.BLACKCHESS)
+							if(color == ChessCache.Player.BLACK.getValue())
 							{
 								blackScore = blackScore + FLEXIBLE_HORSE;
 							}
@@ -696,7 +660,7 @@ public class GameLogic {
 						}
 						else if("elephant".equals(type))		//象相
 						{
-							if(color == this.gamePanel.BLACKCHESS)
+							if(color == ChessCache.Player.BLACK.getValue())
 							{
 								blackScore = blackScore + FLEXIBLE_ELEPHANT;
 							}
@@ -707,7 +671,7 @@ public class GameLogic {
 						}
 						else if("guard".equals(type))		//士仕
 						{
-							if(color == this.gamePanel.BLACKCHESS)
+							if(color == ChessCache.Player.BLACK.getValue())
 							{
 								blackScore = blackScore + FLEXIBLE_GUARD;
 							}
@@ -718,7 +682,7 @@ public class GameLogic {
 						}
 						else if("king".equals(type))		//将帅
 						{
-							if(color == this.gamePanel.BLACKCHESS)
+							if(color == ChessCache.Player.BLACK.getValue())
 							{
 								blackScore = blackScore + FLEXIBLE_KING;
 							}
@@ -729,7 +693,7 @@ public class GameLogic {
 						}
 						else if("cannon".equals(type))		//炮
 						{
-							if(color == this.gamePanel.BLACKCHESS)
+							if(color == ChessCache.Player.BLACK.getValue())
 							{
 								blackScore = blackScore + FLEXIBLE_CANNON;
 							}
@@ -740,7 +704,7 @@ public class GameLogic {
 						}
 						else if("soldier".equals(type))		//卒兵
 						{
-							if(color == this.gamePanel.BLACKCHESS)
+							if(color == ChessCache.Player.BLACK.getValue())
 							{
 								blackScore = blackScore + FLEXIBLE_SOLDIER;
 							}
@@ -756,7 +720,7 @@ public class GameLogic {
 							String type1 = this.gamePanel.mapChess[index].get("type");
 							if("rook".equals(type1))				//车
 							{
-								if(color == this.gamePanel.BLACKCHESS)
+								if(color == ChessCache.Player.BLACK.getValue())
 								{
 									blackScore = blackScore + BASE_ROOK;
 								}
@@ -767,7 +731,7 @@ public class GameLogic {
 							}
 							else if("horse".equals(type1))		//马
 							{
-								if(color == this.gamePanel.BLACKCHESS)
+								if(color == ChessCache.Player.BLACK.getValue())
 								{
 									blackScore = blackScore + BASE_HORSE;
 								}
@@ -778,7 +742,7 @@ public class GameLogic {
 							}
 							else if("elephant".equals(type1))		//象相
 							{
-								if(color == this.gamePanel.BLACKCHESS)
+								if(color == ChessCache.Player.BLACK.getValue())
 								{
 									blackScore = blackScore + BASE_ELEPHANT;
 								}
@@ -789,7 +753,7 @@ public class GameLogic {
 							}
 							else if("guard".equals(type1))		//士仕
 							{
-								if(color == this.gamePanel.BLACKCHESS)
+								if(color == ChessCache.Player.BLACK.getValue())
 								{
 									blackScore = blackScore + BASE_GUARD;
 								}
@@ -800,7 +764,7 @@ public class GameLogic {
 							}
 							else if("king".equals(type1))		//将帅
 							{
-								if(color == this.gamePanel.BLACKCHESS)
+								if(color == ChessCache.Player.BLACK.getValue())
 								{
 									blackScore = blackScore + BASE_KING;
 								}
@@ -811,7 +775,7 @@ public class GameLogic {
 							}
 							else if("cannon".equals(type1))		//炮
 							{
-								if(color == this.gamePanel.BLACKCHESS)
+								if(color == ChessCache.Player.BLACK.getValue())
 								{
 									blackScore = blackScore + BASE_CANNON;
 								}
@@ -822,7 +786,7 @@ public class GameLogic {
 							}
 							else if("soldier".equals(type1))		//卒兵
 							{
-								if(color == this.gamePanel.BLACKCHESS)
+								if(color == ChessCache.Player.BLACK.getValue())
 								{
 									blackScore = blackScore + BASE_SOLDIER;
 								}
@@ -838,7 +802,7 @@ public class GameLogic {
 		}
 
 		//计算总分
-		if(nextColor == this.gamePanel.REDCHESS)
+		if(nextColor == ChessCache.Player.RED.getValue())
 		{
 			score = blackScore - redScore;
 		}
@@ -965,6 +929,9 @@ public class GameLogic {
 	 */
 	private void getMoveRoute(Map<String, String> _mapChess)
 	{
+		if (gamePanel.chineseChess.chessCache.currentUI == ChessDTO.UI.FISH) {
+			return;
+		}
 		this.gamePanel.listMove.clear();
 		
 		//懒得分类挑，反正电脑计算快
@@ -989,13 +956,13 @@ public class GameLogic {
 	 */
 	boolean gameOver()
 	{
-		if(this.gamePanel.chineseChess.fightType == 0)	//人机对战
+		if(gamePanel.chineseChess.chessCache.currentBattle == ChessCache.Battle.PVC)	//人机对战
 		{
 			if("T".equals(this.gamePanel.mapChess[4].get("dead")))	//黑将被吃
 			{
-				if(this.gamePanel.computerChess == this.gamePanel.BLACKCHESS)
+				if(this.gamePanel.computerChess == ChessCache.Player.BLACK.getValue())
 				{
-					JOptionPane.showMessageDialog(null,"恭喜，你终于赢电脑一把了！");
+					JOptionPane.showMessageDialog(null,"电脑有点蠢，不要太得意哦~");
 				}
 				else
 				{
@@ -1005,13 +972,13 @@ public class GameLogic {
 			}
 			if("T".equals(this.gamePanel.mapChess[27].get("dead")))	//红帅被吃
 			{
-				if(this.gamePanel.computerChess == this.gamePanel.BLACKCHESS)
+				if(this.gamePanel.computerChess == ChessCache.Player.BLACK.getValue())
 				{
 					JOptionPane.showMessageDialog(null,"我去，你怎么连电脑都输啊！","提示", JOptionPane.ERROR_MESSAGE);
 				}
 				else
 				{
-					JOptionPane.showMessageDialog(null,"恭喜，你终于赢电脑一把了！");
+					JOptionPane.showMessageDialog(null,"电脑有点蠢，不要太得意哦~");
 				}
 				return true;
 			}
@@ -1020,12 +987,28 @@ public class GameLogic {
 		{
 			if("T".equals(this.gamePanel.mapChess[4].get("dead")))	//黑将被吃
 			{
-				JOptionPane.showMessageDialog(null,"恭喜，红棋赢了！");
+				if(gamePanel.chineseChess.chessCache.currentPlayer == ChessCache.Player.BLACK){
+					JOptionPane.showMessageDialog(null,"少侠，晚上少“运动”，早点休息，保持健康！");
+				}else{
+					JOptionPane.showMessageDialog(null,"汝之秀，吾不能及也！");
+				}
+				if(gamePanel.chineseChess.chessCache.currentMode == ChessCache.Mode.ONLINE){
+					this.gamePanel.chineseChess.send(new Point(ChessDTO.Option.GAME_OVER));
+				}
+				gamePanel.gameOver();
 				return true;
 			}
 			if("T".equals(this.gamePanel.mapChess[27].get("dead")))	//红帅被吃
 			{
-				JOptionPane.showMessageDialog(null,"恭喜，黑棋赢了！");
+				if(gamePanel.chineseChess.chessCache.currentPlayer == ChessCache.Player.BLACK){
+					JOptionPane.showMessageDialog(null,"汝之秀，吾不能及也！");
+				}else{
+					JOptionPane.showMessageDialog(null,"少侠，晚上少“运动”，早点休息，保持健康！");
+				}
+				if(gamePanel.chineseChess.chessCache.currentMode == ChessCache.Mode.ONLINE){
+					this.gamePanel.chineseChess.send(new Point(ChessDTO.Option.GAME_OVER));
+				}
+				gamePanel.gameOver();
 				return true;
 			}
 		}
@@ -1061,14 +1044,13 @@ public class GameLogic {
 		this.gamePanel.chessBoradState[Integer.parseInt(_mapChess.get("oldRow"))][Integer.parseInt(_mapChess.get("oldColumn"))] = -1;
 		this.gamePanel.chessBoradState[_newRow][_newColumn] = index;
 		this.gamePanel.isFirstClick = true;
-
 	}
 	
 	/**
 	 * 功能：鼠标单击事件<br>
 	 */
 	public void mouseClicked(MouseEvent e) {
-		if (this.gamePanel.isGameOver) {
+		if (gamePanel.chineseChess.chessCache.put || this.gamePanel.isGameOver) {
 			return;
 		}
 
@@ -1087,9 +1069,30 @@ public class GameLogic {
 				if (row >= 0 && row < 10 && column >= 0 && column < 9)        //第二次点击
 				{
 					//要移动棋子了
-					if (this.isAbleToMove(this.gamePanel.firstClickChess, row, column)) {
-						System.out.println("thisIsTheKeyboard---------------");
-						this.gamePanel.setChess(new Point(row, column));
+					if(this.isAbleToMove(this.gamePanel.firstClickChess,row,column))
+					{
+						this.moveTo(this.gamePanel.firstClickChess,row,column);
+						//取消移动路线图
+						this.gamePanel.listMove.clear();
+						//落子指示器
+						this.gamePanel.mapPointerChess.put("row",row);
+						this.gamePanel.mapPointerChess.put("column",column);
+						this.gamePanel.mapPointerChess.put("show",1);
+						//更新提示
+						if(Integer.parseInt(gamePanel.firstClickChess.get("color")) == ChessCache.Player.BLACK.getValue())
+						{
+							this.gamePanel.jlb_redStateText.setText("思考中");
+							this.gamePanel.jlb_blackStateText.setText("已下完");
+						}
+						else
+						{
+							this.gamePanel.jlb_redStateText.setText("已下完");
+							this.gamePanel.jlb_blackStateText.setText("思考中");
+						}
+
+						this.gamePanel.repaint();
+
+						processMoveData(row, column);
 					}
 				}
 			} else    //点到棋子上
@@ -1101,7 +1104,11 @@ public class GameLogic {
 				//判断第几次点击
 				if (this.gamePanel.isFirstClick)        //第一次（必须点击到该下棋方的棋子上）
 				{
-					if (Integer.parseInt(this.gamePanel.mapChess[index].get("color")) != gamePanel.getNextChessColor()) {
+					int currentPlayer = gamePanel.chineseChess.chessCache.currentPlayer.getValue();
+					if (ChessCache.Mode.OFFLINE == gamePanel.chineseChess.chessCache.currentMode) {
+						currentPlayer = gamePanel.getNextChessColor();
+					}
+					if (Integer.parseInt(this.gamePanel.mapChess[index].get("color")) != currentPlayer) {
 						return;
 					}
 					//画个落子指示器并记录下第一次点击对象
@@ -1111,10 +1118,9 @@ public class GameLogic {
 					this.gamePanel.mapPointerChess.put("color", Integer.parseInt(this.gamePanel.mapChess[index].get("color")));
 					this.gamePanel.firstClickChess = this.gamePanel.mapChess[index];
 					this.gamePanel.isFirstClick = false;
-					System.out.println("thisIsTheChessPiece---（clickOnThePlayerSPawnForTheFirstTime）------------");
 					this.gamePanel.repaint();
 
-					if (Integer.parseInt(this.gamePanel.mapChess[index].get("color")) == this.gamePanel.BLACKCHESS) {
+					if (Integer.parseInt(this.gamePanel.mapChess[index].get("color")) == ChessCache.Player.BLACK.getValue()) {
 						this.gamePanel.jlb_redStateText.setText("等待中");
 						this.gamePanel.jlb_blackStateText.setText("已选棋");
 					} else {
@@ -1123,20 +1129,23 @@ public class GameLogic {
 					}
 					//显示移动路线图
 					this.getMoveRoute(this.gamePanel.firstClickChess);
-					System.out.println("thisIsTheChessPiece---（clickOnThePlayerSPawnForTheFirstTime）（again?）------------");
 					this.gamePanel.repaint();
 
 				} else    //第二次点击
 				{
 					//点击到该下棋方的棋子上则还算是第一次
-					if (Integer.parseInt(this.gamePanel.mapChess[index].get("color")) == gamePanel.getNextChessColor()) {
+
+					int currentPlayer = gamePanel.chineseChess.chessCache.currentPlayer.getValue();
+					if (ChessCache.Mode.OFFLINE == gamePanel.chineseChess.chessCache.currentMode) {
+						currentPlayer = gamePanel.getNextChessColor();
+					}
+					if (Integer.parseInt(this.gamePanel.mapChess[index].get("color")) == currentPlayer) {
 						this.gamePanel.mapPointerChess.put("row", row);
 						this.gamePanel.mapPointerChess.put("column", column);
 						this.gamePanel.mapPointerChess.put("show", 1);
 						this.gamePanel.firstClickChess = this.gamePanel.mapChess[index];
 						this.gamePanel.isFirstClick = false;
 						this.getMoveRoute(this.gamePanel.firstClickChess);        //显示移动路线图
-						System.out.println("thisIsTheChessPiece---（clickingOnThePlayerSPieceIsTheFirstTime）------------");
 						this.gamePanel.repaint();
 
 					} else    //要吃棋子了
@@ -1150,54 +1159,79 @@ public class GameLogic {
 							this.gamePanel.mapPointerChess.put("row", row);
 							this.gamePanel.mapPointerChess.put("column", column);
 							this.gamePanel.mapPointerChess.put("show", 1);
-							if (Integer.parseInt(gamePanel.firstClickChess.get("color")) == this.gamePanel.BLACKCHESS) {
+							if (Integer.parseInt(gamePanel.firstClickChess.get("color")) == ChessCache.Player.BLACK.getValue()) {
 								this.gamePanel.jlb_redStateText.setText("思考中");
 								this.gamePanel.jlb_blackStateText.setText("已下完");
 							} else {
 								this.gamePanel.jlb_redStateText.setText("已下完");
 								this.gamePanel.jlb_blackStateText.setText("思考中");
 							}
-							System.out.println("thisIsTheChessPiece---（goingToEatChessPieces）------------");
 
 							this.gamePanel.repaint();
 
-							//判断是否将军
-							this.check();
-						}
-
-						//判断游戏是否结束
-						if (this.gameOver()) {
-							this.gamePanel.isGameOver = true;
-							this.gamePanel.setComponentState(false);
-							this.gamePanel.jlb_blackStateText.setText("已结束");
-							this.gamePanel.jlb_redStateText.setText("已结束");
-							return;
+							processMoveData(row, column);
 						}
 
 						//判断双方是否战平（这个不行啊）
 
-						//如果是人机对战，机器要回应啊
-						if (this.gamePanel.chineseChess.fightType == 0)    //人机对战
-						{
-							this.computerPlay();
-							if (this.gamePanel.computerChess == this.gamePanel.BLACKCHESS) {
-								this.gamePanel.jlb_blackStateText.setText("已下完");
-								this.gamePanel.jlb_redStateText.setText("思考中");
-							} else {
-								this.gamePanel.jlb_redStateText.setText("已下完");
-								this.gamePanel.jlb_blackStateText.setText("思考中");
-							}
-							//判断游戏是否结束
-							if (this.gameOver()) {
-								this.gamePanel.isGameOver = true;
-								this.gamePanel.setComponentState(false);
-								this.gamePanel.jlb_blackStateText.setText("已结束");
-								this.gamePanel.jlb_redStateText.setText("已结束");
-								return;
-							}
-						}
 					}
 				}
+			}
+		}
+	}
+
+	private void processMoveData(int row, int column) {
+		//判断是否将军
+		boolean check = this.check();
+
+		if(gamePanel.chineseChess.chessCache.currentMode == ChessCache.Mode.ONLINE){
+			gamePanel.chineseChess.chessCache.put = true;
+
+			this.gamePanel.jb_undo.setEnabled(false);
+
+			ChessDTO.Option option = check ? ChessDTO.Option.CHECK : ChessDTO.Option.DEFAULT;
+			this.gamePanel.chineseChess.send(new Point(row, column, gamePanel.chineseChess.chessCache.currentPlayer.getValue(), Integer.parseInt(gamePanel.firstClickChess.get("index")) , option));
+
+			//判断游戏是否结束
+			if(this.gameOver()){
+				this.gamePanel.isGameOver = true;
+				this.gamePanel.setComponentState(false);
+				this.gamePanel.jlb_blackStateText.setText("已结束");
+				this.gamePanel.jlb_redStateText.setText("已结束");
+			}
+		}else{
+			if (gamePanel.canRepent()) {
+				this.gamePanel.jb_undo.setEnabled(true);
+			}
+
+			//如果是人机对战，机器要回应啊
+			computerRun();
+		}
+	}
+
+	private void computerRun() {
+		if (this.gamePanel.isGameOver) {
+			return;
+		}
+
+		//判断游戏是否结束
+		if (this.gameOver()) {
+			this.gamePanel.isGameOver = true;
+			this.gamePanel.setComponentState(false);
+			this.gamePanel.jlb_blackStateText.setText("已结束");
+			this.gamePanel.jlb_redStateText.setText("已结束");
+			return;
+		}
+
+		// 人机对战
+		if (gamePanel.chineseChess.chessCache.currentBattle == ChessCache.Battle.PVC) {
+			this.computerPlay();
+			if (this.gamePanel.computerChess == ChessCache.Player.BLACK.getValue()) {
+				this.gamePanel.jlb_blackStateText.setText("已下完");
+				this.gamePanel.jlb_redStateText.setText("思考中");
+			} else {
+				this.gamePanel.jlb_redStateText.setText("已下完");
+				this.gamePanel.jlb_blackStateText.setText("思考中");
 			}
 		}
 	}
@@ -1207,11 +1241,11 @@ public class GameLogic {
 	 */
 	public void mouseMoved(MouseEvent e)
 	{
-		int row = -1;
-		int column = -1;
+		int row;
+		int column;
 		int index = -1;
-		
-		if(this.gamePanel.isGameOver){return;}
+
+		if(gamePanel.chineseChess.chessCache.put || this.gamePanel.isGameOver){return;}
 		
 		//得到行列位置
 		if(e.getSource() == this.gamePanel.labelChessBorad)		//在棋盘上移动
@@ -1244,13 +1278,19 @@ public class GameLogic {
 				//第一次点击处理
 				if(this.gamePanel.isFirstClick)
 				{
-					//下棋方显示移动显示器，非下棋方不显示移动指示器
-					if(Integer.parseInt(this.gamePanel.mapChess[index].get("color")) == gamePanel.getNextChessColor())
-					{
-						this.gamePanel.mapPointerMove.put("row",row);
-						this.gamePanel.mapPointerMove.put("column",column);
-						this.gamePanel.mapPointerMove.put("show",1);
-						this.gamePanel.mapPointerMove.put("color",-1);
+					if(Objects.nonNull(gamePanel.chineseChess.chessCache)){
+						//下棋方显示移动显示器，非下棋方不显示移动指示器
+						int currentPlayer = gamePanel.chineseChess.chessCache.currentPlayer.getValue();
+						if (ChessCache.Mode.OFFLINE == gamePanel.chineseChess.chessCache.currentMode) {
+							currentPlayer = gamePanel.getNextChessColor();
+						}
+						if(Integer.parseInt(this.gamePanel.mapChess[index].get("color")) == currentPlayer)
+						{
+							this.gamePanel.mapPointerMove.put("row",row);
+							this.gamePanel.mapPointerMove.put("column",column);
+							this.gamePanel.mapPointerMove.put("show",1);
+							this.gamePanel.mapPointerMove.put("color",-1);
+						}
 					}
 				}
 				else		//第二次点击处理

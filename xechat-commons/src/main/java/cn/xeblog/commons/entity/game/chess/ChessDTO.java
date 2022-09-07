@@ -1,10 +1,7 @@
 package cn.xeblog.commons.entity.game.chess;
 
 import cn.xeblog.commons.entity.game.GameDTO;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * @author anlingyi
@@ -19,10 +16,32 @@ public class ChessDTO extends GameDTO {
     private int x;
     private int y;
 
-    /** 对战方式：1-人人 0-人机 */
+    /** 对战方式：1-红棋 2-黑棋 */
     private int type;
 
-    /** 先手：1-我方先手 2-对方先手 */
-    private int playFirst;
+    /** 棋子索引 */
+    private int index;
+
+    /** 选项 */
+    Option option = Option.DEFAULT;
+
+    /** 当前界面 用途：后期可设置我方和对方不同界面 */
+    public UI currentUI = UI.CLASSIC;
+
+    public enum Option {
+        SURRENDER, UNDO, GAME_OVER, CHECK, DEFAULT
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public enum UI {
+        FISH("摸鱼模式", 0), CLASSIC("经典模式", 1)
+
+        ;
+
+        private String name;
+
+        private int value;
+    }
 
 }
