@@ -11,7 +11,7 @@ import java.util.Objects;
 
 /**
  * 功能：游戏逻辑<br>
- * 作者：我是小木鱼（Lag）<br>
+ * 作者：我是小木鱼（Lag） 原文地址：https://blog.csdn.net/lag_csdn/article/details/122324799<br>
  * 作者：Hao.<br>
  */
 public class GameLogic {
