@@ -20,7 +20,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="XEChat" anchor="bottom" secondary="true" doNotActivateOnStart="true"
-                    factoryClass="cn.xeblog.plugin.factory.MainWindowFactory" icon="/images/logo.png"/>
+                    factoryClass="cn.xeblog.plugin.factory.MainWindowFactory" icon="/images/logo.svg"/>
         <notificationGroup id="cn.xeblog.xechat.notify"
                            displayType="BALLOON"
                            key="xechat-idea"/>
