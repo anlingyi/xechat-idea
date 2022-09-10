@@ -24,7 +24,8 @@ appKey = ${BD_APP_KEY}
 [IP_SEARCH]
 # ip2region
 # 下载地址：https://gitee.com/lionsoul/ip2region/tree/master/data
-ip2Region_path = /home/xechat/db/ip2region.xdb
+# ip2Region_path = /home/xechat/db/ip2region.xdb
+ip2Region_path = E:\\Java\\Projects_Files\\GitHub\\xechat-idea-fork\\xechat-server\\src\\main\resources\\db\\ip2region.xdb
 
 ########## 管理员配置 ##########
 [ADMIN]
