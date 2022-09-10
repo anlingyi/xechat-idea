@@ -38,6 +38,13 @@ public interface BrowserService {
     void reload();
 
     /**
+     * 设置缩放
+     *
+     * @param value
+     */
+    void setZoomLevel(double value);
+
+    /**
      * 浏览器关闭
      */
     void close();

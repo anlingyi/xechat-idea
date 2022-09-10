@@ -260,7 +260,6 @@ public class SnakeGameUI extends JPanel implements ActionListener {
             }
         } while (inSnakeBody);
 
-
         this.pill = new Pill(x, y, pillType);
     }
 
@@ -340,6 +339,42 @@ public class SnakeGameUI extends JPanel implements ActionListener {
             // 移动蛇
             this.snake.move(this.direction);
             Point head = this.snake.getHead();
+
+            // 判断蛇有没有咬到自己或是撞墙
+            int maxWidth = this.width - this.snake.width;
+            int maxHeight = this.height - this.snake.height;
+            boolean isHitWall = head.x > maxWidth || head.x < 0 || head.y > maxHeight || head.y < 0;
+
+            if (isHitWall && pierced) {
+                // 穿墙
+                if (head.x > maxWidth) {
+                    head.x = 0;
+                }
+                if (head.x < 0) {
+                    head.x = maxWidth;
+                }
+                if (head.y > maxHeight) {
+                    head.y = 0;
+                }
+                if (head.y < 0) {
+                    head.y = maxHeight;
+                }
+            }
+
+            boolean isBiting = false;
+            for (int i = this.snake.size() - 1; i > 0; i--) {
+                if (head.equals(this.snake.body.get(i))) {
+                    isBiting = true;
+                    break;
+                }
+            }
+
+            if (isBiting || !pierced && isHitWall) {
+                // 游戏失败
+                this.state = 2;
+                this.stop = true;
+            }
+
             if (head.equals(this.pill.point)) {
                 // 吃药了
                 isAte = true;
@@ -371,42 +406,6 @@ public class SnakeGameUI extends JPanel implements ActionListener {
                         // 加速
                         this.timer.setDelay(curSpeed - 10);
                     }
-                }
-            }
-
-            if (state == 0) {
-                // 判断蛇有没有咬到自己或是撞墙
-                int maxWidth = this.width - this.snake.width;
-                int maxHeight = this.height - this.snake.height;
-                boolean isHitWall = head.x > maxWidth || head.x < 0 || head.y > maxHeight || head.y < 0;
-                boolean isBiting = false;
-                for (int i = this.snake.size() - 1; i > 0; i--) {
-                    if (head.equals(this.snake.body.get(i))) {
-                        isBiting = true;
-                        break;
-                    }
-                }
-
-                if (pierced) {
-                    // 穿墙
-                    if (head.x > maxWidth) {
-                        head.x = 0;
-                    }
-                    if (head.x < 0) {
-                        head.x = maxWidth;
-                    }
-                    if (head.y > maxHeight) {
-                        head.y = 0;
-                    }
-                    if (head.y < 0) {
-                        head.y = maxHeight;
-                    }
-                }
-
-                if (isBiting || !pierced && isHitWall) {
-                    // 游戏失败
-                    this.state = 2;
-                    this.stop = true;
                 }
             }
         }
