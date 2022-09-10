@@ -78,12 +78,13 @@ public class LoginCommandHandler extends AbstractCommandHandler {
                 username = name;
             }
         }
-        username = StrUtil.trim(username);
 
         if (StringUtils.isBlank(username)) {
             ConsoleAction.showSimpleMsg("用户名不能为空！");
             return;
         }
+
+        username = username.replaceAll("\\s*|\t|\r|\n", "");
         if (username.length() > 12) {
             ConsoleAction.showSimpleMsg("用户名长度不能超过12个字符！");
             return;

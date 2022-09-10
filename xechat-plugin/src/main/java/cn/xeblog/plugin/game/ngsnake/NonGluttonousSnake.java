@@ -68,12 +68,18 @@ public class NonGluttonousSnake extends AbstractGame {
 
         int width = 400;
         int height = 300;
-        mainPanel.setMinimumSize(new Dimension(width + 10, height + 10));
+        mainPanel.setMinimumSize(new Dimension(width + 10, height + 80));
         mainPanel.setLayout(new BorderLayout());
         mainPanel.add(Box.createVerticalStrut(5), BorderLayout.NORTH);
 
         SnakeGameUI snakeGameUI = new SnakeGameUI(width, height, gameMode);
         mainPanel.add(snakeGameUI, BorderLayout.CENTER);
+
+        JPanel topPanel = new JPanel();
+        JCheckBox pierceCheckbox = new JCheckBox("穿墙", false);
+        pierceCheckbox.addChangeListener(l -> snakeGameUI.setPierced(((JCheckBox) l.getSource()).isSelected()));
+        topPanel.add(pierceCheckbox);
+        mainPanel.add(topPanel, BorderLayout.NORTH);
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(getBackGameButton());
