@@ -33,7 +33,7 @@ public class MapsUtils {
     }
 
     public static void initMapDataDefault() {
-        URL url = MapsUtils.class.getResource("/map/map.json");
+        URL url = MapsUtils.class.getResource("/games/sokoban/maps/map.json");
         if (url != null) {
             String string = FileUtil.readString(url, Charset.defaultCharset());
             Map<Integer, int[][]> data = JSONUtil.toBean(string, new TypeReference<Map<Integer, int[][]>>() {

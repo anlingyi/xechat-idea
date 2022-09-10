@@ -303,6 +303,7 @@ public class PushBoxUI extends JPanel implements ActionListener {
                     case KeyEvent.VK_PAGE_DOWN:
                         nextLevel();
                         return;
+                    case 8: // 兼容MacOS
                     case KeyEvent.VK_DELETE:
                         undo();
                         return;

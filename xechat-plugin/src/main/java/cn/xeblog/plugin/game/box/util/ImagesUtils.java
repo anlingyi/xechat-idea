@@ -11,7 +11,7 @@ public class ImagesUtils {
 
     public static void initMapDataDefault() {
         for (int i = 1; i <= 13; i++) {
-            URL url = MapsUtils.class.getResource("/images/pic" + i + ".png");
+            URL url = MapsUtils.class.getResource("/games/sokoban/imgs/pic" + i + ".png");
             if (url != null) {
                 imageMap.put(i, Toolkit.getDefaultToolkit().getImage(url));
             }
