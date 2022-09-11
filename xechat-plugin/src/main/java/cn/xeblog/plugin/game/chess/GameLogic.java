@@ -929,9 +929,9 @@ public class GameLogic {
 	 */
 	private void getMoveRoute(Map<String, String> _mapChess)
 	{
-		if (gamePanel.chineseChess.chessCache.currentUI == ChessDTO.UI.FISH) {
+		/*if (gamePanel.chineseChess.chessCache.currentUI == ChessDTO.UI.FISH) {
 			return;
-		}
+		}*/
 		this.gamePanel.listMove.clear();
 		
 		//懒得分类挑，反正电脑计算快
