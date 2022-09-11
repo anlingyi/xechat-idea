@@ -35,7 +35,7 @@ public class ChessDTO extends GameDTO {
     @Getter
     @AllArgsConstructor
     public enum UI {
-        FISH("摸鱼模式", 0), CLASSIC("经典模式", 1)
+        CLASSIC("经典模式", 1), FISH("摸鱼模式", 0)
 
         ;
 

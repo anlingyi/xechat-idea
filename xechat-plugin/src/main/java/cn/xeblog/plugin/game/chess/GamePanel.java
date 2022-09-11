@@ -27,10 +27,10 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	ChineseChess chineseChess;
 
 	/** 网格行数 */
-	final int gridRows = 10;
+	static final int GRID_ROWS = 10;
 
 	/** 网格列数 */
-	final int gridColumns = 9;
+	static final int GRID_COLUMNS = 9;
 
 	/** 网格尺寸 */
 	final int gridSize = 33;
@@ -51,7 +51,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	public ImageIcon imageIconChessBoard;
 
 	/** 棋盘状态信息（-1->无棋，其他数字->棋子信息数组的下标） */
-	int[][] chessBoradState = new int[gridRows][gridColumns];
+	int[][] chessBoradState = new int[GRID_ROWS][GRID_COLUMNS];
 
 	/** 棋子尺寸 */
 	final int chessSize = 25;
