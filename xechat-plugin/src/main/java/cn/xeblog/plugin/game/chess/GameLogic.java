@@ -19,7 +19,7 @@ public class GameLogic {
 	GamePanel gamePanel;
 	
 	/** 最大搜索深度 */
-	int Maxdepth = 2;
+	int Maxdepth = 1;
 	
 	/** 电脑AI要走的位置 */
 	Map<String, String> mapAiChess = new HashMap<>();
@@ -629,9 +629,9 @@ public class GameLogic {
 			}
 			
 			//该棋子可以走的位置
-			for(int row=0;row<this.gamePanel.gridRows;row++)
+			for(int row = 0; row<GamePanel.GRID_ROWS; row++)
 			{
-				for(int column=0;column<this.gamePanel.gridColumns;column++)
+				for(int column = 0; column<GamePanel.GRID_COLUMNS; column++)
 				{
 					if(this.isAbleToMove(this.gamePanel.mapChess[m],row,column))
 					{
@@ -827,7 +827,7 @@ public class GameLogic {
 		
 		//if(this.gameOver())return evaluation(this.gamePanel.chessBoradState);    //胜负已分，返回估值，有问题
 		
-		System.out.println("_depth="+_depth);
+		// System.out.println("_depth="+_depth);
 		
 		//叶子节点
 		if(_depth == 0)
@@ -838,7 +838,7 @@ public class GameLogic {
 		//生成每一步走法
 		int nextColor = gamePanel.getNextChessColor();
 		
-		System.out.println("nextColor="+nextColor);
+		// System.out.println("nextColor="+nextColor);
 		
 		for(int i=0;i<this.gamePanel.mapChess.length;i++)
 		{
@@ -848,32 +848,32 @@ public class GameLogic {
 				continue;
 			}
 			
-			System.out.println(this.gamePanel.mapChess[i].get("name"));
-			
-			
+			// System.out.println(this.gamePanel.mapChess[i].get("name"));
+
+
 			//判断是否可以下棋
-			for(int row=0;row<this.gamePanel.gridRows;row++)
+			for(int row = 0; row<GamePanel.GRID_ROWS; row++)
 			{
-				for(int column=0;column<this.gamePanel.gridColumns;column++)
+				for(int column = 0; column<GamePanel.GRID_COLUMNS; column++)
 				{
 					if(this.isAbleToMove(this.gamePanel.mapChess[i],row,column))
 					{
 						this.moveTo(this.gamePanel.mapChess[i],row,column);
 						//递归搜索子节点
-						
-						
+
+
 						
 						value = -this.negaMax(this.gamePanel.chessBoradState, _depth - 1);
-						
-						System.out.println("bestValue得分："+bestValue);
-						System.out.println("value得分："+value);
+
+//						System.out.println("bestValue得分："+bestValue);
+//						System.out.println("value得分："+value);
 						
 						//判断最大值
 						if(value >= bestValue)
 						{
 							bestValue = value;
 							
-							System.out.println("new _depth="+_depth);
+							// System.out.println("new _depth="+_depth);
 							
 							if(_depth == this.Maxdepth)
 							{
@@ -900,17 +900,17 @@ public class GameLogic {
 	public void computerPlay()
 	{
 		int value;
-		
+
 		value = this.negaMax(this.gamePanel.chessBoradState,this.Maxdepth);
 		
 		int index = Integer.parseInt(this.mapAiChess.get("index"));
 		int newRow = Integer.parseInt(this.mapAiChess.get("newRow")) ;
 		int newColumn = Integer.parseInt(this.mapAiChess.get("newColumn")) ;
 
-		System.out.println("value="+value);
-		System.out.println("index="+index);
-		System.out.println("newRow="+newRow);
-		System.out.println("newColumn="+newColumn);
+		// System.out.println("value="+value);
+		// System.out.println("index="+index);
+		// System.out.println("newRow="+newRow);
+		// System.out.println("newColumn="+newColumn);
 		
 		this.moveTo(this.gamePanel.mapChess[index],newRow,newColumn);
 		
@@ -929,15 +929,15 @@ public class GameLogic {
 	 */
 	private void getMoveRoute(Map<String, String> _mapChess)
 	{
-		if (gamePanel.chineseChess.chessCache.currentUI == ChessDTO.UI.FISH) {
+		/*if (gamePanel.chineseChess.chessCache.currentUI == ChessDTO.UI.FISH) {
 			return;
-		}
+		}*/
 		this.gamePanel.listMove.clear();
 		
 		//懒得分类挑，反正电脑计算快
-		for(int row=0;row<this.gamePanel.gridRows;row++)
+		for(int row = 0; row<GamePanel.GRID_ROWS; row++)
 		{
-			for(int column=0;column<this.gamePanel.gridColumns;column++)
+			for(int column = 0; column<GamePanel.GRID_COLUMNS; column++)
 			{
 				if(this.isAbleToMove(_mapChess,row,column))
 				{
@@ -1204,35 +1204,34 @@ public class GameLogic {
 				this.gamePanel.jb_undo.setEnabled(true);
 			}
 
+			if (this.gamePanel.isGameOver) {
+				return;
+			}
+
+			//判断游戏是否结束
+			if (this.gameOver()) {
+				this.gamePanel.isGameOver = true;
+				this.gamePanel.setComponentState(false);
+				this.gamePanel.jlb_blackStateText.setText("已结束");
+				this.gamePanel.jlb_redStateText.setText("已结束");
+				return;
+			}
+
 			//如果是人机对战，机器要回应啊
-			computerRun();
+			if (gamePanel.chineseChess.chessCache.currentBattle == ChessCache.Battle.PVC) {
+				computerRun();
+			}
 		}
 	}
 
 	private void computerRun() {
-		if (this.gamePanel.isGameOver) {
-			return;
-		}
-
-		//判断游戏是否结束
-		if (this.gameOver()) {
-			this.gamePanel.isGameOver = true;
-			this.gamePanel.setComponentState(false);
-			this.gamePanel.jlb_blackStateText.setText("已结束");
-			this.gamePanel.jlb_redStateText.setText("已结束");
-			return;
-		}
-
-		// 人机对战
-		if (gamePanel.chineseChess.chessCache.currentBattle == ChessCache.Battle.PVC) {
-			this.computerPlay();
-			if (this.gamePanel.computerChess == ChessCache.Player.BLACK.getValue()) {
-				this.gamePanel.jlb_blackStateText.setText("已下完");
-				this.gamePanel.jlb_redStateText.setText("思考中");
-			} else {
-				this.gamePanel.jlb_redStateText.setText("已下完");
-				this.gamePanel.jlb_blackStateText.setText("思考中");
-			}
+		this.computerPlay();
+		if (this.gamePanel.computerChess == ChessCache.Player.BLACK.getValue()) {
+			this.gamePanel.jlb_blackStateText.setText("已下完");
+			this.gamePanel.jlb_redStateText.setText("思考中");
+		} else {
+			this.gamePanel.jlb_redStateText.setText("已下完");
+			this.gamePanel.jlb_blackStateText.setText("思考中");
 		}
 	}
 
