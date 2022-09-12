@@ -20,7 +20,7 @@ public class LogoutCommandHandler extends AbstractCommandHandler {
             return;
         }
 
-        if (GameAction.playing()) {
+        if (!GameAction.isOfflineGame() && GameAction.playing()) {
             // 结束游戏
             Command.OVER.exec(args);
         }
