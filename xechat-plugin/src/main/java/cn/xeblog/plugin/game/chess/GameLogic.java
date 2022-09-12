@@ -988,7 +988,7 @@ public class GameLogic {
 			if("T".equals(this.gamePanel.mapChess[4].get("dead")))	//黑将被吃
 			{
 				if(gamePanel.chineseChess.chessCache.currentPlayer == ChessCache.Player.BLACK){
-					JOptionPane.showMessageDialog(null,"少侠，晚上少“运动”，早点休息，保持健康！");
+					JOptionPane.showMessageDialog(null, "胜败乃兵家常事，少侠请重新来过！");
 				}else{
 					JOptionPane.showMessageDialog(null,"汝之秀，吾不能及也！");
 				}
@@ -1003,7 +1003,7 @@ public class GameLogic {
 				if(gamePanel.chineseChess.chessCache.currentPlayer == ChessCache.Player.BLACK){
 					JOptionPane.showMessageDialog(null,"汝之秀，吾不能及也！");
 				}else{
-					JOptionPane.showMessageDialog(null,"少侠，晚上少“运动”，早点休息，保持健康！");
+					JOptionPane.showMessageDialog(null, "胜败乃兵家常事，少侠请重新来过！");
 				}
 				if(gamePanel.chineseChess.chessCache.currentMode == ChessCache.Mode.ONLINE){
 					this.gamePanel.chineseChess.send(new Point(ChessDTO.Option.GAME_OVER));

@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.game.chess;
 
+import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.entity.game.chess.ChessDTO;
 import cn.xeblog.commons.enums.Game;
 import cn.xeblog.plugin.annotation.DoGame;
@@ -85,12 +86,12 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
                 return;
             }
             if (body.getOption().equals(ChessDTO.Option.SURRENDER)) {
-                JOptionPane.showMessageDialog(null,"对方跑去交作业了！");
+                JOptionPane.showMessageDialog(null, "对方投降了！");
                 gamePanel.gameOver();
                 return;
             }
             if (body.getOption().equals(ChessDTO.Option.GAME_OVER)) {
-                JOptionPane.showMessageDialog(null,"少侠，晚上少“运动”，早点休息，保持健康！");
+                JOptionPane.showMessageDialog(null, "胜败乃兵家常事，少侠请重新来过！");
                 gamePanel.gameOver();
                 return;
             }
@@ -185,7 +186,7 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
     private void startPanel()
     {
         //logo图片
-        ImageIcon imageIconLogo = new ImageIcon(new ImageIcon(this.getClass().getResource("/images/chess/logo.png")).getImage().getScaledInstance(100, 50, Image.SCALE_SMOOTH));//缩放图片来适应标签大小
+        ImageIcon imageIconLogo = new ImageIcon(new ImageIcon(this.getClass().getResource("/games/chinese-chess/logo.png")).getImage().getScaledInstance(100, 50, Image.SCALE_SMOOTH));//缩放图片来适应标签大小
         JLabel labelLogo = new JLabel(imageIconLogo);
         startPanel.add(labelLogo);
         //对战方式
@@ -245,4 +246,15 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
         //棋子信息对调
         return getGameOverButton();
     }
+
+    @Override
+    public void playerLeft(User player) {
+        super.playerLeft(player);
+        if (!gamePanel.isGameOver && status > -1) {
+            ChessDTO dto = new ChessDTO();
+            dto.setOption(ChessDTO.Option.SURRENDER);
+            handle(dto);
+        }
+    }
+
 }

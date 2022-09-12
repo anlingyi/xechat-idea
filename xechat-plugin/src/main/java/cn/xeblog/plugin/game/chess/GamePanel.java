@@ -179,19 +179,14 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	{
 		try
 		{
-			URL resource = this.getClass().getResource("/images/chess/chessboard3.png");
+			URL resource = this.getClass().getResource("/games/chinese-chess/chessboard3.png");
 			ImageIcon chessboard = new ImageIcon(resource);
 			//棋盘图片
 			this.imageIconChessBoard = new ImageIcon(chessboard.getImage().getScaledInstance(this.panelChess.getWidth(),this.panelChess.getHeight(), Image.SCALE_SMOOTH));	//缩放图片来适应标签大小
 			//棋子图片
 			for(int i=0;i<this.imageIconChess.length;i++)
 			{
-				String imgPath;
-				if (chineseChess.chessCache.currentUI == ChessDTO.UI.CLASSIC) {
-					imgPath = "/images/chess/chess"+i+".png";
-				}else{
-					imgPath = "/images/chess/fish/chess"+i+".png";
-				}
+				String imgPath = "/games/chinese-chess/chess" + i + ".png";
 				this.imageIconChess[i] = new ImageIcon(new ImageIcon(this.getClass().getResource(imgPath)).getImage().getScaledInstance(this.chessSize,this.chessSize, Image.SCALE_SMOOTH));	//缩放图片来适应标签大小
 			}
 		}
