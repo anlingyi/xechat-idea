@@ -47,9 +47,7 @@ public class ChessCache {
     @Getter
     @AllArgsConstructor
     public enum Battle {
-        PVP("人人对战", 1), PVC("人机对战", 0)
-
-        ;
+        PVP("左右互搏", 1), PVC("人机对战", 0);
 
         private String name;
 

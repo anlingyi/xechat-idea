@@ -127,8 +127,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
     @Getter
     @AllArgsConstructor
     private enum GameMode {
-        HUMAN_VS_PC("人类VS电脑"),
-        HUMAN_VS_HUMAN("人类VS人类"),
+        HUMAN_VS_PC("人机模式"),
+        HUMAN_VS_HUMAN("左右互搏"),
         ONLINE("在线PK"),
         DEBUG("调试模式");
 
