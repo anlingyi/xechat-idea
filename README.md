@@ -1,6 +1,6 @@
 # XEChat-Idea
 
-> Version 1.6.3-beta
+> Version 1.6.4-beta
 
 > 基于Netty的IDEA即时聊天插件：让你能够在IDEA里实现聊天、下棋、斗地主！(理论上支持JetBrains全系列开发工具🙂)
 
@@ -39,11 +39,13 @@
 * 不贪吃蛇
 * 2048（作者 @[浓睡不消残酒](https://github.com/CodeNoobLH) ，感谢PR😊）
 * 数独（作者 @[Speciallei](https://github.com/Specialleiliei) ，感谢PR😊）
+* 推箱子（作者 @[Speciallei](https://github.com/Specialleiliei) ，感谢PR😊）
+* 中国象棋（支持2人联机、人机对战，作者 @[15738383930](https://github.com/15738383930) ，感谢PR😊）
 
 **工具类**
 
 * 阅读（作者 @[MINIPuffer](https://github.com/MINIPuffer) ，感谢PR😊）
-* 天气查询（基于[和风天气](https://dev.qweather.com/)，作者 @[猎隼丶止戈](https://github.com/nn200433) ，感谢PR😊）
+* 天气查询（作者 @[猎隼丶止戈](https://github.com/nn200433) ，感谢PR😊）
 * 浏览器
 
 [了解更多...](https://xeblog.cn/?tag=xechat-idea)
@@ -55,6 +57,12 @@
 ![](https://oss.xeblog.cn/prod/40ddad661991451889acea177c7f5293.png)
 
 ![](https://oss.xeblog.cn/prod/3af16813518b4e4592ece13b0330be9b.png)
+
+![](https://oss.xeblog.cn/prod/154404fccbdd466591df2fbeabdfeb74.png)
+
+![](https://oss.xeblog.cn/prod/8e5bc4004afd48cf9fed4df18a66d070.png)
+
+![](https://oss.xeblog.cn/prod/76dee7f5bb924dd59a5ffaaf333fc45c.png)
 
 ### 项目结构
 
