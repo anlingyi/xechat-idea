@@ -130,14 +130,8 @@ public class GameLogic {
 		
 		if("king".equals(type))				//将帅
 		{
-			//不能出九宫
-			if((_newRow > 2 && _newRow < 7) || _newColumn < 3 || _newColumn > 5){return false;}
-			//一次只能走一格
-			if(Math.abs(_newRow - oldRow) > 1 || Math.abs(_newColumn - oldColulmn) > 1){return false;}
-			//不能走斜线
-			if((_newRow - oldRow) * (_newColumn - oldColulmn) != 0){return false;}
 			//将帅不能露脸
-			if(index != -1 && "king".equals(this.gamePanel.mapChess[index].get(type)) && oldColulmn == _newColumn)	//目标棋子是将帅并且在同一列上
+			if(index != -1 && "king".equals(this.gamePanel.mapChess[index].get("type")) && oldColulmn == _newColumn)	//目标棋子是将帅并且在同一列上
 			{
 				//判断中间是否有棋子
 				int count = 0;
@@ -147,8 +141,14 @@ public class GameLogic {
 				{
 					if(this.gamePanel.chessBoradState[row][_newColumn] != -1){count++;}
 				}
-				if(count == 0){return false;}
+				if(count == 0){return true;}
 			}
+			//不能出九宫
+			if((_newRow > 2 && _newRow < 7) || _newColumn < 3 || _newColumn > 5){return false;}
+			//一次只能走一格
+			if(Math.abs(_newRow - oldRow) > 1 || Math.abs(_newColumn - oldColulmn) > 1){return false;}
+			//不能走斜线
+			if((_newRow - oldRow) * (_newColumn - oldColulmn) != 0){return false;}
 		}
 		else if("guard".equals(type))		//士仕
 		{
