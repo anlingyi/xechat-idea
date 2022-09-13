@@ -4,10 +4,10 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.xeblog.commons.enums.Game;
 import cn.xeblog.plugin.annotation.DoGame;
 import cn.xeblog.plugin.game.AbstractGame;
-import cn.xeblog.plugin.game.sudoku.other.Level;
-import cn.xeblog.plugin.game.sudoku.other.PanelSize;
-import cn.xeblog.plugin.game.sudoku.other.RealTimeTip;
-import cn.xeblog.plugin.game.sudoku.other.SudokuGui;
+import cn.xeblog.plugin.game.sudoku.enums.Level;
+import cn.xeblog.plugin.game.sudoku.enums.PanelSize;
+import cn.xeblog.plugin.game.sudoku.enums.RealTimeTip;
+import cn.xeblog.plugin.game.sudoku.enums.Theme;
 import com.google.common.collect.Lists;
 import com.intellij.openapi.ui.ComboBox;
 
@@ -27,6 +27,7 @@ public class Sudoku extends AbstractGame {
     private Level level;
     private PanelSize panelSize;
     private RealTimeTip realTimeTip;
+    private Theme theme;
 
     // 提示按钮
     private JButton tips;
@@ -42,10 +43,11 @@ public class Sudoku extends AbstractGame {
         level = Level.EASY;
         panelSize = PanelSize.MIN;
         realTimeTip = RealTimeTip.DIS_ENABLE;
+        theme = Theme.DARK;
 
         mainPanel.setMinimumSize(new Dimension(150, 300));
         JPanel menuJPanel = new JPanel();
-        menuJPanel.setBounds(10, 10, 100, 330);
+        menuJPanel.setBounds(10, 10, 100, 340);
         mainPanel.add(menuJPanel);
 
         JLabel title = new JLabel("摸鱼数独");
@@ -57,7 +59,7 @@ public class Sudoku extends AbstractGame {
 
         Dimension selectDimension = new Dimension(30, 30);
 
-        vBox.add(Box.createVerticalStrut(20));
+        vBox.add(Box.createVerticalStrut(10));
         JLabel levelLabel = new JLabel("难度选择：");
         levelLabel.setFont(new Font("", Font.BOLD, 13));
         vBox.add(levelLabel);
@@ -66,7 +68,7 @@ public class Sudoku extends AbstractGame {
         gameLevelBox.addActionListener(l -> level = Level.getLevel(Objects.requireNonNull(gameLevelBox.getSelectedItem()).toString()));
         vBox.add(gameLevelBox);
 
-        vBox.add(Box.createVerticalStrut(10));
+        vBox.add(Box.createVerticalStrut(5));
         JLabel sizeLabel = new JLabel("主面板大小：");
         sizeLabel.setFont(new Font("", Font.BOLD, 13));
         vBox.add(sizeLabel);
@@ -75,7 +77,7 @@ public class Sudoku extends AbstractGame {
         gameSizeBox.addActionListener(l -> panelSize = PanelSize.getPanelSize(Objects.requireNonNull(gameSizeBox.getSelectedItem()).toString()));
         vBox.add(gameSizeBox);
 
-        vBox.add(Box.createVerticalStrut(10));
+        vBox.add(Box.createVerticalStrut(5));
         JLabel tipLabel = new JLabel("实时提示：");
         tipLabel.setFont(new Font("", Font.BOLD, 13));
         vBox.add(tipLabel);
@@ -84,13 +86,21 @@ public class Sudoku extends AbstractGame {
         tipSelectBox.addActionListener(l -> realTimeTip = RealTimeTip.getRealTimeTip(Objects.requireNonNull(tipSelectBox.getSelectedItem()).toString()));
         vBox.add(tipSelectBox);
 
+        vBox.add(Box.createVerticalStrut(5));
+        JLabel themeLabel = new JLabel("主题：");
+        themeLabel.setFont(new Font("", Font.BOLD, 13));
+        vBox.add(themeLabel);
+        vBox.add(Box.createVerticalStrut(5));
+        ComboBox<String> themeSelectBox = theme.getComboBox(selectDimension);
+        themeSelectBox.addActionListener(l -> theme = Theme.getTheme(Objects.requireNonNull(themeSelectBox.getSelectedItem()).toString()));
+        vBox.add(themeSelectBox);
+
         vBox.add(Box.createVerticalStrut(10));
         vBox.add(getStartJButton("开始解题"));
         vBox.add(getExitButton());
 
         mainPanel.updateUI();
     }
-
 
     @Override
     protected void start() {
@@ -100,7 +110,7 @@ public class Sudoku extends AbstractGame {
         mainPanel.setLayout(new BorderLayout());
         mainPanel.add(Box.createVerticalStrut(10), BorderLayout.NORTH);
         mainPanel.add(Box.createHorizontalStrut(10), BorderLayout.EAST);
-        SudokuGui sudokuGui = new SudokuGui(level, panelSize, realTimeTip);
+        SudokuGui sudokuGui = new SudokuGui(level, panelSize, realTimeTip, theme);
         mainPanel.add(sudokuGui, BorderLayout.CENTER);
         JPanel bottomPanel = getBottomPanel(sudokuGui);
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
@@ -115,7 +125,13 @@ public class Sudoku extends AbstractGame {
         commit = sudokuGui.getCommitJButton();
         tips = sudokuGui.getTipsJButton();
         another = getStartJButton("再来一局");
-        another.setEnabled(false);
+
+        // 设置按钮统一属性
+        Dimension buttonDimension = new Dimension(71, 29);
+        Lists.newArrayList(commit, tips, another).forEach(b -> {
+            b.setEnabled(false);
+            b.setPreferredSize(buttonDimension);
+        });
 
         JPanel buttonPanel1 = new JPanel();
         buttonPanel1.add(commit);
@@ -123,7 +139,7 @@ public class Sudoku extends AbstractGame {
 
         JPanel buttonPanel2 = new JPanel();
         buttonPanel2.add(another);
-        buttonPanel2.add(getMenuJButton());
+        buttonPanel2.add(getMenuJButton(buttonDimension));
 
         JPanel buttonPanel = new JPanel();
         if (PanelSize.MIN == panelSize) {
@@ -139,16 +155,17 @@ public class Sudoku extends AbstractGame {
         return buttonPanel;
     }
 
-    public JButton getMenuJButton() {
-        JButton another = new JButton("主菜单");
-        another.addActionListener(e -> init());
-        return another;
+    public JButton getMenuJButton(Dimension buttonDimension) {
+        JButton menu = new JButton("主菜单");
+        menu.setPreferredSize(buttonDimension);
+        menu.addActionListener(e -> init());
+        return menu;
     }
 
     public JButton getStartJButton(String title) {
-        JButton another = new JButton(title);
-        another.addActionListener(e -> start());
-        return another;
+        JButton start = new JButton(title);
+        start.addActionListener(e -> start());
+        return start;
     }
 
 }

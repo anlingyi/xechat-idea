@@ -61,7 +61,9 @@ public class XEChatClientHandler extends SimpleChannelInboundHandler<Response> {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         DataCache.isOnline = false;
         DataCache.userMap = null;
-        GameAction.over();
+        if (!GameAction.isOfflineGame()) {
+            GameAction.over();
+        }
         ConsoleAction.showSimpleMsg("已断开连接！");
         ConsoleAction.setConsoleTitle("控制台");
 

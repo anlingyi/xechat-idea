@@ -1,15 +1,11 @@
 package cn.xeblog.plugin.listener;
 
-import cn.hutool.core.io.IoUtil;
 import cn.xeblog.plugin.factory.MainWindowFactory;
 import cn.xeblog.plugin.ui.MainWindow;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManagerListener;
 import com.intellij.openapi.wm.*;
 import org.jetbrains.annotations.NotNull;
-
-import javax.swing.*;
-import java.io.InputStream;
 
 /**
  * @author anlingyi
@@ -33,13 +29,11 @@ public class ProjectEventListener implements ProjectManagerListener {
             toolWindowManager.invokeLater(() -> {
                 ToolWindow toolWindow = toolWindowManager.getToolWindow(WINDOW_ID);
                 if (toolWindow != null) {
+                    RegisterToolWindowTask xeChat = RegisterToolWindowTask.notClosable(toolWindow.getId(), toolWindow.getIcon());
                     toolWindow.remove();
+                    toolWindow = toolWindowManager.registerToolWindow(xeChat);
+                    new MainWindowFactory().createToolWindowContent(otherProject, toolWindow);
                 }
-                InputStream inputStream = ProjectEventListener.class.getResourceAsStream("/images/logo.png");
-                ImageIcon icon = new ImageIcon(IoUtil.readBytes(inputStream));
-                RegisterToolWindowTask xeChat = RegisterToolWindowTask.notClosable(WINDOW_ID, icon);
-                toolWindow = toolWindowManager.registerToolWindow(xeChat);
-                new MainWindowFactory().createToolWindowContent(otherProject, toolWindow);
             });
         }
     }

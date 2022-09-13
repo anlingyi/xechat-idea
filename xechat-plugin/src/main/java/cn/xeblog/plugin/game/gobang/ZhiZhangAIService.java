@@ -1208,7 +1208,7 @@ public class ZhiZhangAIService implements AIService {
         int huosanTotal = 0;
         // 冲四数
         int chongsiTotal = 0;
-        // 统计同一方向即冲四又活三的情况，出现这种情况的优先按活三分计算
+        // 统计同一方向既冲四又活三的情况，出现这种情况的优先按活三分计算
         int tfTotal = 0;
 
         for (int i = 1; i < 5; i++) {
@@ -1224,7 +1224,7 @@ public class ZhiZhangAIService implements AIService {
                         // 活三+1
                         huosanTotal++;
                         if (checkSituation(situation, ChessModel.CHONGSI)) {
-                            // 同一方向出现活三又出现活四
+                            // 同一方向出现活三，又出现冲四
                             tfTotal++;
                         }
                         break;
