@@ -386,31 +386,32 @@ public class GameLogic {
 	/**
 	 * 功能：悔棋<br>
 	 */
-	public void undo()
-	{
-		if(this.gamePanel.isGameOver){return;}
+	public void undo() {
 
-		Map<String, String> mapLast = this.gamePanel.listChess.get(this.gamePanel.listChess.size() - 2);
+		// 悔几步
+		int i = 1;
+
+		if (gamePanel.chineseChess.chessCache.currentBattle == ChessCache.Battle.PVC) {
+			// 人机多悔一步
+			i++;
+		}
+
+		Map<String, String> mapLast = this.gamePanel.listChess.get(this.gamePanel.listChess.size() - i);
 		int index = Integer.parseInt(mapLast.get("index"));
 		int color = Integer.parseInt(mapLast.get("color"));
 		int oldRow = Integer.parseInt(mapLast.get("oldRow"));
 		int oldColumn = Integer.parseInt(mapLast.get("oldColumn"));
 
 		if (gamePanel.chineseChess.chessCache.currentMode == ChessCache.Mode.OFFLINE) {
-			gamePanel.blackUndoNum--;
-			gamePanel.redUndoNum--;
-		}else{
-			if(gamePanel.chineseChess.chessCache.currentPlayer == ChessCache.Player.BLACK){
-				gamePanel.blackUndoNum--;
-			} else {
-				gamePanel.redUndoNum--;
-			}
+			this.gamePanel.jb_undo.setEnabled(false);
 		}
 
+		this.undoStep();
 
-		// 后退两步
-		this.undoStep();
-		this.undoStep();
+		if (gamePanel.chineseChess.chessCache.currentBattle == ChessCache.Battle.PVC) {
+			// 人机多悔一步
+			this.undoStep();
+		}
 
 		//重新生成落子指示器
 		this.gamePanel.mapPointerChess.put("row",oldRow);
@@ -437,16 +438,8 @@ public class GameLogic {
 			this.gamePanel.jlb_blackStateText.setText("悔棋中");
 		}
 
-		if(gamePanel.chineseChess.chessCache.currentMode == ChessCache.Mode.ONLINE){
-			this.gamePanel.chineseChess.send(new Point(ChessDTO.Option.UNDO));
-		}
-
 		//刷新
 		this.gamePanel.repaint();
-
-		if (!gamePanel.canRepent()) {
-			this.gamePanel.jb_undo.setEnabled(false);
-		}
 	}
 
 	/**
@@ -1181,13 +1174,17 @@ public class GameLogic {
 	}
 
 	private void processMoveData(int row, int column) {
+		if (gamePanel.canRepent()) {
+			this.gamePanel.jb_undo.setEnabled(true);
+		}else{
+			this.gamePanel.jb_undo.setEnabled(false);
+		}
+
 		//判断是否将军
 		boolean check = this.check();
 
 		if(gamePanel.chineseChess.chessCache.currentMode == ChessCache.Mode.ONLINE){
 			gamePanel.chineseChess.chessCache.put = true;
-
-			this.gamePanel.jb_undo.setEnabled(false);
 
 			ChessDTO.Option option = check ? ChessDTO.Option.CHECK : ChessDTO.Option.DEFAULT;
 			this.gamePanel.chineseChess.send(new Point(row, column, gamePanel.chineseChess.chessCache.currentPlayer.getValue(), Integer.parseInt(gamePanel.firstClickChess.get("index")) , option));
@@ -1200,10 +1197,6 @@ public class GameLogic {
 				this.gamePanel.jlb_redStateText.setText("已结束");
 			}
 		}else{
-			if (gamePanel.canRepent()) {
-				this.gamePanel.jb_undo.setEnabled(true);
-			}
-
 			if (this.gamePanel.isGameOver) {
 				return;
 			}
