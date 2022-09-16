@@ -423,10 +423,7 @@ public class GameLogic {
 		
 		//显示移动路线图
 		this.getMoveRoute(this.gamePanel.firstClickChess);
-		
-		//更新提示
-		this.gamePanel.jlb_blackUndoText.setText("剩"+gamePanel.blackUndoNum+"次");
-		this.gamePanel.jlb_redUndoText.setText("剩"+gamePanel.redUndoNum+"次");
+
 		if(color == ChessCache.Player.RED.getValue())
 		{
 			this.gamePanel.jlb_redStateText.setText("悔棋中");

@@ -83,15 +83,6 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
         gamePanel.jb_undo.setEnabled(false);
         if (status > -1) {
             if (body.getOption().equals(ChessDTO.Option.UNDO)) {
-                if(gamePanel.chineseChess.chessCache.currentPlayer == ChessCache.Player.BLACK){
-                    gamePanel.redUndoNum--;
-                } else {
-                    gamePanel.blackUndoNum--;
-                }
-                //更新提示
-                gamePanel.jlb_blackUndoText.setText("剩"+gamePanel.blackUndoNum+"次");
-                gamePanel.jlb_redUndoText.setText("剩"+gamePanel.redUndoNum+"次");
-
                 int i = JOptionPane.showConfirmDialog(null, "对方请求悔棋，是否同意？", "提示", JOptionPane.YES_NO_OPTION);
                 if (i != 0){
                     // 拒绝悔棋，需发送拒绝通知
@@ -176,7 +167,7 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
 
         mainPanel.removeAll();
         mainPanel.setLayout(new BorderLayout());
-        mainPanel.setMinimumSize(new Dimension(320,450));
+        mainPanel.setMinimumSize(new Dimension(320,360));
 
         this.gamePanel = new GamePanel(this);
 
