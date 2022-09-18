@@ -51,7 +51,7 @@ public class ChannelAction {
     }
 
     public static String getId(ChannelHandlerContext ctx) {
-        return ctx.channel().id().asShortText();
+        return ctx.channel().id().asLongText();
     }
 
     public static User getUser(ChannelHandlerContext ctx) {
