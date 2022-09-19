@@ -89,7 +89,9 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
             byte[] bytes = (byte[]) body.getContent();
             ByteBuf byteBuf = Unpooled.wrappedBuffer(bytes);
             int fileNameLength = byteBuf.readInt();
-            String fileName = new String(ByteBufUtil.getBytes(byteBuf.readBytes(fileNameLength)));
+            ByteBuf fileNameByteBuf = byteBuf.readBytes(fileNameLength);
+            String fileName = new String(ByteBufUtil.getBytes(fileNameByteBuf));
+            fileNameByteBuf.release();
             int fileLength = byteBuf.readInt();
             int index = byteBuf.readInt();
             ImageFileLabel imageFileLabel = IMAGE_File_LABEL_MAP.get(fileName);
