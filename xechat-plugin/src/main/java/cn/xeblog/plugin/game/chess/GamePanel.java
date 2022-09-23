@@ -742,7 +742,8 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	}
 
 	boolean canRepent() {
-		boolean hasNotStarted = this.listChess.size() <= 0;
+		// 前三步不允许悔棋
+		boolean hasNotStarted = this.listChess.size() <= 6;
 		return !hasNotStarted;
 	}
 
@@ -792,11 +793,11 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 		if(color == ChessCache.Player.RED.getValue())
 		{
 			jlb_redStateText.setText("悔棋中");
-			jlb_blackStateText.setText("已下完");
+			jlb_blackStateText.setText(gameLogic.getPrompt(this.listChess.get(this.listChess.size() - 1)));
 		}
 		else
 		{
-			jlb_redStateText.setText("已下完");
+			jlb_redStateText.setText(gameLogic.getPrompt(this.listChess.get(this.listChess.size() - 1)));
 			jlb_blackStateText.setText("悔棋中");
 		}
 
@@ -813,7 +814,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 			this.chineseChess.send(new Point(ChessDTO.Option.SURRENDER));
 		}
 
-		JOptionPane.showMessageDialog(null,"OK，loser!");
+		JOptionPane.showMessageDialog(this,"OK，loser!");
 
 		gameOver();
 	}
@@ -899,6 +900,12 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	@Override
 	public void mouseDragged(MouseEvent e){}
 
+	/**
+	 * 设置对方的棋子
+	 * @author Hao.
+	 * @date 2022/9/22 8:42
+	 * @return
+	 */
 	void setChess(Point point) {
 		int index = point.index;
 		Map<String, String> chess = this.mapChess[index];
@@ -917,18 +924,18 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 		if(Integer.parseInt(chess.get("color")) == ChessCache.Player.BLACK.getValue())
 		{
 			this.jlb_redStateText.setText("思考中");
-			this.jlb_blackStateText.setText("已下完");
+			this.jlb_blackStateText.setText(gameLogic.getOtherSidePrompt(chess));
 		}
 		else
 		{
-			this.jlb_redStateText.setText("已下完");
+			this.jlb_redStateText.setText(gameLogic.getOtherSidePrompt(chess));
 			this.jlb_blackStateText.setText("思考中");
 		}
 
 		this.repaint();
 
 		//判断是否将军
-		this.gameLogic.check();
+		this.gameLogic.check(Integer.parseInt(chess.get("color")));
 	}
 
 	void otherSideCheck()

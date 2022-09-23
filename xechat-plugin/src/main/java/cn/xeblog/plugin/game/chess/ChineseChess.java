@@ -83,7 +83,7 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
         gamePanel.jb_undo.setEnabled(false);
         if (status > -1) {
             if (body.getOption().equals(ChessDTO.Option.UNDO)) {
-                int i = JOptionPane.showConfirmDialog(null, "对方请求悔棋，是否同意？", "提示", JOptionPane.YES_NO_OPTION);
+                int i = JOptionPane.showConfirmDialog(gamePanel, "对方请求悔棋，是否同意？", "提示", JOptionPane.YES_NO_OPTION);
                 if (i != 0){
                     // 拒绝悔棋，需发送拒绝通知
                     send(new Point(ChessDTO.Option.UNDO_REJECT));
@@ -97,7 +97,7 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
             }
             if (body.getOption().equals(ChessDTO.Option.UNDO_REJECT)) {
                 gamePanel.jb_surrender.setEnabled(true);
-                JOptionPane.showMessageDialog(null, "对方拒绝悔棋！");
+                JOptionPane.showMessageDialog(gamePanel, "对方拒绝悔棋！");
                 return;
             }
             if (body.getOption().equals(ChessDTO.Option.UNDO_CONSENT)) {
@@ -107,12 +107,12 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
                 return;
             }
             if (body.getOption().equals(ChessDTO.Option.SURRENDER)) {
-                JOptionPane.showMessageDialog(null, "对方投降了！");
+                JOptionPane.showMessageDialog(gamePanel, "对方投降了！");
                 gamePanel.gameOver();
                 return;
             }
             if (body.getOption().equals(ChessDTO.Option.GAME_OVER)) {
-                JOptionPane.showMessageDialog(null, "胜败乃兵家常事，少侠请重新来过！");
+                JOptionPane.showMessageDialog(gamePanel, "胜败乃兵家常事，少侠请重新来过！");
                 gamePanel.gameOver();
                 return;
             }
@@ -245,14 +245,6 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
         //棋子信息对调
         body.setX(9 - body.getX());
         body.setY(8 - body.getY());
-
-        if (body.getType() == ChessCache.Player.BLACK.getValue()) {
-            this.gamePanel.jlb_redStateText.setText("思考中");
-            this.gamePanel.jlb_blackStateText.setText("已下完");
-        } else {
-            this.gamePanel.jlb_redStateText.setText("已下完");
-            this.gamePanel.jlb_blackStateText.setText("思考中");
-        }
     }
 
     public JButton gameOverButton() {
