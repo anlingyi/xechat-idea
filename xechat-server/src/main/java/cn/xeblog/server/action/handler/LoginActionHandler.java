@@ -86,6 +86,7 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
         user.setRole(isAdmin ? User.Role.ADMIN : User.Role.USER);
         UserCache.add(id, user);
 
+        ChannelAction.add(ctx.channel());
         ChannelAction.sendOnlineUsers(user);
         ChannelAction.sendUserState(user, UserStateMsgDTO.State.ONLINE);
 

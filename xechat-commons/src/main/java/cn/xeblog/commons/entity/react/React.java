@@ -6,6 +6,7 @@ package cn.xeblog.commons.entity.react;
  */
 public enum React {
 
-    SEND_FILE;
+    UPLOAD,
+    DOWNLOAD;
 
 }

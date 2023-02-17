@@ -7,10 +7,8 @@ import lombok.Data;
  * @date 2022/9/19 9:03 AM
  */
 @Data
-public class SendFileReactResult {
+public class UploadReactResult {
 
-    private boolean allowed;
-
-    private String msg;
+    private String fileName;
 
 }

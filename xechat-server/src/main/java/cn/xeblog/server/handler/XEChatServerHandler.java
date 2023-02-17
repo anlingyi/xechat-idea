@@ -20,10 +20,8 @@ public class XEChatServerHandler extends SimpleChannelInboundHandler<Request> {
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-        Channel channel = ctx.channel();
         String channelId = ChannelAction.getId(ctx);
         log.debug("客户端连接成功, id -> {}, ip -> {}", channelId, getClientIP(ctx));
-        ChannelAction.add(channel);
     }
 
     protected void channelRead0(ChannelHandlerContext ctx, Request msg) throws Exception {

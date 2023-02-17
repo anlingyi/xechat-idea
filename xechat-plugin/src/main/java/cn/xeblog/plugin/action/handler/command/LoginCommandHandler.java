@@ -9,8 +9,10 @@ import cn.xeblog.plugin.action.ConnectionAction;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.annotation.DoCommand;
 import cn.xeblog.plugin.cache.DataCache;
+import cn.xeblog.plugin.client.ClientConnectConsumer;
 import cn.xeblog.plugin.enums.Command;
 import cn.xeblog.commons.util.ParamsUtils;
+import io.netty.channel.Channel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
@@ -133,10 +135,17 @@ public class LoginCommandHandler extends AbstractCommandHandler {
         CONNECTING = true;
         DataCache.username = username;
         ConsoleAction.showSimpleMsg("正在连接服务器...");
-        conn.exec((flag) -> {
-            CONNECTING = false;
-            if (flag) {
+        conn.exec(new ClientConnectConsumer() {
+            @Override
+            public void succeed(Channel channel) {
+                CONNECTING = false;
                 DataCache.connectionAction = conn;
+            }
+
+            @Override
+            public void failed() {
+                CONNECTING = false;
+                ConsoleAction.showSimpleMsg("连接服务器失败！");
             }
         });
     }

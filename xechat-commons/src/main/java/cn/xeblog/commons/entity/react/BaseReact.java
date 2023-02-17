@@ -13,4 +13,6 @@ public class BaseReact implements Serializable {
 
     private String id;
 
+    private String uid;
+
 }

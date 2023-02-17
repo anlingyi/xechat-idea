@@ -7,8 +7,10 @@ import lombok.Data;
  * @date 2022/9/19 8:54 AM
  */
 @Data
-public class SendFileReact {
+public class UploadReact {
 
-    private int size;
+    private String fileType;
+
+    private byte[] bytes;
 
 }

@@ -7,7 +7,7 @@ import cn.xeblog.commons.enums.UserStatus;
 import cn.xeblog.plugin.action.ConnectionAction;
 import cn.xeblog.plugin.tools.read.ReadConfig;
 import com.intellij.openapi.project.Project;
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.Channel;
 
 import java.util.List;
 import java.util.Map;
@@ -30,9 +30,9 @@ public class DataCache {
     public static boolean isOnline;
 
     /**
-     * 通道处理上下文
+     * 通道
      */
-    public static ChannelHandlerContext ctx;
+    public static Channel channel;
 
     /**
      * 当前在线用户缓存，key -> username
