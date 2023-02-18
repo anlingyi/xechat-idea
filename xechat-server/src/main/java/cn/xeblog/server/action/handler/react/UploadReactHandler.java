@@ -10,6 +10,7 @@ import cn.xeblog.commons.entity.react.request.UploadReact;
 import cn.xeblog.commons.entity.react.result.ReactResult;
 import cn.xeblog.commons.entity.react.result.UploadReactResult;
 import cn.xeblog.commons.enums.MessageType;
+import cn.xeblog.commons.enums.Permissions;
 import cn.xeblog.server.action.ChannelAction;
 import cn.xeblog.server.annotation.DoReact;
 import cn.xeblog.server.config.GlobalConfig;
@@ -28,6 +29,15 @@ public class UploadReactHandler extends AbstractReactHandler<UploadReact, Upload
 
     @Override
     protected void process(User user, UploadReact body, ReactResult<UploadReactResult> result) {
+        if (!user.hasPermit(Permissions.SEND_FILE)) {
+            result.setMsg("您没有上传文件的权限！");
+            return;
+        }
+        if (!Permissions.SEND_FILE.hasPermit(GlobalConfig.GLOBAL_PERMIT)) {
+            result.setMsg("鱼塘已禁止发送文件！");
+            return;
+        }
+
         int maxSize = GlobalConfig.UPLOAD_FILE_MAX_SIZE;
 
         int len = ArrayUtil.length(body.getBytes());

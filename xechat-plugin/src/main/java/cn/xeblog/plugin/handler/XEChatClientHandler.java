@@ -71,6 +71,7 @@ public class XEChatClientHandler extends SimpleChannelInboundHandler<Response> {
         if (!GameAction.isOfflineGame()) {
             GameAction.over();
         }
+
         ConsoleAction.showSimpleMsg("已断开连接！");
         ConsoleAction.setConsoleTitle("控制台");
 

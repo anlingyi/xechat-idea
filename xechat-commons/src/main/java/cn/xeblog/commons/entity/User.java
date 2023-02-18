@@ -1,5 +1,6 @@
 package cn.xeblog.commons.entity;
 
+import cn.xeblog.commons.enums.Permissions;
 import cn.xeblog.commons.enums.UserStatus;
 import io.netty.channel.Channel;
 import lombok.*;
@@ -17,39 +18,76 @@ public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * uuid
+     */
     @Getter
     @Setter
     private String uuid;
 
+    /**
+     * 用户ID
+     */
     @Getter
     @Setter
     private String id;
 
+    /**
+     * 用户昵称
+     */
     @Getter
     @Setter
     private String username;
 
+    /**
+     * 用户状态
+     */
     @Getter
     @Setter
     private UserStatus status;
 
+    /**
+     * 用户IP
+     */
     @Getter
     @Setter
     private String ip;
 
+    /**
+     * 用户所在区域
+     */
     @Getter
     @Setter
     private IpRegion region;
 
+    /**
+     * 用户角色
+     */
     @Getter
     @Setter
     private Role role;
 
+    /**
+     * 用户权限
+     */
+    @Getter
+    @Setter
+    private int permit;
+
+    /**
+     * 通道
+     */
     @Getter
     private transient Channel channel;
 
     public enum Role {
+        /**
+         * 管理员
+         */
         ADMIN,
+        /**
+         * 用户
+         */
         USER
     }
 
@@ -82,4 +120,45 @@ public class User implements Serializable {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    /**
+     * 添加权限
+     *
+     * @param permissions
+     */
+    public void addPermit(Permissions permissions) {
+        this.permit |= permissions.getValue();
+    }
+
+    /**
+     * 移除权限
+     *
+     * @param permissions
+     */
+    public void removePermit(Permissions permissions) {
+        if (hasPermit(permissions)) {
+            this.permit ^= permissions.getValue();
+        }
+    }
+
+    /**
+     * 是否存在权限
+     *
+     * @param permissions
+     * @return
+     */
+    public boolean hasPermit(Permissions permissions) {
+        int value = permissions.getValue();
+        return (this.permit & value) == value;
+    }
+
+    /**
+     * 是否是管理员
+     *
+     * @return
+     */
+    public boolean isAdmin() {
+        return this.role == Role.ADMIN;
+    }
+
 }

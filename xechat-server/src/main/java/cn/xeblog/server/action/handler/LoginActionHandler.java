@@ -8,10 +8,12 @@ import cn.xeblog.commons.constants.IpConstants;
 import cn.xeblog.commons.entity.*;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.MessageType;
+import cn.xeblog.commons.enums.Permissions;
 import cn.xeblog.server.action.ChannelAction;
 import cn.xeblog.server.annotation.DoAction;
 import cn.xeblog.server.builder.ResponseBuilder;
 import cn.xeblog.server.cache.UserCache;
+import cn.xeblog.server.config.GlobalConfig;
 import cn.xeblog.server.config.ServerConfig;
 import cn.xeblog.server.constant.CommonConstants;
 import cn.xeblog.server.factory.ObjectFactory;
@@ -89,7 +91,9 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
         String configToken = ServerConfig.getConfig().getToken();
         boolean isAdmin = StrUtil.isNotBlank(configToken) && StrUtil.equals(configToken, body.getToken());
         User user = new User(id, username, body.getStatus(), ip, ipRegion, ctx.channel());
+        user.setUuid(body.getUuid());
         user.setRole(isAdmin ? User.Role.ADMIN : User.Role.USER);
+        user.setPermit(GlobalConfig.USER_PERMIT_CACHE.getOrDefault(body.getUuid(), Permissions.ALL.getValue()));
         UserCache.add(id, user);
 
         ChannelAction.add(ctx.channel());

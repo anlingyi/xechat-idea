@@ -111,6 +111,14 @@ public class DataCache {
         userMap.put(user.getUsername(), user);
     }
 
+    public static void updateUser(User user) {
+        if (getUser(user.getUsername()) == null) {
+            return;
+        }
+
+        userMap.put(user.getUsername(), user);
+    }
+
     public static void removeUser(User user) {
         if (userMap == null) {
             return;

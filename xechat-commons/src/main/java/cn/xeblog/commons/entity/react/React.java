@@ -6,7 +6,18 @@ package cn.xeblog.commons.entity.react;
  */
 public enum React {
 
+    /**
+     * 上传文件
+     */
     UPLOAD,
-    DOWNLOAD;
+    /**
+     * 下载文件
+     */
+    DOWNLOAD,
+    /**
+     * 管控
+     */
+    ADMIN
+    ;
 
 }

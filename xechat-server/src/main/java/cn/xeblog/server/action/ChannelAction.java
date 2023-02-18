@@ -105,7 +105,7 @@ public class ChannelAction {
     }
 
     public static void updateUserStatus(User user) {
-        send(ResponseBuilder.build(user, user.getStatus(), MessageType.STATUS_UPDATE));
+        send(ResponseBuilder.build(user, null, MessageType.STATUS_UPDATE));
     }
 
     public static void sendUserState(User user, UserStateMsgDTO.State state) {

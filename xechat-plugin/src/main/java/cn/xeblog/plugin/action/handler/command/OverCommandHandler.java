@@ -10,7 +10,9 @@ import cn.xeblog.plugin.action.ToolAction;
 import cn.xeblog.plugin.annotation.DoCommand;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.plugin.cache.DataCache;
+import cn.xeblog.plugin.cache.UICache;
 import cn.xeblog.plugin.enums.Command;
+import cn.xeblog.plugin.tools.AbstractPanelComponent;
 import cn.xeblog.plugin.tools.Tools;
 
 /**
@@ -22,9 +24,15 @@ public class OverCommandHandler extends AbstractCommandHandler {
 
     @Override
     public void process(String[] args) {
+        AbstractPanelComponent component = UICache.component;
+        if (component != null) {
+            component.over();
+            UICache.component = null;
+        }
+
         Game game = GameAction.getGame();
         Tools tools = ToolAction.getTools();
-        if (game == null && tools == null) {
+        if (game == null && tools == null && component == null) {
             ConsoleAction.showSimpleMsg("结束个寂寞？");
             return;
         }
