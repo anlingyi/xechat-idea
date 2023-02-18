@@ -58,7 +58,7 @@ public interface IpConstants {
         put("香港特别行政区", "港");
         put("澳门特别行政区", "澳");
         put("台湾省", "台");
-        put("未知", "-");
+        put("未知", "中国");
     }};
 
 }

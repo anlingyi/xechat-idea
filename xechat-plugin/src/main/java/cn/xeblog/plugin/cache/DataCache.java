@@ -20,6 +20,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DataCache {
 
     /**
+     * 用户唯一标识
+     */
+    public static String uuid;
+
+    /**
      * 当前登录的用户名
      */
     public static String username;
@@ -82,6 +87,10 @@ public class DataCache {
      * @return
      */
     public static User getUser(String username) {
+        if (userMap == null) {
+             return null;
+        }
+
         return userMap.get(username);
     }
 
@@ -103,6 +112,10 @@ public class DataCache {
     }
 
     public static void removeUser(User user) {
+        if (userMap == null) {
+            return;
+        }
+
         User origin = userMap.get(user.getUsername());
         if (origin == null) {
             return;
@@ -114,6 +127,10 @@ public class DataCache {
     }
 
     public static int getOnlineUserTotal() {
+        if (userMap == null) {
+            return 0;
+        }
+
         return userMap.size();
     }
 

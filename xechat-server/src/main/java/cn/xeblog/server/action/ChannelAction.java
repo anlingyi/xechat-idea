@@ -28,12 +28,6 @@ public class ChannelAction {
     public static void send(Response resp) {
         GROUP.writeAndFlush(resp);
         if (resp.getType() == MessageType.SYSTEM || resp.getType() == MessageType.USER) {
-            if (resp.getType() == MessageType.USER) {
-                UserMsgDTO body = (UserMsgDTO) resp.getBody();
-                if (body.getMsgType() == UserMsgDTO.MsgType.IMAGE) {
-                    return;
-                }
-            }
             ObjectFactory.getObject(AbstractResponseHistoryService.class).addHistory(resp);
         }
     }

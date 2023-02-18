@@ -22,7 +22,7 @@ public interface ClientConnectConsumer {
      * 客户端连接失败
      */
     default void failed() {
-        GlobalThreadPool.execute(() -> doFailed());
+        GlobalThreadPool.execute(this::doFailed);
     }
 
     void doSucceed(Channel channel);

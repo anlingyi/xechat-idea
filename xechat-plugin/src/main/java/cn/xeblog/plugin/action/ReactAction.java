@@ -1,7 +1,7 @@
 package cn.xeblog.plugin.action;
 
-import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.util.IdUtil;
+import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.entity.react.React;
 import cn.xeblog.commons.entity.react.request.ReactRequest;
 import cn.xeblog.commons.entity.react.result.ReactResult;
@@ -41,13 +41,17 @@ public class ReactAction {
             });
 
     public static <T> void request(Object body, React react, ReactResultConsumer<T> consumer) {
+        request(body, react, 15, consumer);
+    }
+
+    public static <T> void request(Object body, React react, int timeout, ReactResultConsumer<T> consumer) {
         if (body == null) {
             consumer.failed("参数为空！");
             return;
         }
 
-        ConnectionAction connectionAction = DataCache.connectionAction;
-        if (connectionAction == null) {
+        User user = DataCache.getCurrentUser();
+        if (user == null) {
             consumer.failed("请先登录！");
             return;
         }
@@ -56,14 +60,20 @@ public class ReactAction {
             String id = IdUtil.fastSimpleUUID();
             ReactRequest<Object> reactRequest = new ReactRequest<>();
             reactRequest.setId(id);
-            reactRequest.setUid(DataCache.getCurrentUser().getId());
+            reactRequest.setUid(user.getId());
             reactRequest.setBody(body);
             reactRequest.setReact(react);
 
-            Reactor<T> reactor = new Reactor();
+            Reactor<T> reactor = new Reactor(timeout, TimeUnit.SECONDS);
             REACTOR_CACHE.put(id, reactor);
 
-            ConnectionAction reactConnection = new ConnectionAction(connectionAction.getHost(), connectionAction.getPort(), new AbstractChannelInitializer() {
+            ConnectionAction reactConnection = new ConnectionAction();
+            ConnectionAction connectionAction = DataCache.connectionAction;
+            if (connectionAction != null) {
+                reactConnection.setHost(connectionAction.getHost());
+                reactConnection.setPort(connectionAction.getPort());
+            }
+            reactConnection.setChannelInitializer(new AbstractChannelInitializer() {
                 @Override
                 public ChannelHandler addClientHandler() {
                     return new ReactClientHandler();

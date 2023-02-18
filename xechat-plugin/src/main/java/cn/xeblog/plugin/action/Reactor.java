@@ -62,6 +62,8 @@ public class Reactor<T> implements Future<ReactResult<T>> {
     public ReactResult<T> get(long timeout, @NotNull TimeUnit unit) {
         try {
             latch.await(timeout, unit);
+            this.result = new ReactResult<>();
+            this.result.setMsg("请求响应超时！");
             close();
         } catch (InterruptedException e) {
             log.error("获取响应结果异常", e);

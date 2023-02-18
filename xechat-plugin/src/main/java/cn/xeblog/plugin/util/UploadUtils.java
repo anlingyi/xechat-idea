@@ -77,7 +77,7 @@ public class UploadUtils {
         UploadReact uploadReact = new UploadReact();
         uploadReact.setFileType(fileName.substring(fileName.lastIndexOf(".") + 1));
         uploadReact.setBytes(bytes);
-        ReactAction.request(uploadReact, React.UPLOAD, new ReactResultConsumer<UploadReactResult>() {
+        ReactAction.request(uploadReact, React.UPLOAD, 600, new ReactResultConsumer<UploadReactResult>() {
             @Override
             public void doSucceed(UploadReactResult body) {
                 UPLOADING = false;

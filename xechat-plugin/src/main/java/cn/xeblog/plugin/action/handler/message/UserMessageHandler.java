@@ -46,67 +46,7 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
         UserMsgDTO body = response.getBody();
         boolean isImage = body.getMsgType() == UserMsgDTO.MsgType.IMAGE;
         if (isImage) {
-            String fileName = (String) body.getContent();
-            JLabel imgLabel = new JLabel("下载图片");
-            imgLabel.setToolTipText("点击下载图片");
-            imgLabel.setAlignmentY(0.85f);
-            imgLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            imgLabel.setForeground(StyleConstants.getForeground(Style.DEFAULT.get()));
-            imgLabel.addMouseListener(new MouseAdapter() {
-                MouseListener mouseListener = this;
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    imgLabel.setEnabled(false);
-                    imgLabel.setText("图片下载中...");
-                    imgLabel.setToolTipText("图片下载中...");
-
-                    GlobalThreadPool.execute(() -> {
-                        ReactAction.request(new DownloadReact(fileName), React.DOWNLOAD, new ReactResultConsumer<DownloadReactResult>() {
-                            @Override
-                            public void doSucceed(DownloadReactResult body) {
-                                String filePath = IMAGES_DIR + "/" + fileName;
-                                File imageFile = new File(filePath);
-                                if (!imageFile.exists()) {
-                                    FileUtil.mkdir(IMAGES_DIR);
-                                    try (FileOutputStream out = new FileOutputStream(imageFile)) {
-                                        out.write(body.getBytes());
-                                    } catch (Exception exception) {
-                                        exception.printStackTrace();
-                                    }
-                                }
-
-                                imgLabel.removeMouseListener(mouseListener);
-                                imgLabel.addMouseListener(new MouseAdapter() {
-                                    @Override
-                                    public void mouseClicked(MouseEvent e) {
-                                        ApplicationManager.getApplication().invokeLater(() -> {
-                                            OpenFileAction.openFile(filePath, DataCache.project);
-                                        });
-                                    }
-                                });
-
-                                imgLabel.setEnabled(true);
-                                imgLabel.setText("查看图片");
-                                imgLabel.setToolTipText("点击查看图片");
-
-                                ConsoleAction.updateUI();
-                            }
-
-                            @Override
-                            public void doFailed(String msg) {
-                                imgLabel.setEnabled(true);
-                                imgLabel.setText("重新下载");
-                                imgLabel.setToolTipText("点击重新下载");
-                            }
-                        });
-                    });
-                }
-            });
-
-            ConsoleAction.atomicExec(() -> {
-                renderName(response);
-                ConsoleAction.renderImageLabel(imgLabel);
-            });
+            renderImage(response);
         } else {
             ConsoleAction.atomicExec(() -> {
                 renderName(response);
@@ -136,6 +76,89 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
         ConsoleAction.renderText(
                 String.format("[%s][%s] %s (%s)%s：", response.getTime(), shortProvince, user.getUsername(),
                         user.getStatus().getName(), roleDisplay), Style.USER_NAME);
+    }
+
+    private void renderImage(Response<UserMsgDTO> response) {
+        UserMsgDTO body = response.getBody();
+        String fileName = (String) body.getContent();
+        String filePath = IMAGES_DIR + "/" + fileName;
+        boolean existFile = new File(filePath).exists();
+
+        JLabel imgLabel = new JLabel();
+        imgLabel.setAlignmentY(0.85f);
+        imgLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        imgLabel.setForeground(StyleConstants.getForeground(Style.DEFAULT.get()));
+
+        Runnable existFileRunnable = () -> {
+            imgLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    ApplicationManager.getApplication().invokeLater(() -> {
+                        OpenFileAction.openFile(filePath, DataCache.project);
+                    });
+                }
+            });
+            imgLabel.setEnabled(true);
+            imgLabel.setText("查看图片");
+            imgLabel.setToolTipText("点击查看图片");
+            ConsoleAction.updateUI();
+        };
+
+        Runnable notExistFileRunnable = () -> {
+            imgLabel.setEnabled(true);
+            imgLabel.setToolTipText("点击下载图片");
+            imgLabel.setText("下载图片");
+
+            imgLabel.addMouseListener(new MouseAdapter() {
+                MouseListener mouseListener = this;
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    imgLabel.setEnabled(false);
+                    imgLabel.setText("图片下载中...");
+                    imgLabel.setToolTipText("图片下载中...");
+                    ConsoleAction.updateUI();
+
+                    GlobalThreadPool.execute(() -> {
+                        ReactAction.request(new DownloadReact(fileName), React.DOWNLOAD, 300, new ReactResultConsumer<DownloadReactResult>() {
+                            @Override
+                            public void doSucceed(DownloadReactResult body) {
+                                File imageFile = new File(filePath);
+                                if (!imageFile.exists()) {
+                                    FileUtil.mkdir(IMAGES_DIR);
+                                    try (FileOutputStream out = new FileOutputStream(imageFile)) {
+                                        out.write(body.getBytes());
+                                    } catch (Exception exception) {
+                                        exception.printStackTrace();
+                                    }
+                                }
+
+                                imgLabel.removeMouseListener(mouseListener);
+                                existFileRunnable.run();
+                            }
+
+                            @Override
+                            public void doFailed(String msg) {
+                                imgLabel.setEnabled(true);
+                                imgLabel.setText("重新下载");
+                                imgLabel.setToolTipText("点击重新下载");
+                                ConsoleAction.showSimpleMsg("图片下载失败！原因：" + msg);
+                            }
+                        });
+                    });
+                }
+            });
+        };
+
+        if (existFile) {
+            existFileRunnable.run();
+        } else {
+            notExistFileRunnable.run();
+        }
+
+        ConsoleAction.atomicExec(() -> {
+            renderName(response);
+            ConsoleAction.renderImageLabel(imgLabel);
+        });
     }
 
 }

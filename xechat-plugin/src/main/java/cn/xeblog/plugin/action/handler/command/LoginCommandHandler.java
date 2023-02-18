@@ -2,6 +2,7 @@ package cn.xeblog.plugin.action.handler.command;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xeblog.commons.entity.OnlineServer;
@@ -17,6 +18,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 import java.util.List;
 
 /**
@@ -132,6 +135,14 @@ public class LoginCommandHandler extends AbstractCommandHandler {
             conn.setPort(onlineServer.getPort());
         }
 
+        if (StrUtil.isBlank(DataCache.uuid)) {
+            String uuid = getMac();
+            if (StrUtil.isBlank(uuid)) {
+                uuid = IdUtil.fastUUID();
+            }
+            DataCache.uuid = uuid;
+        }
+
         CONNECTING = true;
         DataCache.username = username;
         ConsoleAction.showSimpleMsg("正在连接服务器...");
@@ -154,4 +165,27 @@ public class LoginCommandHandler extends AbstractCommandHandler {
     protected boolean check(String[] args) {
         return true;
     }
+
+    public static String getMac() {
+        try {
+            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+            if (networkInterfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = networkInterfaces.nextElement();
+                byte[] bytes = networkInterface.getHardwareAddress();
+                if (bytes != null) {
+                    StringBuilder sb = new StringBuilder();
+                    for (byte b : bytes) {
+                        sb.append(String.format("%02X", b)).append("-");
+                    }
+                    sb.deleteCharAt(sb.length() - 1);
+                    return sb.toString();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
 }

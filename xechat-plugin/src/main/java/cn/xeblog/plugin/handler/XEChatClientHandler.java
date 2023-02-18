@@ -41,8 +41,15 @@ public class XEChatClientHandler extends SimpleChannelInboundHandler<Response> {
         }
 
         String token = PersistenceService.getData().getToken();
-        MessageAction.send(new LoginDTO(DataCache.username, status, reconnected, IdeaUtils.getPluginVersion(), token),
-                Action.LOGIN);
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setUsername(DataCache.username);
+        loginDTO.setStatus(status);
+        loginDTO.setReconnected(reconnected);
+        loginDTO.setPluginVersion(IdeaUtils.getPluginVersion());
+        loginDTO.setToken(token);
+        loginDTO.setUuid(DataCache.uuid);
+
+        MessageAction.send(loginDTO, Action.LOGIN);
         DataCache.reconnected = false;
     }
 

@@ -78,17 +78,19 @@ public class ConsoleAction implements MainWindowInitializedEventListener {
     }
 
     public static void render(String content, AttributeSet attributeSet) {
-        Document document = console.getDocument();
-        try {
-            document.insertString(document.getLength(), content, attributeSet);
-            if (document.getLength() > 10000) {
-                document.remove(0, 2000);
-                document.insertString(0, "...", Style.DEFAULT.get());
+        atomicExec(() -> {
+            Document document = console.getDocument();
+            try {
+                document.insertString(document.getLength(), content, attributeSet);
+                if (document.getLength() > 10000) {
+                    document.remove(0, 2000);
+                    document.insertString(0, "...", Style.DEFAULT.get());
+                }
+            } catch (BadLocationException e) {
+                e.printStackTrace();
             }
-        } catch (BadLocationException e) {
-            e.printStackTrace();
-        }
-        gotoConsoleLow();
+            gotoConsoleLow();
+        });
     }
 
     public static void renderImageLabel(JLabel label) {
@@ -137,14 +139,16 @@ public class ConsoleAction implements MainWindowInitializedEventListener {
     }
 
     public static void gotoConsoleLow(boolean forced) {
-        if (!forced) {
-            JScrollBar verticalScrollBar = consoleScroll.getVerticalScrollBar();
-            if (verticalScrollBar.getValue() + 20 < verticalScrollBar.getMaximum() - verticalScrollBar.getHeight()) {
-                return;
+        atomicExec(() -> {
+            if (!forced) {
+                JScrollBar verticalScrollBar = consoleScroll.getVerticalScrollBar();
+                if (verticalScrollBar.getValue() + 20 < verticalScrollBar.getMaximum() - verticalScrollBar.getHeight()) {
+                    return;
+                }
             }
-        }
 
-        updateCaretPosition(-1);
+            updateCaretPosition(-1);
+        });
     }
 
     public static void showErrorMsg() {

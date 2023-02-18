@@ -41,6 +41,7 @@ public class XEChatClient {
                     .sync();
             channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
+            e.printStackTrace();
             consumer.failed();
         } finally {
             group.shutdownGracefully();

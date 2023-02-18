@@ -77,6 +77,12 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
             return;
         }
 
+        if (StrUtil.isBlank(body.getUuid())) {
+            ctx.writeAndFlush(ResponseBuilder.system("未获取到UUID，请尝试重新登录！"));
+            ctx.close();
+            return;
+        }
+
         String id = ChannelAction.getId(ctx);
         final String ip = IpUtil.getIpByCtx(ctx);
         final IpRegion ipRegion = IpUtil.getRegionByIp(ip);

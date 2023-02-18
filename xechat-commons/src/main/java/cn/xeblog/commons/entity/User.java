@@ -19,6 +19,10 @@ public class User implements Serializable {
 
     @Getter
     @Setter
+    private String uuid;
+
+    @Getter
+    @Setter
     private String id;
 
     @Getter
