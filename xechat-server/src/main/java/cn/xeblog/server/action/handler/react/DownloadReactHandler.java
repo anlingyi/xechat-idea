@@ -7,7 +7,6 @@ import cn.xeblog.commons.entity.react.request.DownloadReact;
 import cn.xeblog.commons.entity.react.result.DownloadReactResult;
 import cn.xeblog.commons.entity.react.result.ReactResult;
 import cn.xeblog.server.annotation.DoReact;
-import cn.xeblog.server.builder.ResponseBuilder;
 import cn.xeblog.server.config.GlobalConfig;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,10 +27,9 @@ public class DownloadReactHandler extends AbstractReactHandler<DownloadReact, Do
             data.setFileName(body.getFileName());
             data.setBytes(bytes);
             result.setData(data);
-            user.send(ResponseBuilder.react(result));
+            result.setSucceed(true);
         } catch (Exception e) {
             log.error("文件下载出现异常", e);
-            result.setSucceed(false);
             result.setMsg("文件下载失败！");
         }
     }

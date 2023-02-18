@@ -12,7 +12,6 @@ import cn.xeblog.commons.entity.react.result.UploadReactResult;
 import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.server.action.ChannelAction;
 import cn.xeblog.server.annotation.DoReact;
-import cn.xeblog.server.builder.ResponseBuilder;
 import cn.xeblog.server.config.GlobalConfig;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,7 +32,6 @@ public class UploadReactHandler extends AbstractReactHandler<UploadReact, Upload
 
         int len = ArrayUtil.length(body.getBytes());
         if (len > maxSize * 1024) {
-            result.setSucceed(false);
             result.setMsg("发送的文件大小不能超过" + maxSize + "KB!");
         } else {
             String filePath = GlobalConfig.UPLOAD_FILE_PATH;
@@ -47,6 +45,7 @@ public class UploadReactHandler extends AbstractReactHandler<UploadReact, Upload
                     UploadReactResult data = new UploadReactResult();
                     data.setFileName(filename);
                     result.setData(data);
+                    result.setSucceed(true);
 
                     UserMsgDTO dto = new UserMsgDTO();
                     dto.setMsgType(UserMsgDTO.MsgType.IMAGE);
@@ -54,13 +53,10 @@ public class UploadReactHandler extends AbstractReactHandler<UploadReact, Upload
                     ChannelAction.send(user, dto, MessageType.USER);
                 } catch (Exception e) {
                     log.error("文件上传异常", e);
-                    result.setSucceed(false);
                     result.setMsg("文件上传失败！");
                 }
             }
         }
-
-        user.send(ResponseBuilder.react(result));
     }
 
 }

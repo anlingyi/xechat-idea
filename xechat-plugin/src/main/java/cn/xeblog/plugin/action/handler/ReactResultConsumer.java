@@ -6,8 +6,15 @@ package cn.xeblog.plugin.action.handler;
  */
 public interface ReactResultConsumer<T> {
 
-    void succeed(T body);
+    default void succeed(T body) {
+        doSucceed(body);
+    }
 
-    void failed(String msg);
+    default void failed(String msg) {
+        doFailed(msg);
+    }
 
+    void doSucceed(T body);
+
+    void doFailed(String msg);
 }

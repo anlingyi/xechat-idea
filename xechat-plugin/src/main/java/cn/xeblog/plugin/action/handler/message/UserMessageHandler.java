@@ -63,7 +63,7 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
                     GlobalThreadPool.execute(() -> {
                         ReactAction.request(new DownloadReact(fileName), React.DOWNLOAD, new ReactResultConsumer<DownloadReactResult>() {
                             @Override
-                            public void succeed(DownloadReactResult body) {
+                            public void doSucceed(DownloadReactResult body) {
                                 String filePath = IMAGES_DIR + "/" + fileName;
                                 File imageFile = new File(filePath);
                                 if (!imageFile.exists()) {
@@ -93,7 +93,7 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
                             }
 
                             @Override
-                            public void failed(String msg) {
+                            public void doFailed(String msg) {
                                 imgLabel.setEnabled(true);
                                 imgLabel.setText("重新下载");
                                 imgLabel.setToolTipText("点击重新下载");

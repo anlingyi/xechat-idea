@@ -72,33 +72,31 @@ public class ReactAction {
 
             reactConnection.exec(new ClientConnectConsumer() {
                 @Override
-                public void succeed(Channel channel) {
-                    GlobalThreadPool.execute(() -> {
-                        try {
-                            reactor.setChannel(channel);
-                            channel.writeAndFlush(RequestBuilder.build(reactRequest, Action.REACT));
+                public void doSucceed(Channel channel) {
+                    try {
+                        reactor.setChannel(channel);
+                        channel.writeAndFlush(RequestBuilder.build(reactRequest, Action.REACT));
 
-                            ReactResult<T> result = reactor.get();
-                            REACTOR_CACHE.invalidate(id);
-                            if (result == null) {
-                                consumer.failed("请求无响应！");
-                                return;
-                            }
-
-                            if (result.isSucceed()) {
-                                consumer.succeed(result.getData());
-                            } else {
-                                consumer.failed(result.getMsg());
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            consumer.failed("请求失败啦！");
+                        ReactResult<T> result = reactor.get();
+                        REACTOR_CACHE.invalidate(id);
+                        if (result == null) {
+                            consumer.failed("请求无响应！");
+                            return;
                         }
-                    });
+
+                        if (result.isSucceed()) {
+                            consumer.succeed(result.getData());
+                        } else {
+                            consumer.failed(result.getMsg());
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        consumer.failed("请求失败啦！");
+                    }
                 }
 
                 @Override
-                public void failed() {
+                public void doFailed() {
                     consumer.failed("连接服务器失败啦！");
                 }
             });

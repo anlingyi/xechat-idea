@@ -79,13 +79,13 @@ public class UploadUtils {
         uploadReact.setBytes(bytes);
         ReactAction.request(uploadReact, React.UPLOAD, new ReactResultConsumer<UploadReactResult>() {
             @Override
-            public void succeed(UploadReactResult body) {
+            public void doSucceed(UploadReactResult body) {
                 UPLOADING = false;
                 ConsoleAction.showSimpleMsg("图片上传成功！");
             }
 
             @Override
-            public void failed(String msg) {
+            public void doFailed(String msg) {
                 UPLOADING = false;
                 ConsoleAction.showSimpleMsg("图片上传失败！原因：" + msg);
             }

@@ -137,13 +137,13 @@ public class LoginCommandHandler extends AbstractCommandHandler {
         ConsoleAction.showSimpleMsg("正在连接服务器...");
         conn.exec(new ClientConnectConsumer() {
             @Override
-            public void succeed(Channel channel) {
+            public void doSucceed(Channel channel) {
                 CONNECTING = false;
                 DataCache.connectionAction = conn;
             }
 
             @Override
-            public void failed() {
+            public void doFailed() {
                 CONNECTING = false;
                 ConsoleAction.showSimpleMsg("连接服务器失败！");
             }

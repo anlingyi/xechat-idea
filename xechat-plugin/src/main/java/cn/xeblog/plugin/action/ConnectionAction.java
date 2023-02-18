@@ -5,11 +5,9 @@ import cn.xeblog.plugin.client.ClientConnectConsumer;
 import cn.xeblog.plugin.client.XEChatClient;
 import cn.xeblog.plugin.handler.AbstractChannelInitializer;
 import cn.xeblog.plugin.handler.DefaultChannelInitializer;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.function.Consumer;
 
 /**
  * @author anlingyi

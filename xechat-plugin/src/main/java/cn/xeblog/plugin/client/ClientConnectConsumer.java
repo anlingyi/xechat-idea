@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.client;
 
+import cn.hutool.core.thread.GlobalThreadPool;
 import io.netty.channel.Channel;
 
 /**
@@ -13,11 +14,19 @@ public interface ClientConnectConsumer {
      *
      * @param channel
      */
-    void succeed(Channel channel);
+    default void succeed(Channel channel) {
+        GlobalThreadPool.execute(() -> doSucceed(channel));
+    }
 
     /**
      * 客户端连接失败
      */
-    void failed();
+    default void failed() {
+        GlobalThreadPool.execute(() -> doFailed());
+    }
+
+    void doSucceed(Channel channel);
+
+    void doFailed();
 
 }
