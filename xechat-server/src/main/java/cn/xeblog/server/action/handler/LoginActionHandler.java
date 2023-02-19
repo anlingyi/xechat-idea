@@ -104,8 +104,9 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
             user.send(ResponseBuilder.system("重新连接服务器成功！"));
         }
         user.send(ResponseBuilder.system("修身洁行，言必由绳墨。"));
-        List<Response> historyMsgList = ObjectFactory.getObject(AbstractResponseHistoryService.class).getHistory(15);
-        final String loginMsg = StrUtil.format("来鱼咯...欢迎[{}·{}]鱼友进入了鱼塘！",
+
+        List<Response> historyMsgList = ObjectFactory.getObject(AbstractResponseHistoryService.class).getHistory(30);
+        final String loginMsg = StrUtil.format("[{}·{}]进入了鱼塘！",
                 MapUtil.getStr(IpConstants.SHORT_PROVINCE, ipRegion.getProvince(), ipRegion.getCountry()), user.getUsername());
         ChannelAction.send(ResponseBuilder.system(loginMsg));
         if (CollectionUtil.isNotEmpty(historyMsgList)) {

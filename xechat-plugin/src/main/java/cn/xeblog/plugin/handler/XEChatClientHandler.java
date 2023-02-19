@@ -60,7 +60,7 @@ public class XEChatClientHandler extends SimpleChannelInboundHandler<Response> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        ConsoleAction.showSimpleMsg("哎呀~ 网络波动啦！");
+        ConsoleAction.showSimpleMsg("你干嘛~ 哎哟！");
         cause.printStackTrace();
     }
 

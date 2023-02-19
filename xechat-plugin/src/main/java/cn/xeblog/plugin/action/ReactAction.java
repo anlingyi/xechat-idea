@@ -14,6 +14,7 @@ import cn.xeblog.plugin.handler.AbstractChannelInitializer;
 import cn.xeblog.plugin.handler.ReactClientHandler;
 import com.google.common.cache.*;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 
 import java.util.concurrent.TimeUnit;
@@ -27,7 +28,7 @@ public class ReactAction {
     private final static LoadingCache<String, Reactor> REACTOR_CACHE = CacheBuilder.newBuilder()
             .initialCapacity(16)
             .maximumSize(256)
-            .expireAfterAccess(30, TimeUnit.SECONDS)
+            .expireAfterAccess(30, TimeUnit.MINUTES)
             .removalListener((RemovalListener<String, Reactor>) notification -> {
                 if (notification.wasEvicted()) {
                     notification.getValue().setResult(null);
@@ -45,11 +46,6 @@ public class ReactAction {
     }
 
     public static <T> void request(Object body, React react, int timeout, ReactResultConsumer<T> consumer) {
-        if (body == null) {
-            consumer.failed("参数为空！");
-            return;
-        }
-
         User user = DataCache.getCurrentUser();
         if (user == null) {
             consumer.failed("请先登录！");
@@ -85,6 +81,11 @@ public class ReactAction {
                 public void doSucceed(Channel channel) {
                     try {
                         reactor.setChannel(channel);
+                        channel.closeFuture().addListener((ChannelFutureListener) future -> {
+                            if (!future.channel().isActive()) {
+                                reactor.setResult(null);
+                            }
+                        });
                         channel.writeAndFlush(RequestBuilder.build(reactRequest, Action.REACT));
 
                         ReactResult<T> result = reactor.get();

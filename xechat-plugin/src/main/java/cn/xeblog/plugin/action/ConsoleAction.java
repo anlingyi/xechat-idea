@@ -27,13 +27,15 @@ import java.util.Map;
  */
 public class ConsoleAction implements MainWindowInitializedEventListener {
 
+    private static final Object LOCK = new Object();
+
     private static JTextPane console;
 
     private static JPanel panel;
 
     private static JScrollPane consoleScroll;
 
-    private static boolean isNewLine;
+    private static volatile boolean isNewLine;
 
     @Override
     public void afterInit(MainWindow mainWindow) {
@@ -64,13 +66,15 @@ public class ConsoleAction implements MainWindowInitializedEventListener {
     }
 
     public static void renderText(String text, Style style) {
-        if (isNewLine) {
-            ModeContext.getMode().renderTextBefore(text);
-        }
+        atomicExec(() -> {
+            if (isNewLine) {
+                ModeContext.getMode().renderTextBefore(text);
+            }
 
-        render(text, style.get());
+            render(text, style.get());
 
-        isNewLine = text.endsWith("\n");
+            isNewLine = text.endsWith("\n");
+        });
     }
 
     public static void showSimpleMsg(String msg) {
@@ -139,16 +143,14 @@ public class ConsoleAction implements MainWindowInitializedEventListener {
     }
 
     public static void gotoConsoleLow(boolean forced) {
-        atomicExec(() -> {
-            if (!forced) {
-                JScrollBar verticalScrollBar = consoleScroll.getVerticalScrollBar();
-                if (verticalScrollBar.getValue() + 20 < verticalScrollBar.getMaximum() - verticalScrollBar.getHeight()) {
-                    return;
-                }
+        if (!forced) {
+            JScrollBar verticalScrollBar = consoleScroll.getVerticalScrollBar();
+            if (verticalScrollBar.getValue() + 20 < verticalScrollBar.getMaximum() - verticalScrollBar.getHeight()) {
+                return;
             }
+        }
 
-            updateCaretPosition(-1);
-        });
+        updateCaretPosition(-1);
     }
 
     public static void showErrorMsg() {
@@ -222,9 +224,8 @@ public class ConsoleAction implements MainWindowInitializedEventListener {
     }
 
     private static void updateCaretPosition(int position) {
-        int copyPosition = position;
         atomicExec(() -> {
-            int pos = copyPosition;
+            int pos = position;
             if (pos == -1) {
                 pos = console.getDocument().getLength();
             }
@@ -286,7 +287,7 @@ public class ConsoleAction implements MainWindowInitializedEventListener {
     }
 
     public static void atomicExec(Runnable runnable) {
-        synchronized (console) {
+        synchronized (LOCK) {
             runnable.run();
         }
     }

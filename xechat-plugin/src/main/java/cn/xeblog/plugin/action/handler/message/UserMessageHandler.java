@@ -113,6 +113,7 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
                 MouseListener mouseListener = this;
                 @Override
                 public void mouseClicked(MouseEvent e) {
+                    imgLabel.removeMouseListener(mouseListener);
                     imgLabel.setEnabled(false);
                     imgLabel.setText("图片下载中...");
                     imgLabel.setToolTipText("图片下载中...");
@@ -141,6 +142,7 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
                                 imgLabel.setEnabled(true);
                                 imgLabel.setText("重新下载");
                                 imgLabel.setToolTipText("点击重新下载");
+                                imgLabel.addMouseListener(mouseListener);
                                 ConsoleAction.showSimpleMsg("图片下载失败！原因：" + msg);
                             }
                         });

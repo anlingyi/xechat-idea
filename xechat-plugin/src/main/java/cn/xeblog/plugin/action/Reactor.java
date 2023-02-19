@@ -77,7 +77,7 @@ public class Reactor<T> implements Future<ReactResult<T>> {
     }
 
     public void close() {
-        if (channel != null) {
+        if (channel != null && channel.isActive()) {
             channel.close();
         }
     }

@@ -6,6 +6,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xeblog.commons.entity.OnlineServer;
+import cn.xeblog.commons.util.ServerUtils;
 import cn.xeblog.plugin.action.ConnectionAction;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.annotation.DoCommand;
@@ -116,6 +117,11 @@ public class LoginCommandHandler extends AbstractCommandHandler {
         String serverIdStr = ParamsUtils.getValue(args, Config.SERVER.getKey());
         if (StrUtil.isNotBlank(serverIdStr)) {
             List<OnlineServer> onlineServerList = DataCache.serverList;
+            if (CollUtil.isEmpty(onlineServerList)) {
+                onlineServerList = ServerUtils.getServerList();
+                DataCache.serverList = onlineServerList;
+            }
+
             if (CollUtil.isEmpty(onlineServerList)) {
                 ConsoleAction.showSimpleMsg("服务列表为空！");
                 return;
