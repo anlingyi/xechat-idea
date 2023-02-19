@@ -29,7 +29,7 @@ public class ChessDTO extends GameDTO {
     public UI currentUI = UI.CLASSIC;
 
     public enum Option {
-        SURRENDER, UNDO, GAME_OVER, CHECK, DEFAULT
+        SURRENDER, UNDO, UNDO_CONSENT, UNDO_REJECT, GAME_OVER, CHECK, DEFAULT
     }
 
     @Getter

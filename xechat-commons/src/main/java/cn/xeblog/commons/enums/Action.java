@@ -55,5 +55,9 @@ public enum Action {
     /**
      * 查询天气
      */
-    WEATHER;
+    WEATHER,
+    /**
+     * react
+     */
+    REACT;
 }

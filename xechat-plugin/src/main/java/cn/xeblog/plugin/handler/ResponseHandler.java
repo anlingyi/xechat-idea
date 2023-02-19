@@ -1,8 +1,7 @@
 package cn.xeblog.plugin.handler;
 
-import cn.hutool.core.thread.GlobalThreadPool;
 import cn.xeblog.commons.entity.Response;
-import cn.xeblog.commons.entity.UserMsgDTO;
+import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.plugin.factory.MessageHandlerFactory;
 import lombok.AllArgsConstructor;
 
@@ -16,23 +15,11 @@ public class ResponseHandler {
     private Response response;
 
     public void exec() {
-        switch (response.getType()) {
-            case HEARTBEAT:
-                return;
-            case USER:
-                UserMsgDTO userMsgDTO = (UserMsgDTO) response.getBody();
-                if (userMsgDTO.getMsgType() == UserMsgDTO.MsgType.IMAGE) {
-                    break;
-                }
-            case SYSTEM:
-            case HISTORY_MSG:
-            case ONLINE_USERS:
-            case USER_STATE:
-                process();
-                return;
+        if (response.getType() == MessageType.HEARTBEAT) {
+            return;
         }
 
-        GlobalThreadPool.execute(() -> process());
+        process();
     }
 
     private void process() {

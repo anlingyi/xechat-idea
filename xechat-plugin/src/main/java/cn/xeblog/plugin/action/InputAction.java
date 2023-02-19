@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.action;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReUtil;
@@ -138,7 +139,7 @@ public class InputAction implements MainWindowInitializedEventListener {
         Transferable transferable = clipboard.getContents(null);
         try {
             if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-                java.util.List<File> fileList = (java.util.List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
+                List<File> fileList = (List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
                 UploadUtils.uploadImageFile(fileList.get(0));
                 clean();
             } else if (transferable.isDataFlavorSupported(DataFlavor.imageFlavor)) {
@@ -153,7 +154,7 @@ public class InputAction implements MainWindowInitializedEventListener {
 
     private static void atUserAndCommandTips(KeyEvent e) {
         boolean isAt = false;
-        java.util.List<String> dataList = null;
+        List<String> dataList = null;
         String content = contentArea.getText();
         int caretPosition = contentArea.getCaretPosition();
         int atIndex = -1;
@@ -164,11 +165,11 @@ public class InputAction implements MainWindowInitializedEventListener {
                 commandMap.put(command.getCommand(), command.getCommand() + " (" + command.getDesc() + ")");
             }
 
-            String command = content;
+            String command = content.substring(1);
             if (StrUtil.isBlank(command)) {
                 dataList = new ArrayList<>(commandMap.values());
             } else {
-                final java.util.List<String> matchList = new ArrayList<>();
+                final List<String> matchList = new ArrayList<>();
                 commandMap.forEach((k, v) -> {
                     if (k.toLowerCase().contains(command.toLowerCase()) || command.startsWith(k)) {
                         matchList.add(v);
@@ -182,7 +183,7 @@ public class InputAction implements MainWindowInitializedEventListener {
                 String atContent = content.substring(0, caretPosition);
                 atIndex = atContent.lastIndexOf("@");
                 if (atIndex > -1) {
-                    java.util.List<User> onlineUserList = new ArrayList<>(DataCache.userMap.values());
+                    List<User> onlineUserList = new ArrayList<>(DataCache.userMap.values());
                     onlineUserList.sort((u1, u2) -> {
                         int o1 = u1.getRole().ordinal();
                         int o2 = u2.getRole().ordinal();
@@ -198,10 +199,6 @@ public class InputAction implements MainWindowInitializedEventListener {
                     List<String> allUserList = new ArrayList<>();
                     onlineUserList.forEach(user -> allUserList.add(user.getUsername()));
 
-                    if (atIndex + 1 == caretPosition) {
-                        dataList = allUserList;
-                    }
-
                     String name = content.substring(atIndex + 1, caretPosition);
                     if (StrUtil.isNotBlank(name)) {
                         dataList = new ArrayList<>();
@@ -210,6 +207,10 @@ public class InputAction implements MainWindowInitializedEventListener {
                                 dataList.add(user);
                             }
                         }
+                    }
+
+                    if (atIndex + 1 == caretPosition && CollUtil.isEmpty(dataList)) {
+                        dataList = allUserList;
                     }
                 }
             }

@@ -1,6 +1,7 @@
 package cn.xeblog.plugin.game.chess;
 
 import cn.xeblog.commons.entity.game.chess.ChessDTO;
+import cn.xeblog.plugin.util.NotifyUtils;
 import com.intellij.ui.JBColor;
 
 import javax.swing.*;
@@ -22,7 +23,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	private static final long serialVersionUID = 1353029267562430095L;
 
 	/** 游戏逻辑 */
-	private GameLogic gameLogic;
+	GameLogic gameLogic;
 
 	ChineseChess chineseChess;
 
@@ -86,12 +87,6 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	/** 电脑棋子颜色 */
 	int computerChess = -1;
 
-	/** 红棋悔棋数 */
-	int redUndoNum = 1;
-
-	/** 黑棋悔棋数 */
-	int blackUndoNum = 1;
-
 	/** 全部下棋信息 */
 	List<Map<String, String>> listChess = new ArrayList<>();
 
@@ -102,7 +97,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	JButton jb_undo,jb_surrender;
 
 	/** 标签控件 */
-	JLabel jlb_blackUndoText,jlb_blackStateText,jlb_redUndoText,jlb_redStateText;
+	JLabel jlb_blackStateText,jlb_redStateText;
 
 	/** 是否第一次点击 */
 	boolean isFirstClick = true;
@@ -117,7 +112,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	 * show -> 是否显示（0-不显示，1-显示）<br>
 	 * color -> 颜色（0-黑，255-红）<br>
 	 */
-	Map<String, Integer> mapPointerChess = new HashMap<String, Integer>();
+	Map<String, Integer> mapPointerChess = new HashMap<>();
 
 	/**
 	 * 移动指示器<br>
@@ -126,7 +121,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	 * show -> 是否显示（0-不显示，1-显示）<br>
 	 * color -> 颜色（-1-默认，0-黑，255-红）<br>
 	 */
-	Map<String, Integer> mapPointerMove = new HashMap<String, Integer>();
+	Map<String, Integer> mapPointerMove = new HashMap<>();
 
 	/** 判断游戏是否结束（true-结束，false-未结束） */
 	boolean isGameOver = false;
@@ -141,7 +136,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 		//设置象棋面板
 		this.setLayout(null);
 		// 设置棋盘宽高
-		this.setPreferredSize(new Dimension(320,450));
+		this.setPreferredSize(new Dimension(320,360));
 		this.panelChess = new JLayeredPane();
 		this.panelChess.setBounds(0,0,320,358);
 		this.panelChess.setLayout(null);
@@ -564,10 +559,29 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	 */
 	private void option()
 	{
+
+		//红棋提示
+		JPanel groupBoxRed = new JPanel();
+		groupBoxRed.setLayout(null);
+		groupBoxRed.setBackground(this.getBackground());
+		groupBoxRed.setBounds((int) (this.panelChess.getWidth() * 0.01), this.panelChess.getHeight(),90,50);
+		groupBoxRed.setBorder(BorderFactory.createTitledBorder("红棋"));
+		this.add(groupBoxRed);
+		JLabel jlb_whiteState = new JLabel("状态：");
+		jlb_whiteState.setFont(new Font("微软雅黑",Font.PLAIN,12));
+		jlb_whiteState.setBounds(10,16,40,30);
+		groupBoxRed.add(jlb_whiteState);
+		this.jlb_redStateText = new JLabel("未开始");
+		this.jlb_redStateText.setFont(new Font("微软雅黑",Font.BOLD,12));
+		this.jlb_redStateText.setForeground(JBColor.darkGray);
+		this.jlb_redStateText.setBounds(44,16,40,30);
+		groupBoxRed.add(this.jlb_redStateText);
+
+
 		//按钮
 		this.jb_undo = new JButton("悔棋");
 		this.jb_undo.setFont(new Font("微软雅黑",Font.PLAIN,12));
-		this.jb_undo.setBounds((int) (this.panelChess.getWidth() * 0.01), (int) (this.panelChess.getHeight()),60,30);
+		this.jb_undo.setBounds((int) (this.panelChess.getWidth() * 0.3), this.panelChess.getHeight() + 15,60,30);
 		this.jb_undo.setActionCommand("undo");
 		this.jb_undo.addActionListener(this);
 		this.jb_undo.setEnabled(false);
@@ -575,65 +589,31 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 
 		this.jb_surrender = new JButton("投降");
 		this.jb_surrender.setFont(new Font("微软雅黑",Font.PLAIN,12));
-		this.jb_surrender.setBounds((int) (this.panelChess.getWidth() * 0.01), (this.panelChess.getHeight() + 50),60,30);
+		this.jb_surrender.setBounds((int) (this.panelChess.getWidth() * 0.5), this.panelChess.getHeight() + 15,60,30);
 		this.jb_surrender.setActionCommand("surrender");
 		this.jb_surrender.addActionListener(this);
 		this.jb_surrender.setEnabled(false);
 		this.add(this.jb_surrender);
 
-		//红棋提示
-		JPanel groupBoxRed = new JPanel();
-		groupBoxRed.setLayout(null);
-		groupBoxRed.setBackground(this.getBackground());
-		groupBoxRed.setBounds((int) (this.panelChess.getWidth() * 0.25), this.panelChess.getHeight(),100,80);
-		groupBoxRed.setBorder(BorderFactory.createTitledBorder("红棋"));
-		this.add(groupBoxRed);
-		JLabel jlb_whiteUndo = new JLabel("悔棋：");
-		jlb_whiteUndo.setFont(new Font("微软雅黑",Font.PLAIN,12));
-		jlb_whiteUndo.setBounds(10,16,40,30);
-		groupBoxRed.add(jlb_whiteUndo);
-		this.jlb_redUndoText = new JLabel("剩"+Integer.toString(this.redUndoNum)+"次");
-		this.jlb_redUndoText.setFont(new Font("微软雅黑",Font.BOLD,12));
-		this.jlb_redUndoText.setForeground(JBColor.darkGray);
-		this.jlb_redUndoText.setBounds(44,16,50,30);
-		groupBoxRed.add(this.jlb_redUndoText);
-		JLabel jlb_whiteState = new JLabel("状态：");
-		jlb_whiteState.setFont(new Font("微软雅黑",Font.PLAIN,12));
-		jlb_whiteState.setBounds(10,44,40,30);
-		groupBoxRed.add(jlb_whiteState);
-		this.jlb_redStateText = new JLabel("未开始");
-		this.jlb_redStateText.setFont(new Font("微软雅黑",Font.BOLD,12));
-		this.jlb_redStateText.setForeground(JBColor.darkGray);
-		this.jlb_redStateText.setBounds(44,44,50,30);
-		groupBoxRed.add(this.jlb_redStateText);
 
 		//黑棋提示
 		JPanel groupBoxBlack = new JPanel();
 		groupBoxBlack.setLayout(null);
 		groupBoxBlack.setBackground(this.getBackground());
-		groupBoxBlack.setBounds((int) (this.panelChess.getWidth() * 0.65), (int) (this.panelChess.getHeight()),100,80);
+		groupBoxBlack.setBounds((int) (this.panelChess.getWidth() * 0.7), this.panelChess.getHeight(),90,50);
 		groupBoxBlack.setBorder(BorderFactory.createTitledBorder("黑棋"));
 		this.add(groupBoxBlack);
-		JLabel jlb_blackUndo = new JLabel("悔棋：");
-		jlb_blackUndo.setFont(new Font("微软雅黑",Font.PLAIN,12));
-		jlb_blackUndo.setBounds(10,16,40,30);
-		groupBoxBlack.add(jlb_blackUndo);
-		this.jlb_blackUndoText = new JLabel("剩"+Integer.toString(this.blackUndoNum)+"次");
-		this.jlb_blackUndoText.setFont(new Font("微软雅黑",Font.BOLD,12));
-		this.jlb_blackUndoText.setForeground(JBColor.darkGray);
-		this.jlb_blackUndoText.setBounds(44,16,50,30);
-		groupBoxBlack.add(this.jlb_blackUndoText);
 		JLabel jlb_blackState = new JLabel("状态：");
 		jlb_blackState.setFont(new Font("微软雅黑",Font.PLAIN,12));
-		jlb_blackState.setBounds(10,44,40,30);
+		jlb_blackState.setBounds(10,16,40,30);
 		groupBoxBlack.add(jlb_blackState);
 		this.jlb_blackStateText = new JLabel("未开始");
 		this.jlb_blackStateText.setFont(new Font("微软雅黑",Font.BOLD,12));
 		this.jlb_blackStateText.setForeground(JBColor.darkGray);
-		this.jlb_blackStateText.setBounds(44,44,50,30);
+		this.jlb_blackStateText.setBounds(44,16,40,30);
 		groupBoxBlack.add(this.jlb_blackStateText);
 	}
-	
+
 	/**
 	 * 功能：绘图<br>
 	 */
@@ -740,7 +720,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 			}
 		}
 	}
-	
+
 	/**
 	 * 功能：开始新游戏<br>
 	 */
@@ -759,25 +739,72 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 		if(chineseChess.chessCache.currentBattle == ChessCache.Battle.PVC && chineseChess.chessCache.currentPlayer == ChessCache.Player.BLACK){
 			this.gameLogic.computerPlay();
 		}
-
 	}
 
 	boolean canRepent() {
-		boolean blackUndo = chineseChess.chessCache.currentPlayer == ChessCache.Player.BLACK && this.blackUndoNum == 0;
-		boolean redUndo = chineseChess.chessCache.currentPlayer == ChessCache.Player.RED && this.redUndoNum == 0;
-		// 同时悔2步棋，所以要得到倒数第二步棋信息
-		boolean twoStepsFlag = this.listChess.size() < 2;
-		return !blackUndo && !redUndo && !twoStepsFlag;
+		// 前三步不允许悔棋
+		boolean hasNotStarted = this.listChess.size() <= 6;
+		return !hasNotStarted;
 	}
-	
+
 	/**
 	 * 功能：悔棋<br>
 	 */
-	public void undo()
+	public void undoConfirm()
 	{
-		this.gameLogic.undo();
+		if(this.isGameOver){return;}
+
+		if(chineseChess.chessCache.currentMode == ChessCache.Mode.ONLINE){
+			jb_undo.setEnabled(false);
+			jb_surrender.setEnabled(false);
+
+			chineseChess.send(new Point(ChessDTO.Option.UNDO));
+
+			// 通知自己
+			NotifyUtils.info("提示", "等待对方同意");
+		}else{
+			gameLogic.undo();
+		}
 	}
-	
+
+	/**
+	 * 功能：对方悔棋<br>
+	 */
+	public void otherSideUndo() {
+		Map<String, String> mapLast = listChess.get(listChess.size() - 1);
+		int index = Integer.parseInt(mapLast.get("index"));
+		int color = Integer.parseInt(mapLast.get("color"));
+		int oldRow = Integer.parseInt(mapLast.get("oldRow"));
+		int oldColumn = Integer.parseInt(mapLast.get("oldColumn"));
+
+		gameLogic.undoStep();
+
+		//重新生成落子指示器
+		mapPointerChess.put("row",oldRow);
+		mapPointerChess.put("column",oldColumn);
+		mapPointerChess.put("color",color);
+		mapPointerChess.put("show",1);
+		isFirstClick = false;
+		firstClickChess = mapChess[index];
+
+		//清除移动路线图
+		listMove.clear();
+
+		if(color == ChessCache.Player.RED.getValue())
+		{
+			jlb_redStateText.setText("悔棋中");
+			jlb_blackStateText.setText(gameLogic.getPrompt(this.listChess.get(this.listChess.size() - 1)));
+		}
+		else
+		{
+			jlb_redStateText.setText(gameLogic.getPrompt(this.listChess.get(this.listChess.size() - 1)));
+			jlb_blackStateText.setText("悔棋中");
+		}
+
+		//刷新
+		repaint();
+	}
+
 	/**
 	 * 功能：投降<br>
 	 */
@@ -787,7 +814,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 			this.chineseChess.send(new Point(ChessDTO.Option.SURRENDER));
 		}
 
-		JOptionPane.showMessageDialog(null,"OK，loser!");
+		JOptionPane.showMessageDialog(this,"OK，loser!");
 
 		gameOver();
 	}
@@ -801,7 +828,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 		if (chineseChess.chessCache.currentMode == ChessCache.Mode.ONLINE) {
 			JButton jb_out = chineseChess.gameOverButton();
 			jb_out.setFont(new Font("微软雅黑",Font.PLAIN,12));
-			jb_out.setBounds((int) (panelChess.getWidth() * 0.01), (int) (panelChess.getHeight() + 20),70,40);
+			jb_out.setBounds((int) (panelChess.getWidth() * 0.38), (int) (panelChess.getHeight() + 10),70,40);
 			this.remove(jb_undo);
 			this.remove(jb_surrender);
 			this.add(jb_out);
@@ -815,7 +842,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	{
 		new ChineseChess().init();
 	}
-	
+
 	/**
 	 * 功能：功能监听<br>
 	 */
@@ -823,10 +850,10 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	public void actionPerformed(ActionEvent e)
 	{
 		String command = e.getActionCommand();
-		
+
 		if("undo".equals(command))
 		{
-			this.undo();
+			this.undoConfirm();
 		}
 		else if("surrender".equals(command))
 		{
@@ -837,7 +864,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 			this.exit();
 		}
 	}
-	
+
 	/**
 	 * 功能：鼠标点击事件监听<br>
 	 */
@@ -873,6 +900,12 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	@Override
 	public void mouseDragged(MouseEvent e){}
 
+	/**
+	 * 设置对方的棋子
+	 * @author Hao.
+	 * @date 2022/9/22 8:42
+	 * @return
+	 */
 	void setChess(Point point) {
 		int index = point.index;
 		Map<String, String> chess = this.mapChess[index];
@@ -891,18 +924,18 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 		if(Integer.parseInt(chess.get("color")) == ChessCache.Player.BLACK.getValue())
 		{
 			this.jlb_redStateText.setText("思考中");
-			this.jlb_blackStateText.setText("已下完");
+			this.jlb_blackStateText.setText(gameLogic.getOtherSidePrompt(chess));
 		}
 		else
 		{
-			this.jlb_redStateText.setText("已下完");
+			this.jlb_redStateText.setText(gameLogic.getOtherSidePrompt(chess));
 			this.jlb_blackStateText.setText("思考中");
 		}
 
 		this.repaint();
 
 		//判断是否将军
-		this.gameLogic.check();
+		this.gameLogic.check(Integer.parseInt(chess.get("color")));
 	}
 
 	void otherSideCheck()
@@ -911,62 +944,6 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 		this.jlb_blackStateText.setText("将军");
 		this.listMove.clear();
 		this.repaint();
-	}
-
-	/**
-	 * 功能：对方悔棋<br>
-	 */
-	public void otherSideUndo()
-	{
-		Map<String, String> mapLast = this.listChess.get(this.listChess.size() - 2);
-		int index = Integer.parseInt(mapLast.get("index"));
-		int color = Integer.parseInt(mapLast.get("color"));
-		int oldRow = Integer.parseInt(mapLast.get("oldRow"));
-		int oldColumn = Integer.parseInt(mapLast.get("oldColumn"));
-
-		//判断玩家是否可以悔棋
-		if(chineseChess.chessCache.currentPlayer == ChessCache.Player.BLACK)		//玩家执黑
-		{
-			this.redUndoNum--;
-		}
-		else
-		{
-			this.blackUndoNum--;
-		}
-		gameLogic.undoStep();	//电脑悔一步
-		gameLogic.undoStep();	//玩家悔一步
-
-		//重新生成落子指示器
-		this.mapPointerChess.put("row",oldRow);
-		this.mapPointerChess.put("column",oldColumn);
-		this.mapPointerChess.put("color",color);
-		this.mapPointerChess.put("show",1);
-		this.isFirstClick = false;
-		this.firstClickChess = this.mapChess[index];
-
-		//更新提示
-		this.jlb_blackUndoText.setText("剩"+blackUndoNum+"次");
-		this.jlb_redUndoText.setText("剩"+redUndoNum+"次");
-		if(color == ChessCache.Player.RED.getValue())
-		{
-			this.jlb_redStateText.setText("悔棋中");
-			this.jlb_blackStateText.setText("已下完");
-		}
-		else
-		{
-			this.jlb_redStateText.setText("已下完");
-			this.jlb_blackStateText.setText("悔棋中");
-		}
-
-		//刷新
-		this.repaint();
-
-		if (this.canRepent()) {
-			return;
-		}
-
-		this.jb_undo.setEnabled(false);
-
 	}
 
 	/**
@@ -1001,7 +978,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	public JButton exitButton() {
 		JButton exit = new JButton("离开");
 		exit.setFont(new Font("微软雅黑",Font.PLAIN,12));
-		exit.setBounds((int) (panelChess.getWidth() * 0.01), (this.panelChess.getHeight() + 50),60,30);
+		exit.setBounds((int) (panelChess.getWidth() * 0.5), this.panelChess.getHeight() + 15,60,30);
 		exit.setActionCommand("exit");
 		exit.addActionListener(this);
 		exit.setEnabled(true);

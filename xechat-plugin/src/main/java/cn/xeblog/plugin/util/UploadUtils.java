@@ -2,19 +2,15 @@ package cn.xeblog.plugin.util;
 
 import cn.hutool.core.img.ImgUtil;
 import cn.hutool.core.io.FileTypeUtil;
-import cn.hutool.core.thread.GlobalThreadPool;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.IdUtil;
-import cn.xeblog.commons.entity.UserMsgDTO;
-import cn.xeblog.commons.enums.Action;
-import cn.xeblog.commons.util.ThreadUtils;
+import cn.xeblog.commons.entity.react.React;
+import cn.xeblog.commons.entity.react.request.UploadReact;
+import cn.xeblog.commons.entity.react.result.UploadReactResult;
 import cn.xeblog.plugin.action.ConsoleAction;
-import cn.xeblog.plugin.action.MessageAction;
-import cn.xeblog.plugin.cache.DataCache;
+import cn.xeblog.plugin.action.ReactAction;
+import cn.xeblog.plugin.action.handler.ReactResultConsumer;
 import com.intellij.util.ui.ImageUtil;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
 import org.apache.commons.io.IOUtils;
 
 import javax.imageio.ImageIO;
@@ -36,8 +32,6 @@ public class UploadUtils {
             ImgUtil.IMAGE_TYPE_BMP,
             ImgUtil.IMAGE_TYPE_PNG
     };
-
-    private static final int MAX_SIZE = 2 << 20;
 
     public static void uploadImageFile(File file) {
         try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file))) {
@@ -77,37 +71,23 @@ public class UploadUtils {
             return;
         }
 
-        if (bytes.length > MAX_SIZE) {
-            ConsoleAction.showSimpleMsg("图片大小不能超过" + (MAX_SIZE >> 20) + "MB！");
-            return;
-        }
-
         UPLOADING = true;
         ConsoleAction.showSimpleMsg("图片上传中...");
 
-        GlobalThreadPool.execute(() -> {
-            try {
-                int offset = 16 << 10;
-                int index = 0;
-                int len = bytes.length;
-                while (index < len && DataCache.isOnline) {
-                    ByteBuf byteBuf = Unpooled.directBuffer();
-                    byteBuf.writeInt(fileName.length());
-                    byteBuf.writeBytes(fileName.getBytes());
-                    byteBuf.writeInt(len);
-                    byteBuf.writeInt(index);
-                    byteBuf.writeBytes(bytes, index, Math.min(offset, len - index));
-                    byte[] sendBytes = ByteBufUtil.getBytes(byteBuf);
-                    byteBuf.release();
-                    index += offset;
-                    MessageAction.send(new UserMsgDTO(sendBytes, UserMsgDTO.MsgType.IMAGE), Action.CHAT);
-                    ThreadUtils.spinMoment(120);
-                }
-            } catch (Exception e) {
-                ConsoleAction.showSimpleMsg("图片上传失败！");
-                e.printStackTrace();
-            } finally {
+        UploadReact uploadReact = new UploadReact();
+        uploadReact.setFileType(fileName.substring(fileName.lastIndexOf(".") + 1));
+        uploadReact.setBytes(bytes);
+        ReactAction.request(uploadReact, React.UPLOAD, 600, new ReactResultConsumer<UploadReactResult>() {
+            @Override
+            public void doSucceed(UploadReactResult body) {
                 UPLOADING = false;
+                ConsoleAction.showSimpleMsg("图片上传成功！");
+            }
+
+            @Override
+            public void doFailed(String msg) {
+                UPLOADING = false;
+                ConsoleAction.showSimpleMsg("图片上传失败！原因：" + msg);
             }
         });
     }
