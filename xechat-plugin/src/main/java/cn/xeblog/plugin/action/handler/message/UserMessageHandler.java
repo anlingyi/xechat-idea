@@ -56,7 +56,7 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
                 if (notified) {
                     style = Style.LIGHT;
                     if (!user.getUsername().equals(DataCache.username)) {
-                        NotifyUtils.info(user.getUsername(), msg);
+                        NotifyUtils.info(user.getUsername(), msg, true);
                     }
                 }
                 ConsoleAction.renderText(msg + "\n", style);
