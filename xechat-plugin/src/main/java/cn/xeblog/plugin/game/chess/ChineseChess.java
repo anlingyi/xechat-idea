@@ -213,7 +213,10 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
         JLabel jlb_fightType = new JLabel("对战方式：");
         jlb_fightType.setFont(new Font("微软雅黑",Font.PLAIN,12));
         startPanel.add(jlb_fightType);
-        jcb_fightType = new ComboBox<>(Arrays.stream(ChessCache.Battle.values()).map(ChessCache.Battle::getName).toArray(String[]::new));
+        jcb_fightType = new ComboBox<>(Arrays.stream(ChessCache.Battle.values())
+                .filter(battle -> battle != ChessCache.Battle.PVC)
+                .map(ChessCache.Battle::getName)
+                .toArray(String[]::new));
         jcb_fightType.setFont(new Font("微软雅黑",Font.PLAIN,12));
         startPanel.add(jcb_fightType);
         //谁先手
