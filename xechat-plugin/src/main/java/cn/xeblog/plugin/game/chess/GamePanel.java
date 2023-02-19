@@ -711,13 +711,13 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 		// TODO 摸鱼简化版：画可移动线路图
 		if(this.listMove.size() > 0) {
 			g2D.setColor(JBColor.BLUE);
-			for (Map<String, Integer> map : this.listMove) {
+			new ArrayList<>(this.listMove).forEach(map -> {
 				int row = map.get("row");
 				int column = map.get("column");
 				g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);    //消除画图锯齿
 				g2D.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_DEFAULT);        //追求速度或质量
 				g2D.fillArc(this.gridsLeftX + column * this.gridSize - 6, this.gridsTopY + row * this.gridSize - 4, 10, 10, 0, 360);
-			}
+			});
 		}
 	}
 
