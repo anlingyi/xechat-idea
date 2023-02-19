@@ -80,18 +80,39 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
 
     @Override
     public void handle(ChessDTO body) {
+        gamePanel.jb_undo.setEnabled(false);
         if (status > -1) {
             if (body.getOption().equals(ChessDTO.Option.UNDO)) {
+                int i = JOptionPane.showConfirmDialog(gamePanel, "对方请求悔棋，是否同意？", "提示", JOptionPane.YES_NO_OPTION);
+                if (i != 0){
+                    // 拒绝悔棋，需发送拒绝通知
+                    send(new Point(ChessDTO.Option.UNDO_REJECT));
+                    return;
+                }
+                chessCache.put = true;
+                // 同意悔棋
+                send(new Point(ChessDTO.Option.UNDO_CONSENT));
                 gamePanel.otherSideUndo();
                 return;
             }
+            if (body.getOption().equals(ChessDTO.Option.UNDO_REJECT)) {
+                gamePanel.jb_surrender.setEnabled(true);
+                JOptionPane.showMessageDialog(gamePanel, "对方拒绝悔棋！");
+                return;
+            }
+            if (body.getOption().equals(ChessDTO.Option.UNDO_CONSENT)) {
+                gamePanel.jb_surrender.setEnabled(true);
+                chessCache.put = false;
+                gamePanel.gameLogic.undo();
+                return;
+            }
             if (body.getOption().equals(ChessDTO.Option.SURRENDER)) {
-                JOptionPane.showMessageDialog(null, "对方投降了！");
+                JOptionPane.showMessageDialog(gamePanel, "对方投降了！");
                 gamePanel.gameOver();
                 return;
             }
             if (body.getOption().equals(ChessDTO.Option.GAME_OVER)) {
-                JOptionPane.showMessageDialog(null, "胜败乃兵家常事，少侠请重新来过！");
+                JOptionPane.showMessageDialog(gamePanel, "胜败乃兵家常事，少侠请重新来过！");
                 gamePanel.gameOver();
                 return;
             }
@@ -122,10 +143,6 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
             }
         }
 
-        if (gamePanel.canRepent()) {
-            this.gamePanel.jb_undo.setEnabled(true);
-        }
-
         chessCache.put = false;
     }
 
@@ -150,7 +167,7 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
 
         mainPanel.removeAll();
         mainPanel.setLayout(new BorderLayout());
-        mainPanel.setMinimumSize(new Dimension(320,450));
+        mainPanel.setMinimumSize(new Dimension(320,360));
 
         this.gamePanel = new GamePanel(this);
 
@@ -159,10 +176,6 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
 
         if(mode == ChessCache.Mode.OFFLINE){
             chessCache.put = false;
-            gamePanel.redUndoNum = 999;
-            gamePanel.blackUndoNum = 999;
-            this.gamePanel.jlb_blackUndoText.setText("剩"+gamePanel.blackUndoNum+"次");
-            this.gamePanel.jlb_redUndoText.setText("剩"+gamePanel.redUndoNum+"次");
             gamePanel.remove(gamePanel.jb_surrender);
             gamePanel.add(gamePanel.exitButton());
         }
@@ -232,18 +245,9 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
         //棋子信息对调
         body.setX(9 - body.getX());
         body.setY(8 - body.getY());
-
-        if (body.getType() == ChessCache.Player.BLACK.getValue()) {
-            this.gamePanel.jlb_redStateText.setText("思考中");
-            this.gamePanel.jlb_blackStateText.setText("已下完");
-        } else {
-            this.gamePanel.jlb_redStateText.setText("已下完");
-            this.gamePanel.jlb_blackStateText.setText("思考中");
-        }
     }
 
     public JButton gameOverButton() {
-        //棋子信息对调
         return getGameOverButton();
     }
 
