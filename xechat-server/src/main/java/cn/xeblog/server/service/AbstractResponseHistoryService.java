@@ -1,5 +1,6 @@
 package cn.xeblog.server.service;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.xeblog.commons.entity.Response;
 import cn.xeblog.commons.entity.User;
 
@@ -26,8 +27,7 @@ public abstract class AbstractResponseHistoryService {
         resp.setType(origin.getType());
         User user = origin.getUser();
         if (user != null) {
-            User newUser = new User(user.getId(), user.getUsername(), user.getStatus(), user.getIp(), user.getRegion(), null);
-            newUser.setRole(user.getRole());
+            User newUser = BeanUtil.copyProperties(user, User.class, "channel");
             resp.setUser(newUser);
         }
         return resp;

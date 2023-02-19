@@ -28,12 +28,6 @@ public class ChannelAction {
     public static void send(Response resp) {
         GROUP.writeAndFlush(resp);
         if (resp.getType() == MessageType.SYSTEM || resp.getType() == MessageType.USER) {
-            if (resp.getType() == MessageType.USER) {
-                UserMsgDTO body = (UserMsgDTO) resp.getBody();
-                if (body.getMsgType() == UserMsgDTO.MsgType.IMAGE) {
-                    return;
-                }
-            }
             ObjectFactory.getObject(AbstractResponseHistoryService.class).addHistory(resp);
         }
     }
@@ -51,7 +45,7 @@ public class ChannelAction {
     }
 
     public static String getId(ChannelHandlerContext ctx) {
-        return ctx.channel().id().asShortText();
+        return ctx.channel().id().asLongText();
     }
 
     public static User getUser(ChannelHandlerContext ctx) {
@@ -111,7 +105,7 @@ public class ChannelAction {
     }
 
     public static void updateUserStatus(User user) {
-        send(ResponseBuilder.build(user, user.getStatus(), MessageType.STATUS_UPDATE));
+        send(ResponseBuilder.build(user, null, MessageType.STATUS_UPDATE));
     }
 
     public static void sendUserState(User user, UserStateMsgDTO.State state) {

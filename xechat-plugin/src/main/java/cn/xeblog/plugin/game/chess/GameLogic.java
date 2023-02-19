@@ -2,6 +2,7 @@ package cn.xeblog.plugin.game.chess;
 
 
 import cn.xeblog.commons.entity.game.chess.ChessDTO;
+import cn.xeblog.plugin.util.NotifyUtils;
 
 import javax.swing.*;
 import java.awt.event.MouseEvent;
@@ -68,36 +69,121 @@ public class GameLogic {
 	/**
 	 * 功能：将军提示<br>
 	 */
-	boolean check()
-	{
-		boolean flag = false;
-		//全体循环，不知道将哪头的军
+	boolean check(int color) {
 		for(int i=0;i<this.gamePanel.mapChess.length;i++) {
 			this.getMoveRoute(this.gamePanel.mapChess[i]);
 			for(int j=0;j<this.gamePanel.listMove.size();j++) {
+
 				Map<String, Integer> map = this.gamePanel.listMove.get(j);
 				int index = this.gamePanel.chessBoradState[map.get("row")][map.get("column")];
-				if(index != -1 && "king".equals(this.gamePanel.mapChess[index].get("type"))) {
-					if(gamePanel.chineseChess.chessCache.currentPlayer == ChessCache.Player.BLACK){
-						this.gamePanel.jlb_redStateText.setText("将军");
-						this.gamePanel.jlb_blackStateText.setText("将军");
-					}else{
-						this.gamePanel.jlb_redStateText.setText("将军");
-						this.gamePanel.jlb_blackStateText.setText("将军");
-					}
-					flag = true;
-					break;
+				if(index == -1){
+					continue;
 				}
-			}
-			if(flag){
+
+				Map<String, String> beEatenChess = this.gamePanel.mapChess[index];
+				if (!"king".equals(beEatenChess.get("type"))) {
+					continue;
+				}
+
+				if (gamePanel.chineseChess.chessCache.currentMode == ChessCache.Mode.ONLINE) {
+
+					// 走完后，自己被将军
+					if (Integer.parseInt(beEatenChess.get("color")) == color) {
+						NotifyUtils.info("提示", "不能送将！");
+						this.undo();
+						return true;
+					}
+
+					// 将军
+
+					// 这次将军是否意味着绝杀
+					if(lore(Integer.parseInt(beEatenChess.get("color")))) {
+						NotifyUtils.info("提示", "绝杀！");
+						beEatenChess.put("dead", "T");
+						break;
+					}
+
+					if(gamePanel.chineseChess.chessCache.currentPlayer.getValue() != color){
+						NotifyUtils.info("提示", "将军！");
+					}
+				} else {
+					NotifyUtils.info("提示", "将军！");
+				}
 				break;
 			}
 		}
 		this.gamePanel.listMove.clear();
 		this.gamePanel.repaint();
-		return flag;
+		return false;
 	}
-	
+
+	/**
+	 * 刀下留将
+	 * @param color 被将军的一方
+	 * @author Hao.
+	 * @date 2022/9/23 9:39
+	 */
+	private boolean  lore(int color) {
+		// 老将能否获救
+		for(int a=0;a<this.gamePanel.mapChess.length;a++) {
+			// 用我方的棋子来模拟
+			if(Integer.parseInt(this.gamePanel.mapChess[a].get("color")) != color) {
+				continue;
+			}
+			for(int row = 0; row<GamePanel.GRID_ROWS; row++) {
+				for(int column = 0; column<GamePanel.GRID_COLUMNS; column++) {
+					if(!this.isAbleToMove(this.gamePanel.mapChess[a], row, column)) {
+						continue;
+					}
+					this.moveTo(this.gamePanel.mapChess[a], row, column);
+					// 移动后，校验是否被绝杀
+					if (!checkLore(color)) {
+						// 逃出生天
+						this.undoStep();
+						return false;
+					}
+					// 这一步是死局呀。。。 赶紧换个路线
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * 老将必须死！
+	 * @param color 被将军的一方
+	 * @author Hao.
+	 * @date 2022/9/23 9:39
+	 */
+	boolean checkLore(int color) {
+		// 哦~ 你走完了，那好，我又来将军了
+		for(int i=0;i<this.gamePanel.mapChess.length;i++) {
+			this.getMoveRoute(this.gamePanel.mapChess[i]);
+			for(int j=0;j<this.gamePanel.listMove.size();j++) {
+
+				Map<String, Integer> map = this.gamePanel.listMove.get(j);
+				int index = this.gamePanel.chessBoradState[map.get("row")][map.get("column")];
+				if(index == -1){
+					continue;
+				}
+
+				Map<String, String> beEatenChess = this.gamePanel.mapChess[index];
+				if (!"king".equals(beEatenChess.get("type"))) {
+					continue;
+				}
+
+				// 老将逃不掉了
+				if (Integer.parseInt(beEatenChess.get("color")) == color) {
+					this.undoStep();
+					return true;
+				}
+			}
+		}
+		this.gamePanel.listMove.clear();
+		this.gamePanel.repaint();
+		return false;
+	}
+
 	/**
 	 * 功能：判断棋子是否可以放到目标位置<br>
 	 * 参数：_mapChess -> 棋子<br>
@@ -318,7 +404,7 @@ public class GameLogic {
 	 */
 	private void addList(Map<String, String> _mapChess)
 	{
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		map.put("index",_mapChess.get("index"));
 		map.put("color",_mapChess.get("color"));
 		map.put("type",_mapChess.get("type"));
@@ -386,31 +472,32 @@ public class GameLogic {
 	/**
 	 * 功能：悔棋<br>
 	 */
-	public void undo()
-	{
-		if(this.gamePanel.isGameOver){return;}
+	public void undo() {
 
-		Map<String, String> mapLast = this.gamePanel.listChess.get(this.gamePanel.listChess.size() - 2);
+		// 悔几步
+		int i = 1;
+
+		if (gamePanel.chineseChess.chessCache.currentBattle == ChessCache.Battle.PVC) {
+			// 人机多悔一步
+			i++;
+		}
+
+		Map<String, String> mapLast = this.gamePanel.listChess.get(this.gamePanel.listChess.size() - i);
 		int index = Integer.parseInt(mapLast.get("index"));
 		int color = Integer.parseInt(mapLast.get("color"));
 		int oldRow = Integer.parseInt(mapLast.get("oldRow"));
 		int oldColumn = Integer.parseInt(mapLast.get("oldColumn"));
 
 		if (gamePanel.chineseChess.chessCache.currentMode == ChessCache.Mode.OFFLINE) {
-			gamePanel.blackUndoNum--;
-			gamePanel.redUndoNum--;
-		}else{
-			if(gamePanel.chineseChess.chessCache.currentPlayer == ChessCache.Player.BLACK){
-				gamePanel.blackUndoNum--;
-			} else {
-				gamePanel.redUndoNum--;
-			}
+			this.gamePanel.jb_undo.setEnabled(false);
 		}
 
+		this.undoStep();
 
-		// 后退两步
-		this.undoStep();
-		this.undoStep();
+		if (gamePanel.chineseChess.chessCache.currentBattle == ChessCache.Battle.PVC) {
+			// 人机多悔一步
+			this.undoStep();
+		}
 
 		//重新生成落子指示器
 		this.gamePanel.mapPointerChess.put("row",oldRow);
@@ -422,31 +509,20 @@ public class GameLogic {
 		
 		//显示移动路线图
 		this.getMoveRoute(this.gamePanel.firstClickChess);
-		
-		//更新提示
-		this.gamePanel.jlb_blackUndoText.setText("剩"+gamePanel.blackUndoNum+"次");
-		this.gamePanel.jlb_redUndoText.setText("剩"+gamePanel.redUndoNum+"次");
+
 		if(color == ChessCache.Player.RED.getValue())
 		{
 			this.gamePanel.jlb_redStateText.setText("悔棋中");
-			this.gamePanel.jlb_blackStateText.setText("已下完");
+			this.gamePanel.jlb_blackStateText.setText(getOtherSidePrompt(this.gamePanel.listChess.get(this.gamePanel.listChess.size() - 1)));
 		}
 		else
 		{
-			this.gamePanel.jlb_redStateText.setText("已下完");
+			this.gamePanel.jlb_redStateText.setText(getOtherSidePrompt(this.gamePanel.listChess.get(this.gamePanel.listChess.size() - 1)));
 			this.gamePanel.jlb_blackStateText.setText("悔棋中");
-		}
-
-		if(gamePanel.chineseChess.chessCache.currentMode == ChessCache.Mode.ONLINE){
-			this.gamePanel.chineseChess.send(new Point(ChessDTO.Option.UNDO));
 		}
 
 		//刷新
 		this.gamePanel.repaint();
-
-		if (!gamePanel.canRepent()) {
-			this.gamePanel.jb_undo.setEnabled(false);
-		}
 	}
 
 	/**
@@ -962,11 +1038,11 @@ public class GameLogic {
 			{
 				if(this.gamePanel.computerChess == ChessCache.Player.BLACK.getValue())
 				{
-					JOptionPane.showMessageDialog(null,"电脑有点蠢，不要太得意哦~");
+					JOptionPane.showMessageDialog(gamePanel,"电脑有点蠢，不要太得意哦~");
 				}
 				else
 				{
-					JOptionPane.showMessageDialog(null,"我去，你怎么连电脑都输啊！","提示", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(gamePanel,"我去，你怎么连电脑都输啊！","提示", JOptionPane.ERROR_MESSAGE);
 				}
 				return true;
 			}
@@ -974,11 +1050,11 @@ public class GameLogic {
 			{
 				if(this.gamePanel.computerChess == ChessCache.Player.BLACK.getValue())
 				{
-					JOptionPane.showMessageDialog(null,"我去，你怎么连电脑都输啊！","提示", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(gamePanel,"我去，你怎么连电脑都输啊！","提示", JOptionPane.ERROR_MESSAGE);
 				}
 				else
 				{
-					JOptionPane.showMessageDialog(null,"电脑有点蠢，不要太得意哦~");
+					JOptionPane.showMessageDialog(gamePanel,"电脑有点蠢，不要太得意哦~");
 				}
 				return true;
 			}
@@ -988,9 +1064,9 @@ public class GameLogic {
 			if("T".equals(this.gamePanel.mapChess[4].get("dead")))	//黑将被吃
 			{
 				if(gamePanel.chineseChess.chessCache.currentPlayer == ChessCache.Player.BLACK){
-					JOptionPane.showMessageDialog(null, "胜败乃兵家常事，少侠请重新来过！");
+					JOptionPane.showMessageDialog(gamePanel, "胜败乃兵家常事，少侠请重新来过！");
 				}else{
-					JOptionPane.showMessageDialog(null,"汝之秀，吾不能及也！");
+					JOptionPane.showMessageDialog(gamePanel,"汝之秀，吾不能及也！");
 				}
 				if(gamePanel.chineseChess.chessCache.currentMode == ChessCache.Mode.ONLINE){
 					this.gamePanel.chineseChess.send(new Point(ChessDTO.Option.GAME_OVER));
@@ -1001,9 +1077,9 @@ public class GameLogic {
 			if("T".equals(this.gamePanel.mapChess[27].get("dead")))	//红帅被吃
 			{
 				if(gamePanel.chineseChess.chessCache.currentPlayer == ChessCache.Player.BLACK){
-					JOptionPane.showMessageDialog(null,"汝之秀，吾不能及也！");
+					JOptionPane.showMessageDialog(gamePanel,"汝之秀，吾不能及也！");
 				}else{
-					JOptionPane.showMessageDialog(null, "胜败乃兵家常事，少侠请重新来过！");
+					JOptionPane.showMessageDialog(gamePanel, "胜败乃兵家常事，少侠请重新来过！");
 				}
 				if(gamePanel.chineseChess.chessCache.currentMode == ChessCache.Mode.ONLINE){
 					this.gamePanel.chineseChess.send(new Point(ChessDTO.Option.GAME_OVER));
@@ -1082,11 +1158,12 @@ public class GameLogic {
 						if(Integer.parseInt(gamePanel.firstClickChess.get("color")) == ChessCache.Player.BLACK.getValue())
 						{
 							this.gamePanel.jlb_redStateText.setText("思考中");
-							this.gamePanel.jlb_blackStateText.setText("已下完");
+
+							this.gamePanel.jlb_blackStateText.setText(getPrompt(this.gamePanel.firstClickChess));
 						}
 						else
 						{
-							this.gamePanel.jlb_redStateText.setText("已下完");
+							this.gamePanel.jlb_redStateText.setText(getPrompt(this.gamePanel.firstClickChess));
 							this.gamePanel.jlb_blackStateText.setText("思考中");
 						}
 
@@ -1161,9 +1238,9 @@ public class GameLogic {
 							this.gamePanel.mapPointerChess.put("show", 1);
 							if (Integer.parseInt(gamePanel.firstClickChess.get("color")) == ChessCache.Player.BLACK.getValue()) {
 								this.gamePanel.jlb_redStateText.setText("思考中");
-								this.gamePanel.jlb_blackStateText.setText("已下完");
+								this.gamePanel.jlb_blackStateText.setText(getPrompt(this.gamePanel.firstClickChess));
 							} else {
-								this.gamePanel.jlb_redStateText.setText("已下完");
+								this.gamePanel.jlb_redStateText.setText(getPrompt(this.gamePanel.firstClickChess));
 								this.gamePanel.jlb_blackStateText.setText("思考中");
 							}
 
@@ -1181,16 +1258,19 @@ public class GameLogic {
 	}
 
 	private void processMoveData(int row, int column) {
-		//判断是否将军
-		boolean check = this.check();
+		if (this.check(gamePanel.chineseChess.chessCache.currentPlayer.getValue())) {
+			return;
+		}
+
+		if (gamePanel.canRepent()) {
+			this.gamePanel.jb_undo.setEnabled(true);
+		}else{
+			this.gamePanel.jb_undo.setEnabled(false);
+		}
 
 		if(gamePanel.chineseChess.chessCache.currentMode == ChessCache.Mode.ONLINE){
 			gamePanel.chineseChess.chessCache.put = true;
-
-			this.gamePanel.jb_undo.setEnabled(false);
-
-			ChessDTO.Option option = check ? ChessDTO.Option.CHECK : ChessDTO.Option.DEFAULT;
-			this.gamePanel.chineseChess.send(new Point(row, column, gamePanel.chineseChess.chessCache.currentPlayer.getValue(), Integer.parseInt(gamePanel.firstClickChess.get("index")) , option));
+			this.gamePanel.chineseChess.send(new Point(row, column, gamePanel.chineseChess.chessCache.currentPlayer.getValue(), Integer.parseInt(gamePanel.firstClickChess.get("index"))));
 
 			//判断游戏是否结束
 			if(this.gameOver()){
@@ -1200,10 +1280,6 @@ public class GameLogic {
 				this.gamePanel.jlb_redStateText.setText("已结束");
 			}
 		}else{
-			if (gamePanel.canRepent()) {
-				this.gamePanel.jb_undo.setEnabled(true);
-			}
-
 			if (this.gamePanel.isGameOver) {
 				return;
 			}
@@ -1227,10 +1303,10 @@ public class GameLogic {
 	private void computerRun() {
 		this.computerPlay();
 		if (this.gamePanel.computerChess == ChessCache.Player.BLACK.getValue()) {
-			this.gamePanel.jlb_blackStateText.setText("已下完");
+			this.gamePanel.jlb_blackStateText.setText(getPrompt(this.gamePanel.firstClickChess));
 			this.gamePanel.jlb_redStateText.setText("思考中");
 		} else {
-			this.gamePanel.jlb_redStateText.setText("已下完");
+			this.gamePanel.jlb_redStateText.setText(getPrompt(this.gamePanel.firstClickChess));
 			this.gamePanel.jlb_blackStateText.setText("思考中");
 		}
 	}
@@ -1244,7 +1320,7 @@ public class GameLogic {
 		int column;
 		int index = -1;
 
-		if(gamePanel.chineseChess.chessCache.put || this.gamePanel.isGameOver){return;}
+		if(this.gamePanel.isGameOver){return;}
 		
 		//得到行列位置
 		if(e.getSource() == this.gamePanel.labelChessBorad)		//在棋盘上移动
@@ -1313,6 +1389,76 @@ public class GameLogic {
 			}
 		}
 		
+	}
+
+	String getPrompt(Map<String, String> mapChess){
+		if (gamePanel.chineseChess.chessCache.currentMode == ChessCache.Mode.OFFLINE) {
+			return "已下完";
+		}
+
+		// 棋子名称
+		String one = mapChess.get("name").split("")[1];
+
+		Integer newRow = 9 - Integer.parseInt(mapChess.get("newRow"));
+		int newColumn = 8 - Integer.parseInt(mapChess.get("newColumn"));
+
+		Integer oldRow = 9 - Integer.parseInt(mapChess.get("oldRow"));
+		int oldColumn = 8 - Integer.parseInt(mapChess.get("oldColumn"));
+
+		// 行不变：平 否则：进/退 （下方： 负=进）
+		int num = oldRow - newRow;
+
+		// 老列号
+		int two = oldColumn + 1;
+
+		// 有意思
+		String three = num == 0 ? "平" : num > 0 ? "退" : "进";
+
+		// 有东西
+		int four = num == 0 ? newColumn + 1 : (oldColumn - newColumn == 0) ? Math.abs(num) : newColumn + 1;
+
+		// 下面从左往右 1-9
+		// 下面从下到上 1-10
+
+		// 上面从右往左 1-9
+		// 上面从上到下 1-10
+		String title = one + two + three + four;
+		return title;
+	}
+
+	String getOtherSidePrompt(Map<String, String> mapChess){
+		if (gamePanel.chineseChess.chessCache.currentMode == ChessCache.Mode.OFFLINE) {
+			return "已下完";
+		}
+
+		// 棋子名称
+		String one = mapChess.get("name").split("")[1];
+
+		Integer newRow = Integer.parseInt(mapChess.get("newRow"));
+		int newColumn = Integer.parseInt(mapChess.get("newColumn"));
+
+		Integer oldRow = Integer.parseInt(mapChess.get("oldRow"));
+		int oldColumn = Integer.parseInt(mapChess.get("oldColumn"));
+
+		// 行不变：平 否则：进/退 （下方： 负=进）
+		int num = oldRow - newRow;
+
+		// 老列号
+		int two = oldColumn + 1;
+
+		// 有意思
+		String three = num == 0 ? "平" : num > 0 ? "退" : "进";
+
+		// 有东西
+		int four = num == 0 ? newColumn + 1 : (oldColumn - newColumn == 0) ? Math.abs(num) : newColumn + 1;
+
+		// 下面从左往右 1-9
+		// 下面从下到上 1-10
+
+		// 上面从右往左 1-9
+		// 上面从上到下 1-10
+		String title = one + two + three + four;
+		return title;
 	}
 	
 }

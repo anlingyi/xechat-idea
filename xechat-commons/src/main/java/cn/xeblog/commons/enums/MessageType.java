@@ -50,5 +50,9 @@ public enum MessageType {
     /**
      * 心跳消息
      */
-    HEARTBEAT;
+    HEARTBEAT,
+    /**
+     * react
+     */
+    REACT;
 }

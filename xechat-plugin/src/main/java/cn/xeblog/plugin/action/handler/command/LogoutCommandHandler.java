@@ -26,7 +26,7 @@ public class LogoutCommandHandler extends AbstractCommandHandler {
         }
 
         ConsoleAction.showSimpleMsg("正在退出中...");
-        DataCache.ctx.close();
+        DataCache.channel.close();
     }
 
 }

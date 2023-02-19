@@ -8,10 +8,12 @@ import cn.xeblog.commons.constants.IpConstants;
 import cn.xeblog.commons.entity.*;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.MessageType;
+import cn.xeblog.commons.enums.Permissions;
 import cn.xeblog.server.action.ChannelAction;
 import cn.xeblog.server.annotation.DoAction;
 import cn.xeblog.server.builder.ResponseBuilder;
 import cn.xeblog.server.cache.UserCache;
+import cn.xeblog.server.config.GlobalConfig;
 import cn.xeblog.server.config.ServerConfig;
 import cn.xeblog.server.constant.CommonConstants;
 import cn.xeblog.server.factory.ObjectFactory;
@@ -77,15 +79,24 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
             return;
         }
 
+        if (StrUtil.isBlank(body.getUuid())) {
+            ctx.writeAndFlush(ResponseBuilder.system("未获取到UUID，请尝试重新登录！"));
+            ctx.close();
+            return;
+        }
+
         String id = ChannelAction.getId(ctx);
         final String ip = IpUtil.getIpByCtx(ctx);
         final IpRegion ipRegion = IpUtil.getRegionByIp(ip);
         String configToken = ServerConfig.getConfig().getToken();
         boolean isAdmin = StrUtil.isNotBlank(configToken) && StrUtil.equals(configToken, body.getToken());
         User user = new User(id, username, body.getStatus(), ip, ipRegion, ctx.channel());
+        user.setUuid(body.getUuid());
         user.setRole(isAdmin ? User.Role.ADMIN : User.Role.USER);
+        user.setPermit(GlobalConfig.USER_PERMIT_CACHE.getOrDefault(body.getUuid(), Permissions.ALL.getValue()));
         UserCache.add(id, user);
 
+        ChannelAction.add(ctx.channel());
         ChannelAction.sendOnlineUsers(user);
         ChannelAction.sendUserState(user, UserStateMsgDTO.State.ONLINE);
 
@@ -93,8 +104,9 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
             user.send(ResponseBuilder.system("重新连接服务器成功！"));
         }
         user.send(ResponseBuilder.system("修身洁行，言必由绳墨。"));
-        List<Response> historyMsgList = ObjectFactory.getObject(AbstractResponseHistoryService.class).getHistory(15);
-        final String loginMsg = StrUtil.format("来鱼咯...欢迎[{}·{}]鱼友进入了鱼塘！",
+
+        List<Response> historyMsgList = ObjectFactory.getObject(AbstractResponseHistoryService.class).getHistory(30);
+        final String loginMsg = StrUtil.format("[{}·{}]进入了鱼塘！",
                 MapUtil.getStr(IpConstants.SHORT_PROVINCE, ipRegion.getProvince(), ipRegion.getCountry()), user.getUsername());
         ChannelAction.send(ResponseBuilder.system(loginMsg));
         if (CollectionUtil.isNotEmpty(historyMsgList)) {

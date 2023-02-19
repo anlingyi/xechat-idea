@@ -2,19 +2,25 @@ package cn.xeblog.plugin.action.handler.command;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xeblog.commons.entity.OnlineServer;
+import cn.xeblog.commons.util.ServerUtils;
 import cn.xeblog.plugin.action.ConnectionAction;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.annotation.DoCommand;
 import cn.xeblog.plugin.cache.DataCache;
+import cn.xeblog.plugin.client.ClientConnectConsumer;
 import cn.xeblog.plugin.enums.Command;
 import cn.xeblog.commons.util.ParamsUtils;
+import io.netty.channel.Channel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 import java.util.List;
 
 /**
@@ -112,6 +118,11 @@ public class LoginCommandHandler extends AbstractCommandHandler {
         if (StrUtil.isNotBlank(serverIdStr)) {
             List<OnlineServer> onlineServerList = DataCache.serverList;
             if (CollUtil.isEmpty(onlineServerList)) {
+                onlineServerList = ServerUtils.getServerList();
+                DataCache.serverList = onlineServerList;
+            }
+
+            if (CollUtil.isEmpty(onlineServerList)) {
                 ConsoleAction.showSimpleMsg("服务列表为空！");
                 return;
             }
@@ -130,13 +141,28 @@ public class LoginCommandHandler extends AbstractCommandHandler {
             conn.setPort(onlineServer.getPort());
         }
 
+        if (StrUtil.isBlank(DataCache.uuid)) {
+            String uuid = getMac();
+            if (StrUtil.isBlank(uuid)) {
+                uuid = IdUtil.fastUUID();
+            }
+            DataCache.uuid = uuid;
+        }
+
         CONNECTING = true;
         DataCache.username = username;
         ConsoleAction.showSimpleMsg("正在连接服务器...");
-        conn.exec((flag) -> {
-            CONNECTING = false;
-            if (flag) {
+        conn.exec(new ClientConnectConsumer() {
+            @Override
+            public void doSucceed(Channel channel) {
+                CONNECTING = false;
                 DataCache.connectionAction = conn;
+            }
+
+            @Override
+            public void doFailed() {
+                CONNECTING = false;
+                ConsoleAction.showSimpleMsg("连接服务器失败！");
             }
         });
     }
@@ -145,4 +171,27 @@ public class LoginCommandHandler extends AbstractCommandHandler {
     protected boolean check(String[] args) {
         return true;
     }
+
+    public static String getMac() {
+        try {
+            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+            if (networkInterfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = networkInterfaces.nextElement();
+                byte[] bytes = networkInterface.getHardwareAddress();
+                if (bytes != null) {
+                    StringBuilder sb = new StringBuilder();
+                    for (byte b : bytes) {
+                        sb.append(String.format("%02X", b)).append("-");
+                    }
+                    sb.deleteCharAt(sb.length() - 1);
+                    return sb.toString();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
 }

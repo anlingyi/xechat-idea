@@ -1,6 +1,6 @@
 # XEChat-Idea
 
-> Version 1.6.4-beta
+> Version 1.6.5-beta
 
 > 基于Netty的IDEA即时聊天插件：让你能够在IDEA里实现聊天、下棋、斗地主！(理论上支持JetBrains全系列开发工具🙂)
 
@@ -50,7 +50,7 @@
 
 [了解更多...](https://xeblog.cn/?tag=xechat-idea)
 
-![](https://oss.xeblog.cn/prod/2f78edccf9c947d5827c3be0e8887b94.png)
+![](https://oss.xeblog.cn/prod/6382599251dc467380c3b1c1eff6bfa5.png)
 
 ![](https://oss.xeblog.cn/prod/87397d4da728467e912450f94e41b2ef.jpg)
 
@@ -234,7 +234,7 @@ http://plugins.xeblog.cn
 version: '3'
 services:
   xechat:
-    image: anlingyi/xechat-server:{Version}
+    image: anlingyi/xechat-server:1.6.5-beta
     container_name: xechat-server
     restart: always
     ports:

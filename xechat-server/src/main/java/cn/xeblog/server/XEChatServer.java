@@ -14,6 +14,7 @@ import cn.xeblog.server.util.IpUtil;
 import cn.xeblog.server.util.SensitiveWordUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -71,10 +72,16 @@ public class XEChatServer {
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
 
         try {
-            ChannelFuture channelFuture = serverBootstrap.bind().sync();
+            ChannelFuture channelFuture = serverBootstrap.bind()
+                    .addListener((ChannelFutureListener) future -> {
+                        if (future.channel().isActive()) {
+                            log.info("XEChatServer Started Successfully!");
+                        }
+                    })
+                    .sync();
             channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
-            log.error("error:", e);
+            log.error("ERROR:", e);
         } finally {
             workGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();

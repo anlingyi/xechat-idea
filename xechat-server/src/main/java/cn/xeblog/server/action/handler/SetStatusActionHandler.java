@@ -18,7 +18,7 @@ public class SetStatusActionHandler extends AbstractActionHandler<UserStatus> {
     @Override
     protected void process(User user, UserStatus body) {
         user.setStatus(body);
-        ChannelAction.send(ResponseBuilder.build(user, body, MessageType.STATUS_UPDATE));
+        ChannelAction.updateUserStatus(user);
     }
 
 }

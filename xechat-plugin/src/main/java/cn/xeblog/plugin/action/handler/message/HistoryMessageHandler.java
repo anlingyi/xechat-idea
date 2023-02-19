@@ -19,14 +19,14 @@ public class HistoryMessageHandler extends AbstractMessageHandler<HistoryMsgDTO>
 
     @Override
     protected void process(Response<HistoryMsgDTO> response) {
-        ConsoleAction.showSimpleMsg("正在加载历史消息...");
         List<Response> msgList = response.getBody().getMsgList();
-        if (CollectionUtil.isEmpty(msgList)) {
-            return;
+        if (CollectionUtil.isNotEmpty(msgList)) {
+            ConsoleAction.atomicExec(() -> {
+                ConsoleAction.showSimpleMsg("正在加载历史消息...");
+                msgList.forEach(msg -> MessageHandlerFactory.INSTANCE.produce(msg.getType()).handle(msg));
+                ConsoleAction.showSimpleMsg("------以上是历史消息------");
+            });
         }
-
-        msgList.forEach(msg -> MessageHandlerFactory.INSTANCE.produce(msg.getType()).handle(msg));
-        ConsoleAction.showSimpleMsg("------以上是历史消息------");
     }
 
 }

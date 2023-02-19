@@ -23,7 +23,7 @@ public class XEChatClientHandler extends SimpleChannelInboundHandler<Response> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        DataCache.ctx = ctx;
+        DataCache.channel = ctx.channel();
         DataCache.isOnline = true;
 
         boolean reconnected = DataCache.reconnected;
@@ -41,8 +41,15 @@ public class XEChatClientHandler extends SimpleChannelInboundHandler<Response> {
         }
 
         String token = PersistenceService.getData().getToken();
-        MessageAction.send(new LoginDTO(DataCache.username, status, reconnected, IdeaUtils.getPluginVersion(), token),
-                Action.LOGIN);
+        LoginDTO loginDTO = new LoginDTO();
+        loginDTO.setUsername(DataCache.username);
+        loginDTO.setStatus(status);
+        loginDTO.setReconnected(reconnected);
+        loginDTO.setPluginVersion(IdeaUtils.getPluginVersion());
+        loginDTO.setToken(token);
+        loginDTO.setUuid(DataCache.uuid);
+
+        MessageAction.send(loginDTO, Action.LOGIN);
         DataCache.reconnected = false;
     }
 
@@ -53,7 +60,7 @@ public class XEChatClientHandler extends SimpleChannelInboundHandler<Response> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        ConsoleAction.showSimpleMsg("哎呀~ 网络波动啦！");
+        ConsoleAction.showSimpleMsg("你干嘛~ 哎哟！");
         cause.printStackTrace();
     }
 
@@ -64,6 +71,7 @@ public class XEChatClientHandler extends SimpleChannelInboundHandler<Response> {
         if (!GameAction.isOfflineGame()) {
             GameAction.over();
         }
+
         ConsoleAction.showSimpleMsg("已断开连接！");
         ConsoleAction.setConsoleTitle("控制台");
 

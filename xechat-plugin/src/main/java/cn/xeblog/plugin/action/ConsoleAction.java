@@ -27,13 +27,15 @@ import java.util.Map;
  */
 public class ConsoleAction implements MainWindowInitializedEventListener {
 
+    private static final Object LOCK = new Object();
+
     private static JTextPane console;
 
     private static JPanel panel;
 
     private static JScrollPane consoleScroll;
 
-    private static boolean isNewLine;
+    private static volatile boolean isNewLine;
 
     @Override
     public void afterInit(MainWindow mainWindow) {
@@ -64,13 +66,15 @@ public class ConsoleAction implements MainWindowInitializedEventListener {
     }
 
     public static void renderText(String text, Style style) {
-        if (isNewLine) {
-            ModeContext.getMode().renderTextBefore(text);
-        }
+        atomicExec(() -> {
+            if (isNewLine) {
+                ModeContext.getMode().renderTextBefore(text);
+            }
 
-        render(text, style.get());
+            render(text, style.get());
 
-        isNewLine = text.endsWith("\n");
+            isNewLine = text.endsWith("\n");
+        });
     }
 
     public static void showSimpleMsg(String msg) {
@@ -78,17 +82,19 @@ public class ConsoleAction implements MainWindowInitializedEventListener {
     }
 
     public static void render(String content, AttributeSet attributeSet) {
-        Document document = console.getDocument();
-        try {
-            document.insertString(document.getLength(), content, attributeSet);
-            if (document.getLength() > 10000) {
-                document.remove(0, 2000);
-                document.insertString(0, "...", Style.DEFAULT.get());
+        atomicExec(() -> {
+            Document document = console.getDocument();
+            try {
+                document.insertString(document.getLength(), content, attributeSet);
+                if (document.getLength() > 10000) {
+                    document.remove(0, 2000);
+                    document.insertString(0, "...", Style.DEFAULT.get());
+                }
+            } catch (BadLocationException e) {
+                e.printStackTrace();
             }
-        } catch (BadLocationException e) {
-            e.printStackTrace();
-        }
-        gotoConsoleLow();
+            gotoConsoleLow();
+        });
     }
 
     public static void renderImageLabel(JLabel label) {
@@ -218,9 +224,8 @@ public class ConsoleAction implements MainWindowInitializedEventListener {
     }
 
     private static void updateCaretPosition(int position) {
-        int copyPosition = position;
         atomicExec(() -> {
-            int pos = copyPosition;
+            int pos = position;
             if (pos == -1) {
                 pos = console.getDocument().getLength();
             }
@@ -282,7 +287,7 @@ public class ConsoleAction implements MainWindowInitializedEventListener {
     }
 
     public static void atomicExec(Runnable runnable) {
-        synchronized (console) {
+        synchronized (LOCK) {
             runnable.run();
         }
     }

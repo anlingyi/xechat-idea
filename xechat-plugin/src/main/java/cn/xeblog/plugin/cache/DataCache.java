@@ -7,7 +7,7 @@ import cn.xeblog.commons.enums.UserStatus;
 import cn.xeblog.plugin.action.ConnectionAction;
 import cn.xeblog.plugin.tools.read.ReadConfig;
 import com.intellij.openapi.project.Project;
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.Channel;
 
 import java.util.List;
 import java.util.Map;
@@ -20,6 +20,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DataCache {
 
     /**
+     * 用户唯一标识
+     */
+    public static String uuid;
+
+    /**
      * 当前登录的用户名
      */
     public static String username;
@@ -30,9 +35,9 @@ public class DataCache {
     public static boolean isOnline;
 
     /**
-     * 通道处理上下文
+     * 通道
      */
-    public static ChannelHandlerContext ctx;
+    public static Channel channel;
 
     /**
      * 当前在线用户缓存，key -> username
@@ -82,6 +87,10 @@ public class DataCache {
      * @return
      */
     public static User getUser(String username) {
+        if (userMap == null) {
+             return null;
+        }
+
         return userMap.get(username);
     }
 
@@ -102,7 +111,19 @@ public class DataCache {
         userMap.put(user.getUsername(), user);
     }
 
+    public static void updateUser(User user) {
+        if (getUser(user.getUsername()) == null) {
+            return;
+        }
+
+        userMap.put(user.getUsername(), user);
+    }
+
     public static void removeUser(User user) {
+        if (userMap == null) {
+            return;
+        }
+
         User origin = userMap.get(user.getUsername());
         if (origin == null) {
             return;
@@ -114,6 +135,10 @@ public class DataCache {
     }
 
     public static int getOnlineUserTotal() {
+        if (userMap == null) {
+            return 0;
+        }
+
         return userMap.size();
     }
 
