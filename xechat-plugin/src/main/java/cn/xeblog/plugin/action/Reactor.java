@@ -24,6 +24,8 @@ public class Reactor<T> implements Future<ReactResult<T>> {
 
     private Channel channel;
 
+    private boolean completed;
+
     public Reactor() {
         this(15, TimeUnit.SECONDS);
     }
@@ -71,6 +73,11 @@ public class Reactor<T> implements Future<ReactResult<T>> {
     }
 
     protected void setResult(ReactResult<T> result) {
+        if (completed) {
+            return;
+        }
+
+        this.completed = true;
         this.result = result;
         latch.countDown();
         close();
