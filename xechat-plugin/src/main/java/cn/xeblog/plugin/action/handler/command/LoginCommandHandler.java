@@ -175,7 +175,7 @@ public class LoginCommandHandler extends AbstractCommandHandler {
     public static String getMac() {
         try {
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
-            if (networkInterfaces.hasMoreElements()) {
+            while (networkInterfaces.hasMoreElements()) {
                 NetworkInterface networkInterface = networkInterfaces.nextElement();
                 byte[] bytes = networkInterface.getHardwareAddress();
                 if (bytes != null) {
