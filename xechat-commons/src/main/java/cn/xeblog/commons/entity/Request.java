@@ -33,6 +33,11 @@ public class Request<T> implements Serializable {
 
     private Protocol protocol;
 
+    public Request(T body, Action action) {
+        this.body = body;
+        this.action = action;
+    }
+
     public void setAction(Action action) {
         this.action = action;
     }
