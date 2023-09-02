@@ -57,7 +57,11 @@ public class LoginDTO implements Serializable {
     }
 
     public void setStatus(String status) {
-        this.status = UserStatus.valueOf(status);
+        try {
+            this.status = UserStatus.valueOf(status);
+        } catch (Exception e) {
+            this.status = UserStatus.FISHING;
+        }
     }
 
     public void setPlatform(Platform platform) {
@@ -65,7 +69,11 @@ public class LoginDTO implements Serializable {
     }
 
     public void setPlatform(String platform) {
-        this.platform = Platform.valueOf(platform);
+        try {
+            this.platform = Platform.valueOf(platform);
+        } catch (Exception e) {
+            this.platform = Platform.IDEA;
+        }
     }
 
 }

@@ -38,6 +38,9 @@ public class Request<T> implements Serializable {
     }
 
     public void setAction(String action) {
-        this.action = Action.valueOf(action);
+        try {
+            this.action = Action.valueOf(action);
+        } catch (Exception e) {
+        }
     }
 }

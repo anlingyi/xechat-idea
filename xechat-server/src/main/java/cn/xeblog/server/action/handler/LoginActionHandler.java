@@ -36,6 +36,11 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
 
     @Override
     public void handle(ChannelHandlerContext ctx, LoginDTO body) {
+        if (ChannelAction.getUser(ctx) != null) {
+            ctx.writeAndFlush(ResponseBuilder.system("请勿重复登录！"));
+            return;
+        }
+
         if (body.getPlatform() == Platform.IDEA) {
             // IDEA平台登录的需要比对插件版本
             String currentPluginVersion = CommonConstants.PLUGIN_VERSION;

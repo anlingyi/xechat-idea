@@ -44,12 +44,18 @@ public class RequestHandler {
 
             // 非默认协议需要转换body的数据类型
             if (request.getProtocol() != Protocol.DEFAULT) {
-                if (request.getAction() == Action.SET_STATUS) {
-                    body = UserStatus.valueOf(body.toString());
-                } else {
-                    body = JSONUtil.toBean(body.toString(), ClassUtil.getTypeArgument(produce.getClass()));
+                try {
+                    if (request.getAction() == Action.SET_STATUS) {
+                        body = UserStatus.valueOf(body.toString());
+                    } else {
+                        body = JSONUtil.toBean(body.toString(), ClassUtil.getTypeArgument(produce.getClass()));
+                    }
+                } catch (Exception e) {
+                    ctx.writeAndFlush(ResponseBuilder.system("消息内容解析异常!"));
+                    return;
                 }
             }
+
             produce.handle(ctx, body);
         });
     }
