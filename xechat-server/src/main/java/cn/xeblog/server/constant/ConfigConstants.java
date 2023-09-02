@@ -19,6 +19,11 @@ public interface ConfigConstants {
      */
     String SERVER_PORT = "port";
 
+    /**
+     * 是否开启WS协议
+     */
+    String SERVER_ENABLE_WS = "enableWS";
+
     // endregion
 
     // region ============================== 敏感词 配置 ==============================

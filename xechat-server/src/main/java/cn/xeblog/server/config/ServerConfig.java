@@ -19,6 +19,11 @@ public class ServerConfig {
     private Integer port;
 
     /**
+     * 是否开启WS协议
+     */
+    private boolean enableWS;
+
+    /**
      * 敏感词文件地址
      */
     private String sensitiveWordPath;
@@ -90,4 +95,7 @@ public class ServerConfig {
         return StrUtil.equals("${TOKEN}", token) ? null : token;
     }
 
+    public boolean getEnableWS() {
+        return enableWS;
+    }
 }

@@ -2,6 +2,8 @@
 [SERVER]
 # 端口
 port = 1024
+# 是否开启WS协议
+enableWS = true
 
 ########## 敏感词配置 ##########
 [SENSITIVE_WORD]

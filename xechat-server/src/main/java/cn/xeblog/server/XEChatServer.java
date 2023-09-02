@@ -36,6 +36,11 @@ public class XEChatServer {
 
     private int port;
 
+    /**
+     * 是否开启WS协议
+     */
+    private boolean enableWS = true;
+
     public XEChatServer(int port) {
         this.port = port;
     }
@@ -59,7 +64,12 @@ public class XEChatServer {
     }
 
     public void run() {
-        EventLoopGroup bossGroup = new NioEventLoopGroup(2);
+        int threads = 1;
+        if (enableWS) {
+            threads++;
+        }
+
+        EventLoopGroup bossGroup = new NioEventLoopGroup(threads);
         EventLoopGroup workGroup = new NioEventLoopGroup();
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();
@@ -69,26 +79,31 @@ public class XEChatServer {
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
 
-        ServerBootstrap httpAndWebSocketServer = new ServerBootstrap();
-        httpAndWebSocketServer.group(bossGroup, workGroup)
-                .channel(NioServerSocketChannel.class)
-                .childHandler(new HttpAndWebSocketChannelInitializer())
-                .option(ChannelOption.SO_BACKLOG, 128)
-                .childOption(ChannelOption.SO_KEEPALIVE, true);
+        ServerBootstrap httpAndWebSocketServer = null;
+        if (enableWS) {
+            httpAndWebSocketServer = new ServerBootstrap();
+            httpAndWebSocketServer.group(bossGroup, workGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(new HttpAndWebSocketChannelInitializer())
+                    .option(ChannelOption.SO_BACKLOG, 128)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true);
+        }
 
         try {
+            if (httpAndWebSocketServer != null) {
+                httpAndWebSocketServer.bind(port + 1)
+                        .addListener((ChannelFutureListener) future -> {
+                            if (future.channel().isActive()) {
+                                log.info("XEChatHTTPAndWebSocketServer Started Successfully!");
+                            }
+                        })
+                        .sync().channel().closeFuture();
+            }
+
             serverBootstrap.bind(port)
                     .addListener((ChannelFutureListener) future -> {
                         if (future.channel().isActive()) {
                             log.info("XEChatServer Started Successfully!");
-                        }
-                    })
-                    .sync().channel().closeFuture();
-
-            httpAndWebSocketServer.bind(port + 1)
-                    .addListener((ChannelFutureListener) future -> {
-                        if (future.channel().isActive()) {
-                            log.info("XEChatHTTPAndWebSocketServer Started Successfully!");
                         }
                     })
                     .sync().channel().closeFuture().sync();
@@ -129,6 +144,8 @@ public class XEChatServer {
             final IpUtil ipUtil = new IpUtil(ip2RegionService);
         }
 
-        new XEChatServer(serverConfig.getPort()).run();
+        XEChatServer server = new XEChatServer(serverConfig.getPort());
+        server.enableWS = serverConfig.getEnableWS();
+        server.run();
     }
 }

@@ -1,6 +1,7 @@
 package cn.xeblog.server.util;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.setting.Setting;
 import cn.xeblog.commons.util.ParamsUtils;
@@ -33,6 +34,7 @@ public class ConfigUtil {
         final String ip2regionPath = ParamsUtils.getValue(args, "-ipfile");
         final String configPath = ParamsUtils.getValue(args, "-path");
         final String token = ParamsUtils.getValue(args, "-token");
+        final String enableWS = ParamsUtils.getValue(args, "-enableWS");
 
         final Setting configSetting = new Setting(StrUtil.blankToDefault(configPath, "config.setting"), StandardCharsets.UTF_8, Boolean.TRUE);
         final String fileConfigPort = configSetting.getByGroup(ConfigConstants.SERVER_PORT, ConfigConstants.SERVER);
@@ -42,6 +44,7 @@ public class ConfigUtil {
         final String fileTranslationAppKey = configSetting.getByGroup(ConfigConstants.TRANSLATION_APP_KEY, ConfigConstants.TRANSLATION);
         final String fileIp2regionPath = configSetting.getByGroup(ConfigConstants.IP2REGION_PATH, ConfigConstants.IP_SEARCH);
         final String fileToken = configSetting.getByGroup(ConfigConstants.ADMIN_TOKEN, ConfigConstants.ADMIN);
+        final String fileEnableWS = configSetting.getByGroup(ConfigConstants.SERVER_ENABLE_WS, ConfigConstants.SERVER);
 
         return ServerConfig.builder()
                 .port(Convert.toInt(StrUtil.blankToDefault(configPort, fileConfigPort), 1024))
@@ -51,6 +54,7 @@ public class ConfigUtil {
                 .translationAppKey(StrUtil.blankToDefault(translationAppKey, fileTranslationAppKey))
                 .ip2RegionPath(StrUtil.blankToDefault(ip2regionPath, fileIp2regionPath))
                 .token(StrUtil.blankToDefault(token, fileToken))
+                .enableWS(BooleanUtil.toBoolean(StrUtil.blankToDefault(enableWS, fileEnableWS)))
                 .build();
     }
 
