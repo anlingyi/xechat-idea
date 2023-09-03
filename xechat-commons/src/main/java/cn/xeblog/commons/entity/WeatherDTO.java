@@ -28,4 +28,12 @@ public class WeatherDTO implements Serializable {
      */
     private String location;
 
+    public void setType(WeatherType type) {
+        this.type = type;
+    }
+
+    public void setType(String type) {
+        this.type = WeatherType.build(type);
+    }
+
 }

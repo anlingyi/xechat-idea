@@ -1,6 +1,7 @@
 package cn.xeblog.commons.entity;
 
 import cn.xeblog.commons.enums.Action;
+import cn.xeblog.commons.enums.Protocol;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,4 +31,21 @@ public class Request<T> implements Serializable {
      */
     private Action action;
 
+    private Protocol protocol;
+
+    public Request(T body, Action action) {
+        this.body = body;
+        this.action = action;
+    }
+
+    public void setAction(Action action) {
+        this.action = action;
+    }
+
+    public void setAction(String action) {
+        try {
+            this.action = Action.valueOf(action);
+        } catch (Exception e) {
+        }
+    }
 }

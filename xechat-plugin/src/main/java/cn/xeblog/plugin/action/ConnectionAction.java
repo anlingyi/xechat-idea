@@ -33,7 +33,7 @@ public class ConnectionAction {
         if (channelInitializer == null) {
             channelInitializer = new DefaultChannelInitializer();
         }
-        GlobalThreadPool.execute(() -> XEChatClient.run(host, port, channelInitializer, consumer));
+        GlobalThreadPool.execute(() -> XEChatClient.run(this, consumer));
     }
 
 }

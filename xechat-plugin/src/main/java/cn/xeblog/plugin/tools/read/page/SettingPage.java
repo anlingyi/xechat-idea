@@ -150,7 +150,17 @@ public class SettingPage implements IPage {
     private boolean saveConfig() {
         String host = (String) configTable.getValueAt(0, 1);
         if (StrUtil.isNotEmpty(host) && !StrUtil.equals(DataCache.readConfig.getLegadoHost(), host)) {
-            if (DataCache.readConfig.verifyLegadoHost(host)) {
+            String ip;
+            if (host.contains(":")) {
+                String[] hostInfo = host.split(":");
+                ip = hostInfo[0];
+                if (hostInfo.length < 2) {
+                    host = ip;
+                }
+            } else {
+                ip = host;
+            }
+            if (DataCache.readConfig.verifyLegadoHost(ip)) {
                 DataCache.readConfig.setLegadoHost(host);
             } else {
                 SwingUtilities.invokeLater(() -> {

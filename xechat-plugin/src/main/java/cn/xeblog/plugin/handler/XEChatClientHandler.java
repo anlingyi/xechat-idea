@@ -2,6 +2,7 @@ package cn.xeblog.plugin.handler;
 
 import cn.xeblog.commons.entity.LoginDTO;
 import cn.xeblog.commons.enums.Action;
+import cn.xeblog.commons.enums.Platform;
 import cn.xeblog.commons.enums.UserStatus;
 import cn.xeblog.plugin.action.ConnectionAction;
 import cn.xeblog.plugin.action.ConsoleAction;
@@ -48,6 +49,7 @@ public class XEChatClientHandler extends SimpleChannelInboundHandler<Response> {
         loginDTO.setPluginVersion(IdeaUtils.getPluginVersion());
         loginDTO.setToken(token);
         loginDTO.setUuid(DataCache.uuid);
+        loginDTO.setPlatform(Platform.IDEA);
 
         MessageAction.send(loginDTO, Action.LOGIN);
         DataCache.reconnected = false;

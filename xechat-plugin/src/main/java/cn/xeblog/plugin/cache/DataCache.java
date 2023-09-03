@@ -5,6 +5,7 @@ import cn.xeblog.commons.entity.OnlineServer;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.enums.UserStatus;
 import cn.xeblog.plugin.action.ConnectionAction;
+import cn.xeblog.plugin.tools.browser.config.BrowserConfig;
 import cn.xeblog.plugin.tools.read.ReadConfig;
 import com.intellij.openapi.project.Project;
 import io.netty.channel.Channel;
@@ -79,6 +80,11 @@ public class DataCache {
      * 阅读配置
      */
     public static ReadConfig readConfig = new ReadConfig();
+
+    /**
+     * 浏览器配置
+     */
+    public static BrowserConfig browserConfig = new BrowserConfig();
 
     /**
      * 获取用户信息

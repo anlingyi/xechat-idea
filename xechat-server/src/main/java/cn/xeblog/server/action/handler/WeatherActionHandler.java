@@ -13,14 +13,12 @@ import cn.xeblog.commons.entity.weather.FutureWeather;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.commons.enums.WeatherType;
-import cn.xeblog.server.action.ChannelAction;
 import cn.xeblog.server.annotation.DoAction;
 import cn.xeblog.server.builder.ResponseBuilder;
 import cn.xeblog.server.service.CityService;
 import cn.xeblog.server.service.WeatherService;
 import cn.xeblog.server.service.impl.HeFengCityServiceImpl;
 import cn.xeblog.server.service.impl.HeFengWeatherServiceImpl;
-import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -33,15 +31,11 @@ import java.util.List;
  */
 @Slf4j
 @DoAction(Action.WEATHER)
-public class WeatherActionHandler implements ActionHandler<WeatherDTO> {
+public class WeatherActionHandler extends AbstractActionHandler<WeatherDTO> {
+
 
     @Override
-    public void handle(ChannelHandlerContext ctx, WeatherDTO body) {
-        User user = ChannelAction.getUser(ctx);
-        if (user == null) {
-            return;
-        }
-
+    protected void process(User user, WeatherDTO body) {
         WeatherService weatherService = Singleton.get(HeFengWeatherServiceImpl.class);
         CityService cityService = Singleton.get(HeFengCityServiceImpl.class);
 

@@ -29,7 +29,11 @@ public class LegadoApi {
     private final HttpClient client;
 
     public LegadoApi(String host) {
-        this.server = StrUtil.format("http://{}:{}", host, PORT);
+        if (!host.contains(":")) {
+            host = host + ":" + PORT;
+        }
+
+        this.server = StrUtil.format("http://{}", host);
         this.client = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(5000)).build();
     }
 

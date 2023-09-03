@@ -36,6 +36,9 @@ public class ChatActionHandler extends AbstractActionHandler<UserMsgDTO> {
             String msg = Convert.toStr(body.getContent());
             BaiDuFyUtil baiDuFyUtil = Singleton.get(BaiDuFyUtil.class.getName(), () -> new BaiDuFyUtil("", ""));
             body.setContent(baiDuFyUtil.translate(SensitiveWordUtils.loveChina(msg)));
+        } else {
+            // 暂时不支持这种形式的消息，全部转为文本消息
+            body.setMsgType(UserMsgDTO.MsgType.TEXT);
         }
 
         ChannelAction.send(user, body, MessageType.USER);

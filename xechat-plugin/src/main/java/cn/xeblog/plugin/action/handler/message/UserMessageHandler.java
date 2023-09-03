@@ -12,6 +12,7 @@ import cn.xeblog.commons.entity.react.React;
 import cn.xeblog.commons.entity.react.request.DownloadReact;
 import cn.xeblog.commons.entity.react.result.DownloadReactResult;
 import cn.xeblog.commons.enums.MessageType;
+import cn.xeblog.commons.enums.Platform;
 import cn.xeblog.plugin.action.ConsoleAction;
 import cn.xeblog.plugin.action.ReactAction;
 import cn.xeblog.plugin.action.handler.ReactResultConsumer;
@@ -68,14 +69,15 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
         User user = response.getUser();
         IpRegion region = user.getRegion();
         final String shortProvince = MapUtil.getStr(IpConstants.SHORT_PROVINCE, region.getProvince(), region.getCountry());
+        String platform = user.getPlatform() == Platform.WEB ? " ༄" : " ♨";
         String roleDisplay = "";
         if (user.getRole() == User.Role.ADMIN) {
             roleDisplay = " ☆";
         }
 
         ConsoleAction.renderText(
-                String.format("[%s][%s] %s (%s)%s：", response.getTime(), shortProvince, user.getUsername(),
-                        user.getStatus().getName(), roleDisplay), Style.USER_NAME);
+                String.format("[%s][%s] %s (%s)%s%s：", response.getTime(), shortProvince, user.getUsername(),
+                        user.getStatus().getName(), platform, roleDisplay), Style.USER_NAME);
     }
 
     private void renderImage(Response<UserMsgDTO> response) {

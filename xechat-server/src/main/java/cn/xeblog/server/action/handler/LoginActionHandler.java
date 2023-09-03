@@ -9,6 +9,7 @@ import cn.xeblog.commons.entity.*;
 import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.commons.enums.Permissions;
+import cn.xeblog.commons.enums.Platform;
 import cn.xeblog.server.action.ChannelAction;
 import cn.xeblog.server.annotation.DoAction;
 import cn.xeblog.server.builder.ResponseBuilder;
@@ -35,34 +36,42 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
 
     @Override
     public void handle(ChannelHandlerContext ctx, LoginDTO body) {
-        String currentPluginVersion = CommonConstants.PLUGIN_VERSION;
-        String userPluginVersion = body.getPluginVersion();
-        if (StrUtil.isNotBlank(userPluginVersion)) {
-            int len = currentPluginVersion.length();
-            int len2 = userPluginVersion.length();
-            int k = len - len2;
-            String padding = "";
-            for (int i = Math.abs(k); i > 0; i--) {
-                padding += "0";
-            }
-            if (k > 0) {
-                userPluginVersion += padding;
-            } else if (k < 0) {
-                currentPluginVersion += padding;
-            }
+        if (ChannelAction.getUser(ctx) != null) {
+            ctx.writeAndFlush(ResponseBuilder.system("请勿重复登录！"));
+            return;
         }
 
-        int versionState = VersionComparator.INSTANCE.compare(currentPluginVersion, userPluginVersion);
-        if (versionState > 0) {
-            ctx.writeAndFlush(ResponseBuilder.system("温馨提醒~ 请尽快更新插件版本至v" + CommonConstants.PLUGIN_VERSION + "！"));
-            ctx.close();
-            return;
+        if (body.getPlatform() == null) {
+            body.setPlatform(Platform.IDEA);
         }
-        if (versionState < 0) {
-            ctx.writeAndFlush(ResponseBuilder.system("当前服务端版本过低！你的版本：v" + body.getPluginVersion()
-                    + "，服务端版本：v" + CommonConstants.PLUGIN_VERSION));
-            ctx.close();
-            return;
+
+        if (body.getPlatform() == Platform.IDEA) {
+            // IDEA平台登录的需要比对插件版本
+            String currentPluginVersion = CommonConstants.PLUGIN_VERSION;
+            String userPluginVersion = body.getPluginVersion();
+            if (StrUtil.isNotBlank(userPluginVersion)) {
+                int len = currentPluginVersion.length();
+                int len2 = userPluginVersion.length();
+                int k = len - len2;
+                String padding = "";
+                for (int i = Math.abs(k); i > 0; i--) {
+                    padding += "0";
+                }
+                if (k > 0) {
+                    userPluginVersion += padding;
+                } else if (k < 0) {
+                    currentPluginVersion += padding;
+                }
+            }
+
+            int versionState = VersionComparator.INSTANCE.compare(currentPluginVersion, userPluginVersion);
+            if (versionState > 0) {
+                ctx.writeAndFlush(ResponseBuilder.system("温馨提醒~ 请尽快更新插件版本至v" + CommonConstants.PLUGIN_VERSION + "！"));
+            }
+            if (versionState < 0) {
+                ctx.writeAndFlush(ResponseBuilder.system("当前服务端版本过低！你的版本：v" + body.getPluginVersion()
+                        + "，服务端版本：v" + CommonConstants.PLUGIN_VERSION));
+            }
         }
 
         boolean isReconnect = body.isReconnected();
@@ -94,6 +103,7 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
         user.setUuid(body.getUuid());
         user.setRole(isAdmin ? User.Role.ADMIN : User.Role.USER);
         user.setPermit(GlobalConfig.USER_PERMIT_CACHE.getOrDefault(body.getUuid(), Permissions.ALL.getValue()));
+        user.setPlatform(body.getPlatform());
         UserCache.add(id, user);
 
         ChannelAction.add(ctx.channel());

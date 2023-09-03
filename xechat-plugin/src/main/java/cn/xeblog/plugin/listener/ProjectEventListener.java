@@ -41,10 +41,10 @@ public class ProjectEventListener implements ProjectManagerListener {
                         }
                         RegisterToolWindowTask xeChat = RegisterToolWindowTask.notClosable(WINDOW_ID, icon);
                         toolWindow.remove();
+                        // TODO can't calculate origin icon (too deep in hierarchy), src: com.intellij.openapi.wm.impl.ToolWindowIcon@6a8b6070
                         toolWindow = toolWindowManager.registerToolWindow(xeChat);
                         new MainWindowFactory().createToolWindowContent(otherProject, toolWindow);
                     } catch (Exception e) {
-                        e.printStackTrace();
                     }
                 }
             });

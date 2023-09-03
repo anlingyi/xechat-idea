@@ -66,4 +66,12 @@ public class GameRoomMsgDTO extends GameDTO {
         ROOM_CLOSE;
     }
 
+    public void setMsgType(MsgType msgType) {
+        this.msgType = msgType;
+    }
+
+    public void setMsgType(String msgType) {
+        this.msgType = MsgType.valueOf(msgType);
+    }
+
 }

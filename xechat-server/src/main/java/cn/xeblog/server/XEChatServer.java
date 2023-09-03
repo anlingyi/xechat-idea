@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.xeblog.server.config.IpRegionProperties;
 import cn.xeblog.server.config.ServerConfig;
 import cn.xeblog.server.handler.DefaultChannelInitializer;
+import cn.xeblog.server.handler.HttpAndWebSocketChannelInitializer;
 import cn.xeblog.server.service.IpRegionService;
 import cn.xeblog.server.service.impl.HeFengWeatherConfigServiceImpl;
 import cn.xeblog.server.service.impl.Ip2RegionServiceImpl;
@@ -13,7 +14,6 @@ import cn.xeblog.server.util.ConfigUtil;
 import cn.xeblog.server.util.IpUtil;
 import cn.xeblog.server.util.SensitiveWordUtils;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -26,7 +26,6 @@ import io.netty.handler.ssl.SslProvider;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.InputStream;
-import java.net.InetSocketAddress;
 
 /**
  * @author anlingyi
@@ -36,6 +35,11 @@ import java.net.InetSocketAddress;
 public class XEChatServer {
 
     private int port;
+
+    /**
+     * 是否开启WS协议
+     */
+    private boolean enableWS = true;
 
     public XEChatServer(int port) {
         this.port = port;
@@ -60,27 +64,50 @@ public class XEChatServer {
     }
 
     public void run() {
-        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+        int threads = 1;
+        if (enableWS) {
+            threads++;
+        }
+
+        EventLoopGroup bossGroup = new NioEventLoopGroup(threads);
         EventLoopGroup workGroup = new NioEventLoopGroup();
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup, workGroup)
                 .channel(NioServerSocketChannel.class)
-                .localAddress(new InetSocketAddress(port))
                 .childHandler(new DefaultChannelInitializer(sslContext))
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
 
+        ServerBootstrap httpAndWebSocketServer = null;
+        if (enableWS) {
+            httpAndWebSocketServer = new ServerBootstrap();
+            httpAndWebSocketServer.group(bossGroup, workGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(new HttpAndWebSocketChannelInitializer())
+                    .option(ChannelOption.SO_BACKLOG, 128)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true);
+        }
+
         try {
-            ChannelFuture channelFuture = serverBootstrap.bind()
+            if (httpAndWebSocketServer != null) {
+                httpAndWebSocketServer.bind(port + 1)
+                        .addListener((ChannelFutureListener) future -> {
+                            if (future.channel().isActive()) {
+                                log.info("XEChatHTTPAndWebSocketServer Started Successfully!");
+                            }
+                        })
+                        .sync().channel().closeFuture();
+            }
+
+            serverBootstrap.bind(port)
                     .addListener((ChannelFutureListener) future -> {
                         if (future.channel().isActive()) {
                             log.info("XEChatServer Started Successfully!");
                         }
                     })
-                    .sync();
-            channelFuture.channel().closeFuture().sync();
-        } catch (InterruptedException e) {
+                    .sync().channel().closeFuture().sync();
+        } catch (Exception e) {
             log.error("ERROR:", e);
         } finally {
             workGroup.shutdownGracefully();
@@ -117,6 +144,8 @@ public class XEChatServer {
             final IpUtil ipUtil = new IpUtil(ip2RegionService);
         }
 
-        new XEChatServer(serverConfig.getPort()).run();
+        XEChatServer server = new XEChatServer(serverConfig.getPort());
+        server.enableWS = serverConfig.getEnableWS();
+        server.run();
     }
 }

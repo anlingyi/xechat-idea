@@ -1,6 +1,7 @@
 package cn.xeblog.commons.entity;
 
 import cn.xeblog.commons.enums.Permissions;
+import cn.xeblog.commons.enums.Platform;
 import cn.xeblog.commons.enums.UserStatus;
 import io.netty.channel.Channel;
 import lombok.*;
@@ -74,6 +75,10 @@ public class User implements Serializable {
     @Setter
     private int permit;
 
+    @Getter
+    @Setter
+    private Platform platform;
+
     /**
      * 通道
      */
@@ -98,6 +103,7 @@ public class User implements Serializable {
         this.ip = ip;
         this.region = region;
         this.channel = channel;
+        this.platform = Platform.IDEA;
     }
 
     public void send(Response response) {

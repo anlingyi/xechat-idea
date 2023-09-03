@@ -54,4 +54,12 @@ public class UserMsgDTO implements Serializable {
         return false;
     }
 
+    public void setMsgType(MsgType msgType) {
+        this.msgType = msgType;
+    }
+
+    public void setMsgType(String msgType) {
+        this.msgType = MsgType.valueOf(msgType);
+    }
+
 }

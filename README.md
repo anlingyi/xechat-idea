@@ -1,8 +1,10 @@
 # XEChat-Idea
 
-> Version 1.6.5-beta
+> Version 1.6.6-beta
 
 > 基于Netty的IDEA即时聊天插件：让你能够在IDEA里实现聊天、下棋、斗地主！(理论上支持JetBrains全系列开发工具🙂)
+
+> 浏览器端：[XEChat-Web](https://github.com/anlingyi/xechat-web)
 
 - [目录](#xechat-idea)
     - [项目介绍](#项目介绍)
@@ -103,6 +105,7 @@
 * [实现一个自定义命令](https://xeblog.cn/articles/79)
 * [实现一个自定义消息](https://xeblog.cn/articles/100)
 * [实现一个联机对战游戏](https://xeblog.cn/articles/95)
+* [WebSocket协议接入文档](https://xeblog.cn/articles/112)
 
 ## 运行 & 部署
 

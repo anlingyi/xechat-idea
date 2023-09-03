@@ -60,6 +60,10 @@ public class ChapterUtil {
      * 当前页
      */
     public String currentPage() {
+        if (pageIndex < 0 || pageIndex >= CollUtil.size(contentPage)) {
+            return "";
+        }
+
         this.book.setChapterPos(this.pageIndex);
         return contentPage.get(pageIndex);
     }

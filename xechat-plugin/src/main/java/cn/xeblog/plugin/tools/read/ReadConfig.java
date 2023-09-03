@@ -135,7 +135,11 @@ public class ReadConfig {
     }
 
     public boolean verifyLegadoHost(String host) {
-        if (Validator.isIpv4(host)) {
+        String ip = host;
+        if (host.contains(":")) {
+            ip = host.split(":")[0];
+        }
+        if (Validator.isIpv4(ip)) {
             LegadoApi api = new LegadoApi(host);
             return api.testConnect();
         }
