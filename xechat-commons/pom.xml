@@ -6,7 +6,7 @@
 
     <groupId>cn.xeblog</groupId>
     <artifactId>xechat-commons</artifactId>
-    <version>1.6.5-beta</version>
+    <version>1.6.6-beta</version>
     <build>
         <plugins>
             <plugin>
