@@ -15,7 +15,9 @@ public class XEChatClient {
     private static final String HOST = "localhost";
     private static final int PORT = 1024;
 
-    public static void run(String host, int port, AbstractChannelInitializer channelInitializer, ClientConnectConsumer consumer) {
+    public static void run(ConnectionAction connectionAction, ClientConnectConsumer consumer) {
+        String host = connectionAction.getHost();
+        int port = connectionAction.getPort();
         if (host == null) {
             host = HOST;
             connectionAction.setHost(HOST);

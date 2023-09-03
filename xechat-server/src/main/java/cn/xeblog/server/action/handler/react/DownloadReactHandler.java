@@ -1,13 +1,12 @@
 package cn.xeblog.server.action.handler.react;
 
-import cn.hutool.core.io.FileUtil;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.entity.react.React;
 import cn.xeblog.commons.entity.react.request.DownloadReact;
 import cn.xeblog.commons.entity.react.result.DownloadReactResult;
 import cn.xeblog.commons.entity.react.result.ReactResult;
 import cn.xeblog.server.annotation.DoReact;
-import cn.xeblog.server.config.GlobalConfig;
+import cn.xeblog.server.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -21,8 +20,12 @@ public class DownloadReactHandler extends AbstractReactHandler<DownloadReact, Do
     @Override
     protected void process(User user, DownloadReact body, ReactResult<DownloadReactResult> result) {
         try {
-            String filePath = GlobalConfig.UPLOAD_FILE_PATH + "/" + body.getFileName();
-            byte[] bytes = FileUtil.readBytes(filePath);
+            byte[] bytes = FileUtil.getFile(body.getFileName());
+            if (bytes == null) {
+                result.setMsg("文件不存在!");
+                return;
+            }
+
             DownloadReactResult data = new DownloadReactResult();
             data.setFileName(body.getFileName());
             data.setBytes(bytes);
