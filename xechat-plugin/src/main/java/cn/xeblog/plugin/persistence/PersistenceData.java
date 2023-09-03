@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.persistence;
 
+import cn.xeblog.plugin.tools.browser.config.BrowserConfig;
 import cn.xeblog.plugin.tools.read.ReadConfig;
 import lombok.Data;
 
@@ -38,5 +39,10 @@ public class PersistenceData {
      * token
      */
     private String token;
+
+    /**
+     * 浏览器配置
+     */
+    private BrowserConfig browserConfig;
 
 }

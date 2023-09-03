@@ -1,5 +1,6 @@
 package cn.xeblog.plugin.persistence;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.xeblog.commons.constants.Commons;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.tools.read.ReadConfig;
@@ -25,6 +26,7 @@ public class PersistenceService implements PersistentStateComponent<PersistenceD
         data.setMsgNotify(DataCache.msgNotify);
         data.setReadConfig(DataCache.readConfig);
         data.setHistoryCommandList(CommandHistoryUtils.getHistoryList());
+        data.setBrowserConfig(DataCache.browserConfig);
         return data;
     }
 
@@ -34,6 +36,7 @@ public class PersistenceService implements PersistentStateComponent<PersistenceD
         DataCache.username = data.getUsername();
         DataCache.msgNotify = data.getMsgNotify();
         DataCache.readConfig = ReadConfig.getInstance(state.getReadConfig());
+        BeanUtil.copyProperties(data.getBrowserConfig(), DataCache.browserConfig);
         CommandHistoryUtils.setHistoryList(state.getHistoryCommandList());
     }
 

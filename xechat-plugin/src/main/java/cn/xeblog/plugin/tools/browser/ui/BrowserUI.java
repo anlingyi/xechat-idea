@@ -2,7 +2,9 @@ package cn.xeblog.plugin.tools.browser.ui;
 
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.enums.Command;
+import cn.xeblog.plugin.tools.browser.config.BrowserConfig;
 import cn.xeblog.plugin.tools.browser.core.BrowserEventListener;
 import cn.xeblog.plugin.tools.browser.core.BrowserService;
 import cn.xeblog.plugin.tools.browser.core.JcefBrowserService;
@@ -21,8 +23,6 @@ import java.awt.event.KeyEvent;
  */
 public class BrowserUI extends JPanel {
 
-    private final static String HOME_PAGE = "https://cn.bing.com";
-
     private BrowserService browserService;
 
     private String lastUrl;
@@ -34,6 +34,8 @@ public class BrowserUI extends JPanel {
     private Component browserUI;
 
     private JTextField urlField;
+
+    private BrowserConfig browserConfig;
 
     private enum WindowMode {
         SMALL("S", 200, 250),
@@ -67,13 +69,14 @@ public class BrowserUI extends JPanel {
     public BrowserUI() {
         this.windowMode = WindowMode.SMALL;
         this.userAgent = UserAgent.IPHONE;
+        this.browserConfig = DataCache.browserConfig;
         initPanel();
     }
 
     private void initPanel() {
         removeAll();
 
-        String url = HOME_PAGE;
+        String url = browserConfig.getHomePage();
         if (lastUrl != null) {
             url = lastUrl;
         }
@@ -97,10 +100,16 @@ public class BrowserUI extends JPanel {
         exitButton.addActionListener(l -> Command.OVER.exec());
         hbox.add(exitButton);
 
+        JButton settingButton = new JButton("✡");
+        settingButton.setToolTipText("设置");
+        settingButton.setPreferredSize(buttonDimension);
+        settingButton.addActionListener(l -> new SettingUI().show());
+        hbox.add(settingButton);
+
         JButton homeButton = new JButton("♨");
         homeButton.setToolTipText("主页");
         homeButton.setPreferredSize(buttonDimension);
-        homeButton.addActionListener(l -> browserService.loadURL(HOME_PAGE));
+        homeButton.addActionListener(l -> browserService.loadURL(browserConfig.getHomePage()));
         hbox.add(homeButton);
 
         JButton backButton = new JButton("←");
