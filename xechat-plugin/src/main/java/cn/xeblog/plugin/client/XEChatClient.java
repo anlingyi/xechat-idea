@@ -1,6 +1,6 @@
 package cn.xeblog.plugin.client;
 
-import cn.xeblog.plugin.handler.AbstractChannelInitializer;
+import cn.xeblog.plugin.action.ConnectionAction;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -18,9 +18,11 @@ public class XEChatClient {
     public static void run(String host, int port, AbstractChannelInitializer channelInitializer, ClientConnectConsumer consumer) {
         if (host == null) {
             host = HOST;
+            connectionAction.setHost(HOST);
         }
         if (port == 0) {
             port = PORT;
+            connectionAction.setPort(PORT);
         }
 
         EventLoopGroup group = new NioEventLoopGroup();
@@ -30,7 +32,7 @@ public class XEChatClient {
                     .channel(NioSocketChannel.class)
                     .option(ChannelOption.TCP_NODELAY, true)
                     .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
-                    .handler(channelInitializer);
+                    .handler(connectionAction.getChannelInitializer());
             ChannelFuture channelFuture = bootstrap.connect(host, port)
                     .addListener((ChannelFutureListener) future -> {
                         Channel channel = future.channel();
