@@ -41,6 +41,10 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
             return;
         }
 
+        if (body.getPlatform() == null) {
+            body.setPlatform(Platform.IDEA);
+        }
+
         if (body.getPlatform() == Platform.IDEA) {
             // IDEA平台登录的需要比对插件版本
             String currentPluginVersion = CommonConstants.PLUGIN_VERSION;
