@@ -4,7 +4,10 @@ import cn.xeblog.commons.enums.Permissions;
 import cn.xeblog.commons.enums.Platform;
 import cn.xeblog.commons.enums.UserStatus;
 import io.netty.channel.Channel;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -96,14 +99,14 @@ public class User implements Serializable {
         USER
     }
 
-    public User(String id, String username, UserStatus status, String ip, IpRegion region, Channel channel) {
+    public User(String id, String username, UserStatus status, String ip, IpRegion region, Platform platform, Channel channel) {
         this.id = id;
         this.username = username;
         this.status = status;
         this.ip = ip;
         this.region = region;
         this.channel = channel;
-        this.platform = Platform.IDEA;
+        this.platform = platform;
     }
 
     public void send(Response response) {

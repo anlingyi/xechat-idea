@@ -99,7 +99,7 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
         final IpRegion ipRegion = IpUtil.getRegionByIp(ip);
         String configToken = ServerConfig.getConfig().getToken();
         boolean isAdmin = StrUtil.isNotBlank(configToken) && StrUtil.equals(configToken, body.getToken());
-        User user = new User(id, username, body.getStatus(), ip, ipRegion, ctx.channel());
+        User user = new User(id, username, body.getStatus(), ip, ipRegion, body.getPlatform(), ctx.channel());
         user.setUuid(body.getUuid());
         user.setRole(isAdmin ? User.Role.ADMIN : User.Role.USER);
         user.setPermit(GlobalConfig.USER_PERMIT_CACHE.getOrDefault(body.getUuid(), Permissions.ALL.getValue()));
