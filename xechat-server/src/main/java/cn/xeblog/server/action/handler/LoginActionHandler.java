@@ -94,6 +94,12 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
             return;
         }
 
+        if(username.length()>18){
+            ctx.writeAndFlush(ResponseBuilder.system("昵称过长，请修改后重试！"));
+            ctx.close();
+            return;
+        }
+
         String id = ChannelAction.getId(ctx);
         final String ip = IpUtil.getIpByCtx(ctx);
         final IpRegion ipRegion = IpUtil.getRegionByIp(ip);
