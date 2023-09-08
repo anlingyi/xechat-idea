@@ -74,6 +74,13 @@ public class TetrisUI extends JPanel implements KeyListener, ActionListener {
                 tetrisUI.requestFocusInWindow();
             }
         });
+
+        this.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                tetrisUI.pauseGame();
+            }
+        });
     }
 
     /**
@@ -276,7 +283,6 @@ public class TetrisUI extends JPanel implements KeyListener, ActionListener {
         if (this.tetrisLogic.gameOver()) {
             //屏蔽键盘信息
             this.isAcceptKey = false;
-            this.tetrisLogic.showGameOver();
             return;
         }
     }

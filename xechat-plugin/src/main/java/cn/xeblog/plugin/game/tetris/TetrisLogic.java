@@ -233,15 +233,6 @@ public class TetrisLogic {
     }
 
     /**
-     * 功能：提示游戏结束<br>
-     */
-    public void showGameOver() {
-        int finalScore = this.score;
-        JOptionPane.showMessageDialog(null, "得分：" + finalScore, "游戏结束",
-            JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    /**
      * 功能：返回大地图（共21行12列，该地图包含墙和固定死的方块信息）<br>
      */
     public byte[][] getMap() {
