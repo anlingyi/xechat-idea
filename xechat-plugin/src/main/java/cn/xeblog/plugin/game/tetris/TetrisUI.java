@@ -11,6 +11,8 @@ import lombok.Getter;
  * @description: 游戏面板
  * @author: sherlock
  * @date: 2023-09-07 14:02:18
+ * 原作者：我是小木鱼
+ * 原文地址：https://blog.csdn.net/lag_csdn/article/details/124711977
  */
 public class TetrisUI extends JPanel implements KeyListener, ActionListener {
     private static final long serialVersionUID = 1L;

@@ -17,6 +17,8 @@ import cn.xeblog.plugin.game.AbstractGame;
  * @description: 俄罗斯方块
  * @author: sherlock
  * @date: 2023-09-07 14:02:18
+ * 原作者：我是小木鱼
+ * 原文地址：https://blog.csdn.net/lag_csdn/article/details/124711977
  */
 @DoGame(Game.TETRIS)
 public class Tetris extends AbstractGame {

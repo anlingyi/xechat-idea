@@ -8,6 +8,8 @@ import javax.swing.*;
  * @description: 游戏逻辑
  * @author: sherlock
  * @date: 2023-09-07 14:02:18
+ * 原作者：我是小木鱼
+ * 原文地址：https://blog.csdn.net/lag_csdn/article/details/124711977
  */
 public class TetrisLogic {
     /** 大地图（共21行12列，该地图包含墙和后加入固定死的方块信息） */
