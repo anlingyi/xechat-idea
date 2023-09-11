@@ -20,6 +20,7 @@ public enum Game {
     PUSH_BOX("推箱子", false),
     CHINESE_CHESS("中国象棋", false),
     TETRIS("俄罗斯方块", false),
+    MINESWEEPER("扫雷", false),
     ;
 
     /**
