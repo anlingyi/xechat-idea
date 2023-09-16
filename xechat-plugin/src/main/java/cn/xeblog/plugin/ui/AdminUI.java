@@ -35,6 +35,8 @@ public class AdminUI extends AbstractPanelComponent {
         super(true);
     }
 
+    private JPanel mainPanel;
+
     private JTextField searchUserField;
 
     private JPanel userListPanel;
@@ -49,6 +51,8 @@ public class AdminUI extends AbstractPanelComponent {
 
     @Override
     protected void init() {
+        mainPanel = new JPanel();
+
         globalCheckBox1 = new JCheckBox("全员禁言");
         globalCheckBox2 = new JCheckBox("全员禁图");
         Box hBox = Box.createHorizontalBox();
@@ -118,6 +122,11 @@ public class AdminUI extends AbstractPanelComponent {
         mainPanel.add(panel, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
         mainPanel.updateUI();
+    }
+
+    @Override
+    protected JComponent getComponent() {
+        return mainPanel;
     }
 
     private void bindEvent() {
