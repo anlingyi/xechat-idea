@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class AbstractPanelComponent {
 
-    protected final JPanel mainPanel;
+    private final JPanel mainPanel;
 
     private JFrame window;
 
@@ -46,9 +46,12 @@ public abstract class AbstractPanelComponent {
      */
     protected abstract void init();
 
-    protected JComponent getComponent() {
-        return null;
-    }
+    /**
+     * 获取组件
+     *
+     * @return
+     */
+    protected abstract JComponent getComponent();
 
     protected final void showMainPanel() {
         this.closeWindow();
@@ -57,8 +60,6 @@ public abstract class AbstractPanelComponent {
         this.mainPanel.setLayout(new BorderLayout());
         JComponent component = this.getComponent();
         if (component != null) {
-            Dimension minimumSize = this.getComponent().getMinimumSize();
-            this.mainPanel.setMinimumSize(new Dimension((int) minimumSize.getWidth(), (int) (minimumSize.getHeight() + 50)));
             this.mainPanel.add(this.getComponent(), BorderLayout.CENTER);
         }
 
@@ -75,13 +76,17 @@ public abstract class AbstractPanelComponent {
         this.initWindow();
         this.addWindowListener();
 
+        this.window.add(Box.createHorizontalStrut(10), BorderLayout.NORTH);
+        this.window.add(Box.createHorizontalStrut(10), BorderLayout.WEST);
+        this.window.add(Box.createHorizontalStrut(10), BorderLayout.EAST);
+
         JPanel buttonPanel = this.getWindowButtonPanel();
         this.window.add(buttonPanel, BorderLayout.SOUTH);
 
         JComponent component = this.getComponent();
         if (component != null) {
             Dimension minimumSize = component.getMinimumSize();
-            this.window.setSize((int) minimumSize.getWidth(), (int) (minimumSize.getHeight() + 50));
+            this.window.setSize((int) minimumSize.getWidth() + 30, (int) minimumSize.getHeight() + 80);
             this.window.add(component, BorderLayout.CENTER);
         }
 
@@ -102,9 +107,9 @@ public abstract class AbstractPanelComponent {
 
     private JPanel getWindowButtonPanel() {
         JPanel panel = new JPanel();
-        panel.setSize(200, 80);
+        panel.setSize(200, 50);
 
-        JSlider transparencySlider = new JSlider(JSlider.HORIZONTAL, 10, 100, 100);
+        JSlider transparencySlider = new JSlider(JSlider.HORIZONTAL, 5, 100, 100);
         transparencySlider.setPreferredSize(new Dimension(100, 20));
         transparencySlider.setMajorTickSpacing(10);
         transparencySlider.setMinorTickSpacing(1);
@@ -119,11 +124,11 @@ public abstract class AbstractPanelComponent {
             window.setVisible(true);
         });
 
-        JButton switchButton = new JButton("Default");
-        switchButton.addActionListener(e -> showMainPanel());
+        JButton modeButton = new JButton("Debug");
+        modeButton.addActionListener(e -> showMainPanel());
 
         panel.add(transparencySlider);
-        panel.add(switchButton);
+        panel.add(modeButton);
 
         return panel;
     }
@@ -300,7 +305,7 @@ public abstract class AbstractPanelComponent {
         ThreadUtils.spinMoment(millis);
     }
 
-    protected void initMainPanel() {
+    private void initMainPanel() {
         mainPanel.removeAll();
         mainPanel.setLayout(null);
         mainPanel.setPreferredSize(null);
