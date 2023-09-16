@@ -5,6 +5,7 @@ import cn.xeblog.plugin.tools.AbstractTool;
 import cn.xeblog.plugin.tools.Tools;
 import cn.xeblog.plugin.tools.browser.ui.BrowserUI;
 
+import javax.swing.*;
 import java.awt.*;
 
 /**
@@ -16,11 +17,20 @@ public class Browser extends AbstractTool {
 
     private BrowserUI browserUI;
 
+    private JPanel mainPanel;
+
     @Override
     protected void init() {
         this.browserUI = new BrowserUI();
+
+        mainPanel= new JPanel();
         mainPanel.setLayout(new BorderLayout());
         mainPanel.add(this.browserUI, BorderLayout.CENTER);
+    }
+
+    @Override
+    protected JComponent getComponent() {
+        return mainPanel;
     }
 
     @Override
