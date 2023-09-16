@@ -1,6 +1,5 @@
 package cn.xeblog.plugin.game.minesweeper;
 
-import cn.hutool.core.util.StrUtil;
 import cn.xeblog.commons.enums.Game;
 import cn.xeblog.plugin.annotation.DoGame;
 import cn.xeblog.plugin.game.AbstractGame;
@@ -33,9 +32,6 @@ public class Minesweeper extends AbstractGame {
         mainPanel.add(Box.createVerticalStrut(10), BorderLayout.NORTH);
         mainPanel.add(Box.createHorizontalStrut(10), BorderLayout.EAST);
 
-        if (!init && minesweeperUI != null) {
-            level = minesweeperUI.getLevel();
-        }
         minesweeperUI = new MinesweeperUI(level);
         mainPanel.add(minesweeperUI, BorderLayout.CENTER);
         mainPanel.add(getBottomPanel(), BorderLayout.SOUTH);

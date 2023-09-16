@@ -1,11 +1,6 @@
 package cn.xeblog.plugin.game.minesweeper;
 
-import cn.xeblog.plugin.game.box.util.MapsUtils;
-import cn.xeblog.plugin.game.tetris.TetrisUI;
-import lombok.Getter;
-
 import java.awt.*;
-import java.net.URL;
 import java.util.Map;
 import java.util.HashMap;
 import java.awt.event.ActionEvent;
@@ -24,10 +19,6 @@ public class MinesweeperUI extends JPanel implements MouseListener, ActionListen
 
     /** 游戏逻辑 */
     private MinesweeperLogic  minesweeperLogic;
-
-    /** 难度 */
-    @Getter
-    private int               level              = 1;
 
     /** 初级难度（9×9，10个地雷） */
     final int                 EASY               = 1;
