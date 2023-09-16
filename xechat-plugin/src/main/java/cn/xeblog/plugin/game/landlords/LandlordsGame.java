@@ -37,6 +37,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     public static WindowMode windowMode;
 
     private AtomicInteger restartCounter;
+    private JPanel mainPanel;
     private JPanel startPanel;
     private JButton gameOverButton;
     private JButton outPokerButton;
@@ -210,6 +211,10 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
             restartCounter = new AtomicInteger();
         }
         restartCounter.incrementAndGet();
+
+        if (mainPanel == null) {
+            mainPanel = new JPanel();
+        }
 
         mainPanel.removeAll();
         mainPanel.setLayout(null);
@@ -1292,4 +1297,8 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         return debugMode == DebugMode.HARD;
     }
 
+    @Override
+    protected JComponent getComponent() {
+        return mainPanel;
+    }
 }
