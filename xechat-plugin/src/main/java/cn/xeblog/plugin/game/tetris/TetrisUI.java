@@ -37,6 +37,11 @@ public class TetrisUI extends JPanel implements KeyListener, ActionListener {
     private Timer             timer;
 
     /**
+     * 游戏是否结束
+     */
+    private boolean isOver;
+
+    /**
      * 功能：构造函数<br>
      */
     public TetrisUI(int speed) {
@@ -260,6 +265,11 @@ public class TetrisUI extends JPanel implements KeyListener, ActionListener {
             }
         }
 
+        if (this.isOver) {
+            g.setColor(new Color(238, 133, 133));
+            g.setFont(new Font("宋体", Font.PLAIN, 20));
+            g.drawString("游戏结束！", 100, 100);
+        }
     }
 
     /**
@@ -278,21 +288,23 @@ public class TetrisUI extends JPanel implements KeyListener, ActionListener {
         //得到移动后的新地图
         this.map = this.tetrisLogic.getMap();
 
-        //重绘界面
-        this.repaint();
-
         //判断是否Gave Over
         if (this.tetrisLogic.gameOver()) {
+            // 标记游戏已经结束
+            this.isOver = true;
             //屏蔽键盘信息
             this.isAcceptKey = false;
-            return;
         }
+
+        //重绘界面
+        this.repaint();
     }
 
     /**
      * 功能：开始新游戏<br>
      */
     public void newGame() {
+        this.isOver = false;
         this.isAcceptKey = true;
         this.initGame();
         timer.start();
@@ -302,6 +314,10 @@ public class TetrisUI extends JPanel implements KeyListener, ActionListener {
      * 功能：暂停游戏<br>
      */
     public void pauseGame() {
+        if (this.isOver) {
+            return;
+        }
+
         this.isAcceptKey = false;
         timer.stop();
     }
@@ -310,6 +326,10 @@ public class TetrisUI extends JPanel implements KeyListener, ActionListener {
      * 功能：继续游戏<br>
      */
     public void continueGame() {
+        if (this.isOver) {
+            return;
+        }
+
         this.isAcceptKey = true;
         timer.start();
     }
