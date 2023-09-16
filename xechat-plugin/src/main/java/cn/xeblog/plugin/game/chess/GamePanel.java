@@ -840,7 +840,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	 */
 	public void exit()
 	{
-		new ChineseChess().init();
+		this.chineseChess.init();
 	}
 
 	/**

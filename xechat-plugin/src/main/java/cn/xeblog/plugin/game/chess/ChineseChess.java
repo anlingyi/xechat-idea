@@ -22,6 +22,8 @@ import java.util.List;
 @DoGame(Game.CHINESE_CHESS)
 public class ChineseChess extends AbstractGame<ChessDTO> {
 
+    private JPanel mainPanel;
+
     // 开始界面
     private JPanel startPanel;
 
@@ -44,6 +46,10 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
 
     @Override
     protected void init() {
+        if (mainPanel == null) {
+            mainPanel = new JPanel();
+        }
+
         mainPanel.removeAll();
         mainPanel.setLayout(null);
         mainPanel.setEnabled(true);
@@ -264,4 +270,8 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
         }
     }
 
+    @Override
+    protected JComponent getComponent() {
+        return mainPanel;
+    }
 }
