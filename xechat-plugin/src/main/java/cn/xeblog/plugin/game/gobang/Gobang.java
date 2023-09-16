@@ -42,6 +42,9 @@ public class Gobang extends AbstractGame<GobangDTO> {
     // 棋子总数
     private static final int CHESS_TOTAL = ROWS * COLS;
 
+    // 主面板
+    private JPanel mainPanel;
+
     // 棋盘
     private JPanel chessPanel;
     // 提示
@@ -851,6 +854,10 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
     @Override
     protected void init() {
+        if (this.mainPanel == null) {
+            this.mainPanel = new JPanel();
+        }
+
         initStartPanel();
     }
 
@@ -1179,4 +1186,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
         return new ZhiZhangAIService(aiConfig);
     }
 
+    @Override
+    protected JComponent getComponent() {
+        return this.mainPanel;
+    }
 }
