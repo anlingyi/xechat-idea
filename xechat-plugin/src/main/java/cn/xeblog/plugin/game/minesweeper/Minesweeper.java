@@ -25,9 +25,11 @@ public class Minesweeper extends AbstractGame {
     /** 菜单控件 */
     JMenuItem             jmi_easy, jmi_normal, jmi_hard;
 
+    private JPanel mainPanel;
+
     @Override
     protected void start() {
-        initMainPanel();
+        initPanel();
         mainPanel.setLayout(new BorderLayout());
         mainPanel.add(Box.createVerticalStrut(10), BorderLayout.NORTH);
         mainPanel.add(Box.createHorizontalStrut(10), BorderLayout.EAST);
@@ -50,7 +52,7 @@ public class Minesweeper extends AbstractGame {
         init = true;
         level = 1;
 
-        initMainPanel();
+        initPanel();
 
         mainPanel.setMinimumSize(new Dimension(150, 300));
         JPanel menuJPanel = new JPanel();
@@ -81,6 +83,23 @@ public class Minesweeper extends AbstractGame {
         vBox.add(getExitButton());
 
         mainPanel.updateUI();
+    }
+
+    @Override
+    protected JComponent getComponent() {
+        return mainPanel;
+    }
+
+    protected void initPanel() {
+        if (mainPanel == null) {
+            mainPanel = new JPanel();
+        }
+
+        mainPanel.removeAll();
+        mainPanel.setLayout(null);
+        mainPanel.setPreferredSize(null);
+        mainPanel.setEnabled(true);
+        mainPanel.setVisible(true);
     }
 
     // 创建按钮面板
