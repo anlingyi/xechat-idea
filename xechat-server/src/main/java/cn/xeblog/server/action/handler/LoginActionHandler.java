@@ -122,7 +122,7 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
         User user = new User(id, username, body.getStatus(), ip, ipRegion, ctx.channel());
         user.setUuid(body.getUuid());
         user.setRole(isAdmin ? User.Role.ADMIN : User.Role.USER);
-        user.setPermit(GlobalConfig.USER_PERMIT_CACHE.getOrDefault(body.getUuid(), Permissions.ALL.getValue()));
+        user.setPermit(GlobalConfig.getUserPermit(user));
         user.setPlatform(body.getPlatform());
         UserCache.add(id, user);
 

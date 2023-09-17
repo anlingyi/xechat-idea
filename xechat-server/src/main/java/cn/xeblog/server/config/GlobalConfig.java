@@ -1,5 +1,7 @@
 package cn.xeblog.server.config;
 
+import cn.hutool.core.util.StrUtil;
+import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.enums.Permissions;
 
 import java.util.Map;
@@ -30,5 +32,56 @@ public class GlobalConfig {
      * 用户权限缓存
      */
     public static final Map<String, Integer> USER_PERMIT_CACHE = new ConcurrentHashMap<>(32);
+
+    /**
+     * 获取用户权限
+     *
+     * @param user
+     * @return
+     */
+    public static int getUserPermit(User user) {
+        int permit = Permissions.ALL.getValue();
+
+        if (user == null) {
+            return permit;
+        }
+
+        String uuid = user.getUuid();
+        String ip = user.getIp();
+
+        if (StrUtil.isNotBlank(user.getUuid())) {
+            Integer permitByUuid  = USER_PERMIT_CACHE.get(uuid);
+            if (permitByUuid != null) {
+                return permitByUuid;
+            }
+        }
+
+        if (StrUtil.isNotBlank(user.getIp())) {
+            Integer permitByIp = USER_PERMIT_CACHE.get(ip);
+            if (permitByIp != null) {
+                return permitByIp;
+            }
+        }
+
+        return permit;
+    }
+
+    /**
+     * 添加用户权限
+     *
+     * @param user
+     * @param permit
+     */
+    public static void addUserPermit(User user, int permit) {
+        String uuid = user.getUuid();
+        String ip = user.getIp();
+
+        if (StrUtil.isNotBlank(uuid)) {
+            USER_PERMIT_CACHE.put(uuid, permit);
+        }
+        if (StrUtil.isNotBlank(ip)) {
+            USER_PERMIT_CACHE.put(ip, permit);
+        }
+    }
 
 }
