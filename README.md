@@ -172,6 +172,8 @@ java -jar target/xechat-server-xxx.jar -p 1024 -swfile /Users/anlingyi/local/tes
 
 [和风天气相关配置参考](https://xeblog.cn/articles/101)
 
+[开放WS协议相关配置参考](https://xeblog.cn/articles/113)
+
 ### IDEA插件端
 
 #### 修改IDEA版本
