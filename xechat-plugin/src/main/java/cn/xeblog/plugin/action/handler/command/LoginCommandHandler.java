@@ -6,6 +6,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.xeblog.commons.entity.OnlineServer;
+import cn.xeblog.commons.util.CheckUtils;
 import cn.xeblog.commons.util.ServerUtils;
 import cn.xeblog.plugin.action.ConnectionAction;
 import cn.xeblog.plugin.action.ConsoleAction;
@@ -90,7 +91,11 @@ public class LoginCommandHandler extends AbstractCommandHandler {
             return;
         }
 
-        username = username.replaceAll("\\s*|\t|\r|\n", "");
+        if (!CheckUtils.checkUsername(username)) {
+            ConsoleAction.showSimpleMsg("用户名不合法，请修改后重试！");
+            return;
+        }
+
         if (username.length() > 12) {
             ConsoleAction.showSimpleMsg("用户名长度不能超过12个字符！");
             return;

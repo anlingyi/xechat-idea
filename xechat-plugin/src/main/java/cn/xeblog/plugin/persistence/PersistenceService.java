@@ -27,12 +27,14 @@ public class PersistenceService implements PersistentStateComponent<PersistenceD
         data.setReadConfig(DataCache.readConfig);
         data.setHistoryCommandList(CommandHistoryUtils.getHistoryList());
         data.setBrowserConfig(DataCache.browserConfig);
+        data.setUuid(DataCache.uuid);
         return data;
     }
 
     @Override
     public void loadState(@NotNull PersistenceData state) {
         data = state;
+        DataCache.uuid = data.getUuid();
         DataCache.username = data.getUsername();
         DataCache.msgNotify = data.getMsgNotify();
         DataCache.readConfig = ReadConfig.getInstance(state.getReadConfig());

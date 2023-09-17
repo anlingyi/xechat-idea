@@ -21,13 +21,14 @@ import java.awt.event.*;
 @DoGame(Game.PUSH_BOX)
 public class PushBox extends AbstractGame {
 
+    private JPanel mainPanel;
     private int level;
     private boolean init;
     private PushBoxUI pushBoxUI;
 
     @Override
     protected void start() {
-        initMainPanel();
+        initPanel();
         mainPanel.setLayout(new BorderLayout());
         mainPanel.add(Box.createVerticalStrut(10), BorderLayout.NORTH);
         mainPanel.add(Box.createHorizontalStrut(10), BorderLayout.EAST);
@@ -56,7 +57,7 @@ public class PushBox extends AbstractGame {
         init = true;
         level = 1;
 
-        initMainPanel();
+        initPanel();
 
         mainPanel.setMinimumSize(new Dimension(150, 300));
         JPanel menuJPanel = new JPanel();
@@ -88,6 +89,23 @@ public class PushBox extends AbstractGame {
         vBox.add(getExitButton());
 
         mainPanel.updateUI();
+    }
+
+    @Override
+    protected JPanel getComponent() {
+        return mainPanel;
+    }
+
+    protected void initPanel() {
+        if (mainPanel == null) {
+            mainPanel = new JPanel();
+        }
+
+        mainPanel.removeAll();
+        mainPanel.setLayout(null);
+        mainPanel.setPreferredSize(null);
+        mainPanel.setEnabled(true);
+        mainPanel.setVisible(true);
     }
 
     // 创建按钮面板

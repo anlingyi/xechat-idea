@@ -1,6 +1,6 @@
 # XEChat-Idea
 
-> Version 1.6.6-beta
+> Version 1.6.7-beta
 
 > 基于Netty的IDEA即时聊天插件：让你能够在IDEA里实现聊天、下棋、斗地主！(理论上支持JetBrains全系列开发工具🙂)
 
@@ -43,6 +43,8 @@
 * 数独（作者 @[Speciallei](https://github.com/Specialleiliei) ，感谢PR😊）
 * 推箱子（作者 @[Speciallei](https://github.com/Specialleiliei) ，感谢PR😊）
 * 中国象棋（支持2人联机、人机对战，作者 @[15738383930](https://github.com/15738383930) ，感谢PR😊）
+* 俄罗斯方块（作者 @[SherlockerSun](https://github.com/SherlockerSun) ，感谢PR😊）
+* 扫雷（作者 @[SherlockerSun](https://github.com/SherlockerSun) ，感谢PR😊）
 
 **工具类**
 
@@ -65,6 +67,12 @@
 ![](https://oss.xeblog.cn/prod/8e5bc4004afd48cf9fed4df18a66d070.png)
 
 ![](https://oss.xeblog.cn/prod/76dee7f5bb924dd59a5ffaaf333fc45c.png)
+
+![](https://oss.xeblog.cn/prod/ad9a78cf91b94ec0b0a622a8de8f38d9.png)
+
+![](https://oss.xeblog.cn/prod/8adc57b65371469ab6dec2d9e34cb38b.png)
+
+![](https://oss.xeblog.cn/prod/d5706e73906f4377921231898c3ddceb.png)
 
 ### 项目结构
 
@@ -150,6 +158,7 @@ java -jar target/xechat-server-xxx.jar
 * **设置ip2region文件**：`-ipfile {文件路径}`
 * **设置管理员令牌**：`-token {令牌}`
 * **指定外部配置文件**：`-path {文件路径}`
+* **开放WS协议**：`-enableWS {true|false}`
 
 具体的外部配置文件信息请看：`xechat-server/src/main/resources/config.setting`
 
@@ -163,6 +172,8 @@ java -jar target/xechat-server-xxx.jar -p 1024 -swfile /Users/anlingyi/local/tes
 
 [和风天气相关配置参考](https://xeblog.cn/articles/101)
 
+[开放WS协议相关配置参考](https://xeblog.cn/articles/113)
+
 ### IDEA插件端
 
 #### 修改IDEA版本
@@ -171,7 +182,7 @@ java -jar target/xechat-server-xxx.jar -p 1024 -swfile /Users/anlingyi/local/tes
 
 ```
 intellij {
-    version '2021.2'
+    version '2021.3'
 }
 ```
 
@@ -237,11 +248,12 @@ http://plugins.xeblog.cn
 version: '3'
 services:
   xechat:
-    image: anlingyi/xechat-server:1.6.5-beta
+    image: anlingyi/xechat-server:1.6.7-beta
     container_name: xechat-server
     restart: always
     ports:
       - 1024:1024
+      - 1025:1025
     volumes:
       - /home/xechat/logs:/var/log/xechat-server
       - /home/xechat/config/config.setting:/home/xechat/config/config.setting

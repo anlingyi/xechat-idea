@@ -14,9 +14,11 @@ import java.awt.*;
 @DoGame(Game.GAME_2048)
 public class Game2048 extends AbstractGame {
 
+    private JPanel mainPanel;
+
     @Override
     protected void init() {
-        initMainPanel();
+        initPanel();
         mainPanel.setMinimumSize(new Dimension(150, 200));
         JPanel startPanel = new JPanel();
         startPanel.setBounds(10, 10, 120, 200);
@@ -36,7 +38,7 @@ public class Game2048 extends AbstractGame {
 
     @Override
     protected void start() {
-        initMainPanel();
+        initPanel();
         int width = 240;
         int height = 300;
         mainPanel.setMinimumSize(new Dimension(width + 10, height + 10));
@@ -52,6 +54,23 @@ public class Game2048 extends AbstractGame {
         mainPanel.updateUI();
 
         gameUI.requestFocusInWindow();
+    }
+
+    private void initPanel() {
+        if (mainPanel == null) {
+            mainPanel = new JPanel();
+        }
+
+        mainPanel.removeAll();
+        mainPanel.setLayout(null);
+        mainPanel.setPreferredSize(null);
+        mainPanel.setEnabled(true);
+        mainPanel.setVisible(true);
+    }
+
+    @Override
+    protected JPanel getComponent() {
+        return mainPanel;
     }
 
     private JButton getStartGameButton() {

@@ -19,9 +19,12 @@ public class NonGluttonousSnake extends AbstractGame {
 
     private GameMode gameMode;
 
+    private JPanel mainPanel;
+
     @Override
     protected void init() {
-        initMainPanel();
+        initPanel();
+
         mainPanel.setMinimumSize(new Dimension(150, 200));
         JPanel startPanel = new JPanel();
         startPanel.setBounds(10, 10, 120, 200);
@@ -64,7 +67,7 @@ public class NonGluttonousSnake extends AbstractGame {
 
     @Override
     protected void start() {
-        initMainPanel();
+        initPanel();
 
         int width = 400;
         int height = 300;
@@ -100,6 +103,23 @@ public class NonGluttonousSnake extends AbstractGame {
         JButton button = new JButton("返回游戏");
         button.addActionListener(e -> init());
         return button;
+    }
+
+    @Override
+    protected JPanel getComponent() {
+        return mainPanel;
+    }
+
+    private void initPanel() {
+        if (mainPanel == null) {
+            mainPanel = new JPanel();
+        }
+
+        mainPanel.removeAll();
+        mainPanel.setLayout(null);
+        mainPanel.setPreferredSize(null);
+        mainPanel.setEnabled(true);
+        mainPanel.setVisible(true);
     }
 
 }

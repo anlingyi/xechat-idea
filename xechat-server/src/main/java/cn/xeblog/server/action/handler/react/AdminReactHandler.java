@@ -88,7 +88,7 @@ public class AdminReactHandler extends AbstractReactHandler<AdminReact, AdminRea
                     }
                 }
 
-                GlobalConfig.USER_PERMIT_CACHE.put(execUser.getUuid(), execUser.getPermit());
+                GlobalConfig.addUserPermit(user, execUser.getPermit());
                 ChannelAction.send(ResponseBuilder.build(execUser, null, MessageType.STATUS_UPDATE));
         }
 

@@ -45,4 +45,9 @@ public class PersistenceData {
      */
     private BrowserConfig browserConfig;
 
+    /**
+     * uuid
+     */
+    private String uuid;
+
 }

@@ -2,6 +2,7 @@ package cn.xeblog.server.action.handler;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.Singleton;
+import cn.hutool.core.util.StrUtil;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.entity.UserMsgDTO;
 import cn.xeblog.commons.enums.Action;
@@ -34,6 +35,11 @@ public class ChatActionHandler extends AbstractActionHandler<UserMsgDTO> {
 
         if (body.getMsgType() == UserMsgDTO.MsgType.TEXT) {
             String msg = Convert.toStr(body.getContent());
+            if (StrUtil.length(msg) > 200) {
+                user.send(ResponseBuilder.system("发送的内容长度不能超过200字符！"));
+                return;
+            }
+
             BaiDuFyUtil baiDuFyUtil = Singleton.get(BaiDuFyUtil.class.getName(), () -> new BaiDuFyUtil("", ""));
             body.setContent(baiDuFyUtil.translate(SensitiveWordUtils.loveChina(msg)));
         } else {

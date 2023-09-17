@@ -24,6 +24,7 @@ import java.util.Objects;
 @DoGame(Game.SUDOKU)
 public class Sudoku extends AbstractGame {
 
+    private JPanel mainPanel;
     private Level level;
     private PanelSize panelSize;
     private RealTimeTip realTimeTip;
@@ -39,7 +40,7 @@ public class Sudoku extends AbstractGame {
     @Override
     protected void init() {
 
-        initMainPanel();
+        initPanel();
         level = Level.EASY;
         panelSize = PanelSize.MIN;
         realTimeTip = RealTimeTip.DIS_ENABLE;
@@ -104,7 +105,7 @@ public class Sudoku extends AbstractGame {
 
     @Override
     protected void start() {
-        initMainPanel();
+        initPanel();
 
         mainPanel.setMinimumSize(new Dimension(panelSize.getMainWith(), panelSize.getMainHeight()));
         mainPanel.setLayout(new BorderLayout());
@@ -118,6 +119,23 @@ public class Sudoku extends AbstractGame {
 
         // 解密  困难以上模式解密可能会比较耗时，异步解密后开启按钮操作
         ThreadUtil.execAsync(() -> sudokuGui.doSolution(Lists.newArrayList(commit, tips, another)));
+    }
+
+    private void initPanel() {
+        if (mainPanel == null) {
+            mainPanel = new JPanel();
+        }
+
+        mainPanel.removeAll();
+        mainPanel.setLayout(null);
+        mainPanel.setPreferredSize(null);
+        mainPanel.setEnabled(true);
+        mainPanel.setVisible(true);
+    }
+
+    @Override
+    protected JPanel getComponent() {
+        return mainPanel;
     }
 
     // 创建按钮面板

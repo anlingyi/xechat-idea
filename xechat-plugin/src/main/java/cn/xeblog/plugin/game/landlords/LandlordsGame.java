@@ -37,6 +37,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     public static WindowMode windowMode;
 
     private AtomicInteger restartCounter;
+    private JPanel mainPanel;
     private JPanel startPanel;
     private JButton gameOverButton;
     private JButton outPokerButton;
@@ -50,6 +51,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     private JPanel playerTopPanel;
     private JLabel titleLabel;
     private JButton backButton;
+    private JButton restartButton;
     private JPanel pokerListPanel;
     private JPanel showPokerPanel;
     private JPanel playerMainPanel;
@@ -167,6 +169,10 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         }
 
         public void showTips(String tips) {
+            if (tipsLabel == null) {
+                return;
+            }
+
             tipsLabel.setText(tips);
             tipsLabel.updateUI();
         }
@@ -206,10 +212,13 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     @Override
     protected void init() {
         state = 0;
-        if (restartCounter == null) {
-            restartCounter = new AtomicInteger();
+        if (restartCounter != null) {
+            restartCounter.incrementAndGet();
         }
-        restartCounter.incrementAndGet();
+
+        if (mainPanel == null) {
+            mainPanel = new JPanel();
+        }
 
         mainPanel.removeAll();
         mainPanel.setLayout(null);
@@ -270,7 +279,13 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
 
     @Override
     protected void start() {
+        if (restartCounter == null) {
+            restartCounter = new AtomicInteger();
+        }
+        restartCounter.incrementAndGet();
+
         initValue();
+
         GameRoom gameRoom = getRoom();
         if (gameRoom != null) {
             gameMode = GameMode.getMode(gameRoom.getGameMode());
@@ -305,7 +320,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
                     List<String> joinedAIList = new ArrayList<>(aiPlayerList);
                     joinedAIList.removeAll(userList);
                     Collections.shuffle(joinedAIList);
-                    List<String> aiList = joinedAIList.subList(0, nums);
+                    List<String> aiList = joinedAIList.subList(0, Math.min(joinedAIList.size(), nums));
                     aiList.forEach(ai -> aiPlayerActionMap.put(ai, null));
                     sendMsg(LandlordsGameDTO.MsgType.JOIN_ROBOTS, GameAction.getNickname(), new ArrayList<>(aiList));
                 } else {
@@ -589,6 +604,10 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     }
 
     private void showGamePanel() {
+        if (mainPanel == null) {
+            mainPanel = new JPanel();
+        }
+
         mainPanel.removeAll();
         mainPanel.setLayout(new BorderLayout());
         mainPanel.setMinimumSize(new Dimension(490, 350));
@@ -647,7 +666,9 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         JPanel mainBottomPanel = new JPanel();
         if (getRoom() == null) {
             backButton = getBackButton();
+            restartButton = getRestartButton();
             mainBottomPanel.add(backButton);
+            mainBottomPanel.add(restartButton);
         }
         gameOverButton = getGameOverButton();
         gameOverButton.setVisible(false);
@@ -1066,8 +1087,16 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     }
 
     private JButton getBackButton() {
-        JButton button = new JButton(isHard() ? "Back Debug" : "返回游戏");
+        JButton button = new JButton(isHard() ? "Back Debug" : "返回");
         button.addActionListener(e -> init());
+        return button;
+    }
+
+    private JButton getRestartButton() {
+        JButton button = new JButton(isHard() ? "Restart" : "再来");
+        button.setEnabled(false);
+        button.addActionListener(e -> start());
+        invoke(() -> button.setEnabled(true), 3000);
         return button;
     }
 
@@ -1198,8 +1227,9 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
 
     private void flushDebugMode() {
         String title = "斗地主！";
-        String backButtonText = "返回游戏";
-        String gameOverButtonText = "游戏结束";
+        String backButtonText = "返回";
+        String restartButtonText = "再来";
+        String gameOverButtonText = "结束";
         String notOutPokerButtonText = "过！";
         String outPokerButtonText = "出牌";
         String resetButtonText = "重置";
@@ -1207,6 +1237,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         if (isHard()) {
             title = "Synergy Debugging";
             backButtonText = "Back";
+            restartButtonText = "Restart";
             gameOverButtonText = "Debug Over";
             notOutPokerButtonText = "Run!";
             outPokerButtonText = "Debug";
@@ -1221,6 +1252,10 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         if (backButton != null) {
             backButton.setText(backButtonText);
             backButton.updateUI();
+        }
+        if (restartButton != null) {
+            restartButton.setText(restartButtonText);
+            restartButton.updateUI();
         }
         if (notOutPokerButton != null) {
             notOutPokerButton.setText(notOutPokerButtonText);
@@ -1292,4 +1327,8 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
         return debugMode == DebugMode.HARD;
     }
 
+    @Override
+    protected JPanel getComponent() {
+        return mainPanel;
+    }
 }

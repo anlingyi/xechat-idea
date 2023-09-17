@@ -10,6 +10,7 @@ import cn.xeblog.commons.enums.Action;
 import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.commons.enums.Permissions;
 import cn.xeblog.commons.enums.Platform;
+import cn.xeblog.commons.util.CheckUtils;
 import cn.xeblog.server.action.ChannelAction;
 import cn.xeblog.server.annotation.DoAction;
 import cn.xeblog.server.builder.ResponseBuilder;
@@ -75,7 +76,26 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
         }
 
         boolean isReconnect = body.isReconnected();
-        String username = body.getUsername().replaceAll("\\s*|\t|\r|\n", "");
+        String username = body.getUsername();
+
+        if (StrUtil.isBlank(username)) {
+            ctx.writeAndFlush(ResponseBuilder.system("昵称不能为空！"));
+            ctx.close();
+            return;
+        }
+
+        if (!CheckUtils.checkUsername(username)) {
+            ctx.writeAndFlush(ResponseBuilder.system("昵称不合法，请修改后重试！"));
+            ctx.close();
+            return;
+        }
+
+        if (username.length() > 12) {
+            ctx.writeAndFlush(ResponseBuilder.system("昵称长度不能超过12个字符！"));
+            ctx.close();
+            return;
+        }
+
         if (UserCache.existUsername(username)) {
             ctx.writeAndFlush(ResponseBuilder.system("[" + username + "]昵称重复！"));
             ctx.close();
@@ -102,7 +122,7 @@ public class LoginActionHandler implements ActionHandler<LoginDTO> {
         User user = new User(id, username, body.getStatus(), ip, ipRegion, ctx.channel());
         user.setUuid(body.getUuid());
         user.setRole(isAdmin ? User.Role.ADMIN : User.Role.USER);
-        user.setPermit(GlobalConfig.USER_PERMIT_CACHE.getOrDefault(body.getUuid(), Permissions.ALL.getValue()));
+        user.setPermit(GlobalConfig.getUserPermit(user));
         user.setPlatform(body.getPlatform());
         UserCache.add(id, user);
 

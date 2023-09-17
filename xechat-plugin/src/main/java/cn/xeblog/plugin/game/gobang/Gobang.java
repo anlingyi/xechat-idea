@@ -42,6 +42,9 @@ public class Gobang extends AbstractGame<GobangDTO> {
     // 棋子总数
     private static final int CHESS_TOTAL = ROWS * COLS;
 
+    // 主面板
+    private JPanel mainPanel;
+
     // 棋盘
     private JPanel chessPanel;
     // 提示
@@ -191,12 +194,12 @@ public class Gobang extends AbstractGame<GobangDTO> {
         switch (status) {
             case 1:
                 if (!isDebug) {
-                    showTips("游戏结束：" + username + "这个菜鸡赢了！");
+                    showTips("游戏结束：" + username + "赢了！");
                 }
                 break;
             case 2:
                 if (!isDebug) {
-                    showTips("游戏结束：平局~ 卧槽？？？");
+                    showTips("游戏结束：平局~");
                 }
                 break;
             default:
@@ -298,12 +301,13 @@ public class Gobang extends AbstractGame<GobangDTO> {
             regretButton = getRegretButton();
             chessButtonPanel.add(regretButton);
 
-            JButton restartButton = new JButton("重新开始");
-            restartButton.addActionListener(e -> {
-                mainPanel.removeAll();
-                initStartPanel();
-                mainPanel.updateUI();
-            });
+            JButton restartButton = new JButton("再来");
+            restartButton.addActionListener(e -> initChessPanel());
+
+            JButton backButton = new JButton("返回");
+            backButton.addActionListener(e -> initStartPanel());
+
+            gameButtonPanel.add(backButton);
             gameButtonPanel.add(restartButton);
             gameButtonPanel.add(getOutputChessRecordButton());
             gameButtonPanel.add(getExitButton());
@@ -851,6 +855,10 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
     @Override
     protected void init() {
+        if (this.mainPanel == null) {
+            this.mainPanel = new JPanel();
+        }
+
         initStartPanel();
     }
 
@@ -1179,4 +1187,8 @@ public class Gobang extends AbstractGame<GobangDTO> {
         return new ZhiZhangAIService(aiConfig);
     }
 
+    @Override
+    protected JPanel getComponent() {
+        return this.mainPanel;
+    }
 }
