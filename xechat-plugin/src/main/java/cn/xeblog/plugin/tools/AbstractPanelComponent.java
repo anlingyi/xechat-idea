@@ -86,7 +86,11 @@ public abstract class AbstractPanelComponent {
         JComponent component = this.getComponent();
         if (component != null) {
             Dimension minimumSize = component.getMinimumSize();
-            this.window.setSize((int) minimumSize.getWidth() + 30, (int) minimumSize.getHeight() + 80);
+            int width = (int) minimumSize.getWidth();
+            int height = (int) minimumSize.getHeight();
+            width = Math.max(240, width);
+            height = Math.max(150, height);
+            this.window.setSize(width, height);
             this.window.add(component, BorderLayout.CENTER);
         }
 
