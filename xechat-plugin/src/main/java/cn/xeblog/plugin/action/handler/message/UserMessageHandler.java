@@ -1,10 +1,7 @@
 package cn.xeblog.plugin.action.handler.message;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.thread.GlobalThreadPool;
-import cn.xeblog.commons.constants.IpConstants;
-import cn.xeblog.commons.entity.IpRegion;
 import cn.xeblog.commons.entity.Response;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.entity.UserMsgDTO;
@@ -67,8 +64,6 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
 
     private void renderName(Response<UserMsgDTO> response) {
         User user = response.getUser();
-        IpRegion region = user.getRegion();
-        final String shortProvince = MapUtil.getStr(IpConstants.SHORT_PROVINCE, region.getProvince(), region.getCountry());
         String platform = user.getPlatform() == Platform.WEB ? " ༄" : " ♨";
         String roleDisplay = "";
         if (user.getRole() == User.Role.ADMIN) {
@@ -76,7 +71,7 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
         }
 
         ConsoleAction.renderText(
-                String.format("[%s][%s] %s (%s)%s%s：", response.getTime(), shortProvince, user.getUsername(),
+                String.format("[%s][%s] %s (%s)%s%s：", response.getTime(), user.getShortRegion(), user.getUsername(),
                         user.getStatus().getName(), platform, roleDisplay), Style.USER_NAME);
     }
 

@@ -1,5 +1,7 @@
 package cn.xeblog.commons.entity;
 
+import cn.hutool.core.map.MapUtil;
+import cn.xeblog.commons.constants.IpConstants;
 import cn.xeblog.commons.enums.Permissions;
 import cn.xeblog.commons.enums.Platform;
 import cn.xeblog.commons.enums.UserStatus;
@@ -48,18 +50,25 @@ public class User implements Serializable {
     private UserStatus status;
 
     /**
+     * 地区简称
+     */
+    @Getter
+    @Setter
+    private String shortRegion;
+
+    /**
      * 用户IP
      */
     @Getter
     @Setter
-    private String ip;
+    private transient String ip;
 
     /**
      * 用户所在区域
      */
     @Getter
     @Setter
-    private IpRegion region;
+    private transient IpRegion region;
 
     /**
      * 用户角色
@@ -104,6 +113,7 @@ public class User implements Serializable {
         this.region = region;
         this.channel = channel;
         this.platform = Platform.IDEA;
+        this.shortRegion = MapUtil.getStr(IpConstants.SHORT_PROVINCE, region.getProvince(), region.getCountry());
     }
 
     public void send(Response response) {
