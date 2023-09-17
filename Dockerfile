@@ -5,7 +5,7 @@ ENV JAVA_OPTS="-Xms512m -Xmx512m"
 ENV PARAMS="-path /home/xechat/config/config.setting"
 ENV TZ="Asia/Shanghai"
 
-EXPOSE 1024
+EXPOSE 1024 1025
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 ADD xechat-server/target/xechat-server-*.jar /home/xechat/server.jar
