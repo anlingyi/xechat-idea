@@ -114,12 +114,12 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
             }
             if (body.getOption().equals(ChessDTO.Option.SURRENDER)) {
                 JOptionPane.showMessageDialog(gamePanel, "对方投降了！");
-                gamePanel.gameOver();
+                invoke(() -> gamePanel.gameOver());
                 return;
             }
             if (body.getOption().equals(ChessDTO.Option.GAME_OVER)) {
                 JOptionPane.showMessageDialog(gamePanel, "胜败乃兵家常事，少侠请重新来过！");
-                gamePanel.gameOver();
+                invoke(() -> gamePanel.gameOver());
                 return;
             }
 
@@ -169,6 +169,10 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
             chessCache.currentPlayer = Arrays.stream(ChessCache.Player.values()).filter(o -> o.getName().equals(jcb_playFirst.getSelectedItem().toString())).findFirst().get();
             chessCache.currentBattle = Arrays.stream(ChessCache.Battle.values()).filter(o -> o.getName().equals(jcb_fightType.getSelectedItem().toString())).findFirst().get();
             chessCache.currentUI = Arrays.stream(ChessDTO.UI.values()).filter(o -> o.getName().equals(jcb_UIType.getSelectedItem().toString())).findFirst().get();
+        }
+
+        if (mainPanel == null) {
+            mainPanel = new JPanel();
         }
 
         mainPanel.removeAll();
@@ -271,7 +275,7 @@ public class ChineseChess extends AbstractGame<ChessDTO> {
     }
 
     @Override
-    protected JComponent getComponent() {
+    protected JPanel getComponent() {
         return mainPanel;
     }
 }

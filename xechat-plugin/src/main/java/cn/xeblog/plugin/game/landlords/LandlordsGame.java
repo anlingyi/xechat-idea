@@ -212,10 +212,9 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     @Override
     protected void init() {
         state = 0;
-        if (restartCounter == null) {
-            restartCounter = new AtomicInteger();
+        if (restartCounter != null) {
+            restartCounter.incrementAndGet();
         }
-        restartCounter.incrementAndGet();
 
         if (mainPanel == null) {
             mainPanel = new JPanel();
@@ -280,7 +279,11 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
 
     @Override
     protected void start() {
+        if (restartCounter == null) {
+            restartCounter = new AtomicInteger();
+        }
         restartCounter.incrementAndGet();
+
         initValue();
 
         GameRoom gameRoom = getRoom();
@@ -601,6 +604,10 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     }
 
     private void showGamePanel() {
+        if (mainPanel == null) {
+            mainPanel = new JPanel();
+        }
+
         mainPanel.removeAll();
         mainPanel.setLayout(new BorderLayout());
         mainPanel.setMinimumSize(new Dimension(490, 350));
@@ -1321,7 +1328,7 @@ public class LandlordsGame extends AbstractGame<LandlordsGameDTO> {
     }
 
     @Override
-    protected JComponent getComponent() {
+    protected JPanel getComponent() {
         return mainPanel;
     }
 }

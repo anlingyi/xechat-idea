@@ -69,7 +69,7 @@ public class Game2048 extends AbstractGame {
     }
 
     @Override
-    protected JComponent getComponent() {
+    protected JPanel getComponent() {
         return mainPanel;
     }
 

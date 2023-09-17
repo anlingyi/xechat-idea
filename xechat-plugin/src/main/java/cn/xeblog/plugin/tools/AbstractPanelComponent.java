@@ -9,6 +9,7 @@ import com.intellij.openapi.application.ApplicationManager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -53,26 +54,41 @@ public abstract class AbstractPanelComponent {
      */
     protected abstract JComponent getComponent();
 
+    protected final void flush() {
+        if (window != null) {
+            this.openWindow();
+        } else {
+            this.showMainPanel();
+        }
+    }
+
     protected final void showMainPanel() {
+        this.showMainPanel(this.getComponent());
+    }
+
+    protected final void showMainPanel(JComponent component) {
         this.closeWindow();
         this.initMainPanel();
 
         this.mainPanel.setLayout(new BorderLayout());
-        JComponent component = this.getComponent();
         if (component != null) {
-            this.mainPanel.add(this.getComponent(), BorderLayout.CENTER);
+            this.mainPanel.add(component, BorderLayout.CENTER);
         }
 
         JPanel panel = new JPanel();
         JButton switchButton = new JButton("Free!");
-        switchButton.addActionListener(e -> openWindow());
+        switchButton.addActionListener(e -> openWindow(component));
         panel.add(switchButton);
         this.mainPanel.add(panel, BorderLayout.SOUTH);
 
         this.mainPanel.updateUI();
     }
 
-    protected final void openWindow() {
+    protected final  void openWindow() {
+        this.openWindow(this.getComponent());
+    }
+
+    protected final void openWindow(JComponent component) {
         this.initWindow();
         this.addWindowListener();
 
@@ -80,16 +96,15 @@ public abstract class AbstractPanelComponent {
         this.window.add(Box.createHorizontalStrut(10), BorderLayout.WEST);
         this.window.add(Box.createHorizontalStrut(10), BorderLayout.EAST);
 
-        JPanel buttonPanel = this.getWindowButtonPanel();
+        JPanel buttonPanel = this.getWindowButtonPanel(e -> showMainPanel(component));
         this.window.add(buttonPanel, BorderLayout.SOUTH);
 
-        JComponent component = this.getComponent();
         if (component != null) {
             Dimension minimumSize = component.getMinimumSize();
             int width = (int) minimumSize.getWidth();
             int height = (int) minimumSize.getHeight();
-            width = Math.max(240, width);
-            height = Math.max(150, height);
+            width = Math.max(250, width) + 50;
+            height = Math.max(200, height) + 50;
             this.window.setSize(width, height);
             this.window.add(component, BorderLayout.CENTER);
         }
@@ -109,7 +124,7 @@ public abstract class AbstractPanelComponent {
         this.window.setResizable(true);
     }
 
-    private JPanel getWindowButtonPanel() {
+    private JPanel getWindowButtonPanel(ActionListener modeButtonAction) {
         JPanel panel = new JPanel();
         panel.setSize(200, 50);
 
@@ -129,7 +144,7 @@ public abstract class AbstractPanelComponent {
         });
 
         JButton modeButton = new JButton("Debug");
-        modeButton.addActionListener(e -> showMainPanel());
+        modeButton.addActionListener(modeButtonAction);
 
         panel.add(transparencySlider);
         panel.add(modeButton);
@@ -256,7 +271,7 @@ public abstract class AbstractPanelComponent {
     }
 
     private int getCursorRegion(Point point) {
-        int border = 5;
+        int border = 10;
         int x = point.x;
         int y = point.y;
         int width = window.getWidth();

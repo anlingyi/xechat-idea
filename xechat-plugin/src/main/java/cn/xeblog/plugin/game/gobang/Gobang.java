@@ -1188,7 +1188,7 @@ public class Gobang extends AbstractGame<GobangDTO> {
     }
 
     @Override
-    protected JComponent getComponent() {
+    protected JPanel getComponent() {
         return this.mainPanel;
     }
 }
