@@ -262,6 +262,9 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
         Dimension mainDimension = new Dimension(width + 180, height + 50);
 
+        if (this.mainPanel == null) {
+            this.mainPanel = new JPanel();
+        }
         mainPanel.removeAll();
         mainPanel.setLayout(new BorderLayout());
         mainPanel.setMinimumSize(mainDimension);
@@ -748,6 +751,10 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
     private void initStartPanel() {
         this.aiService = null;
+
+        if (this.mainPanel == null) {
+            this.mainPanel = new JPanel();
+        }
         mainPanel.removeAll();
         mainPanel.setLayout(null);
         mainPanel.setEnabled(true);
@@ -855,10 +862,6 @@ public class Gobang extends AbstractGame<GobangDTO> {
 
     @Override
     protected void init() {
-        if (this.mainPanel == null) {
-            this.mainPanel = new JPanel();
-        }
-
         initStartPanel();
     }
 
