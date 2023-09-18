@@ -1,6 +1,6 @@
 # XEChat-Idea
 
-> Version 1.6.7-beta1
+> Version 1.6.7-beta0
 
 > 基于Netty的IDEA即时聊天插件：让你能够在IDEA里实现聊天、下棋、斗地主！(理论上支持JetBrains全系列开发工具🙂)
 
