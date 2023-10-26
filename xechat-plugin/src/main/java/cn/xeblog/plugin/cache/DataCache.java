@@ -6,6 +6,7 @@ import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.enums.UserStatus;
 import cn.xeblog.plugin.action.ConnectionAction;
 import cn.xeblog.plugin.tools.browser.config.BrowserConfig;
+import cn.xeblog.plugin.tools.encourage.cache.EncourageCache;
 import cn.xeblog.plugin.tools.read.ReadConfig;
 import com.intellij.openapi.project.Project;
 import io.netty.channel.Channel;
@@ -76,7 +77,6 @@ public class DataCache {
     public static List<OnlineServer> serverList;
 
     /**
-
      * 阅读配置
      */
     public static ReadConfig readConfig = new ReadConfig();
@@ -94,7 +94,7 @@ public class DataCache {
      */
     public static User getUser(String username) {
         if (userMap == null) {
-             return null;
+            return null;
         }
 
         return userMap.get(username);
@@ -137,6 +137,10 @@ public class DataCache {
 
         if (StrUtil.equals(origin.getId(), user.getId())) {
             userMap.remove(user.getUsername());
+        }
+
+        if (EncourageCache.privateChatUser != null && StrUtil.equals(origin.getId(), user.getId())) {
+            EncourageCache.privateChatUser = null;
         }
     }
 

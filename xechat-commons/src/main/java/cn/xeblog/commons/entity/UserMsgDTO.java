@@ -39,6 +39,7 @@ public class UserMsgDTO implements Serializable {
 
     public enum MsgType {
         TEXT,
+        PRIVATE,
         IMAGE
     }
 

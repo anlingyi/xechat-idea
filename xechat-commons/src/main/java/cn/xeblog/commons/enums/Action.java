@@ -59,5 +59,9 @@ public enum Action {
     /**
      * react
      */
-    REACT;
+    REACT,
+    /**
+     * 统计在线用户
+     */
+    STATISTICS;
 }

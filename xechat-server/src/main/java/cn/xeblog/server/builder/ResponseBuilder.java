@@ -1,6 +1,7 @@
 package cn.xeblog.server.builder;
 
 import cn.xeblog.commons.entity.Response;
+import cn.xeblog.commons.entity.SystemStateDTO;
 import cn.xeblog.commons.entity.User;
 import cn.xeblog.commons.entity.react.result.ReactResult;
 import cn.xeblog.commons.enums.MessageType;
@@ -16,7 +17,7 @@ public class ResponseBuilder {
     }
 
     public static Response system(String msg) {
-        return build(null, msg, MessageType.SYSTEM);
+        return build(null, new SystemStateDTO(msg), MessageType.SYSTEM);
     }
 
     public static Response build(User user, Object msg, MessageType messageType) {

@@ -11,6 +11,7 @@ import cn.xeblog.commons.enums.Permissions;
 import cn.xeblog.server.action.ChannelAction;
 import cn.xeblog.server.annotation.DoAction;
 import cn.xeblog.server.builder.ResponseBuilder;
+import cn.xeblog.server.cache.UserCache;
 import cn.xeblog.server.config.GlobalConfig;
 import cn.xeblog.server.util.BaiDuFyUtil;
 import cn.xeblog.server.util.SensitiveWordUtils;
@@ -42,12 +43,32 @@ public class ChatActionHandler extends AbstractActionHandler<UserMsgDTO> {
 
             BaiDuFyUtil baiDuFyUtil = Singleton.get(BaiDuFyUtil.class.getName(), () -> new BaiDuFyUtil("", ""));
             body.setContent(baiDuFyUtil.translate(SensitiveWordUtils.loveChina(msg)));
+            ChannelAction.send(user, body, MessageType.USER);
+        } else if (body.getMsgType() == UserMsgDTO.MsgType.PRIVATE) {
+            String toUserName = body.getToUsers()[0];
+            String msg = Convert.toStr(body.getContent());
+
+            // 消息原封不动发给自己 不然看不到自己发了啥
+            user.send(ResponseBuilder.build(user, body, MessageType.USER));
+            if (user.getUsername().equals(toUserName)) {
+                user.send(ResponseBuilder.system("发给自己？是不是很无聊？"));
+                return;
+            }
+
+            // 发给对方
+            User toUser = UserCache.getUserByUsername(toUserName);
+            if (toUser != null) {
+                UserMsgDTO msgDTO = new UserMsgDTO(StrUtil.format("私聊消息::{}", msg), new String[]{toUserName});
+                toUser.send(ResponseBuilder.build(user, msgDTO, MessageType.USER));
+            } else {
+                user.send(ResponseBuilder.system(StrUtil.format("用户[{}]不存在！", toUserName)));
+            }
+
         } else {
             // 暂时不支持这种形式的消息，全部转为文本消息
             body.setMsgType(UserMsgDTO.MsgType.TEXT);
+            ChannelAction.send(user, body, MessageType.USER);
         }
-
-        ChannelAction.send(user, body, MessageType.USER);
     }
 
 }
