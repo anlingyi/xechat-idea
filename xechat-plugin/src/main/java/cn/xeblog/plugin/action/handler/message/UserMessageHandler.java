@@ -16,6 +16,7 @@ import cn.xeblog.plugin.action.handler.ReactResultConsumer;
 import cn.xeblog.plugin.annotation.DoMessage;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.enums.Style;
+import cn.xeblog.plugin.tools.encourage.cache.EncourageCache;
 import cn.xeblog.plugin.util.NotifyUtils;
 import com.intellij.ide.actions.OpenFileAction;
 import com.intellij.openapi.application.ApplicationManager;
@@ -43,6 +44,14 @@ public class UserMessageHandler extends AbstractMessageHandler<UserMsgDTO> {
         User user = response.getUser();
         UserMsgDTO body = response.getBody();
         boolean isImage = body.getMsgType() == UserMsgDTO.MsgType.IMAGE;
+
+        if (EncourageCache.checkBlock(user)) {
+            if (EncourageCache.showTips) {
+                ConsoleAction.showSystemMsg(response.getTime(), String.format("用户[%s]发了[%s]", user.getUsername(), isImage ? "一张图片" : "一条消息"));
+            }
+            return;
+        }
+
         if (isImage) {
             renderImage(response);
         } else {

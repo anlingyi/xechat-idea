@@ -17,6 +17,8 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -217,6 +219,11 @@ public class ConsoleAction implements MainWindowInitializedEventListener {
             ConsoleAction.showSimpleMsg(v.getCommand());
             v.exec();
         }));
+    }
+
+    public static void showSystemMsg(String msg) {
+        String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM/dd HH:mm"));
+        showSystemMsg(time, msg);
     }
 
     public static void showSystemMsg(String time, String msg) {

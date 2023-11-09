@@ -11,6 +11,7 @@ import cn.xeblog.commons.enums.Action;
 import cn.xeblog.plugin.cache.DataCache;
 import cn.xeblog.plugin.enums.Command;
 import cn.xeblog.plugin.listener.MainWindowInitializedEventListener;
+import cn.xeblog.plugin.tools.encourage.cache.EncourageCache;
 import cn.xeblog.plugin.ui.MainWindow;
 import cn.xeblog.plugin.util.CommandHistoryUtils;
 import cn.xeblog.plugin.util.UploadUtils;
@@ -28,8 +29,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.*;
 import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author anlingyi
@@ -300,46 +302,25 @@ public class InputAction implements MainWindowInitializedEventListener {
                 Command.handle(content);
             } else {
                 if (DataCache.isOnline) {
-                    if (sendCounter == 0 && System.currentTimeMillis() - sendCounterStartTime < INTERVAL_TIME) {
-                        sendCounterStartTime = 0;
-                        freezeEndTime = System.currentTimeMillis() + FREEZE_TIME;
-                    }
 
-                    long endTime = freezeEndTime - System.currentTimeMillis();
-                    if (endTime > 0) {
-                        ConsoleAction.showSimpleMsg("消息发送过于频繁，请于" + endTime / 1000 + "s后再发...");
+                    if (checkFreeze()) {
                         return;
                     }
 
-                    String[] toUsers = null;
-                    List<String> toUserList = ReUtil.findAll("(@)([^\\s]+)([\\s]*)", content, 2);
-                    if (CollectionUtil.isNotEmpty(toUserList)) {
-                        List<String> removeList = new ArrayList<>();
-                        for (String toUser : toUserList) {
-                            if (DataCache.getUser(toUser) == null) {
-                                removeList.add(toUser);
-                            }
-                        }
-                        if (!removeList.isEmpty()) {
-                            toUserList.removeAll(removeList);
-                        }
-                        if (!toUserList.isEmpty()) {
-                            toUserList.add(DataCache.username);
-                            toUsers = ArrayUtil.toArray(new HashSet<>(toUserList), String.class);
-                        }
+                    UserMsgDTO.MsgType msgType = UserMsgDTO.MsgType.TEXT;
+                    String[] toUsers;
+                    if (EncourageCache.supportPrivateChat && EncourageCache.privateChatUser != null) {
+                        toUsers = new String[]{EncourageCache.privateChatUser.getUsername()};
+                        msgType = UserMsgDTO.MsgType.PRIVATE;
+                    } else if (!EncourageCache.atUsers.isEmpty()) {
+                        // 艾特勾选的用户
+                        toUsers = getToUsers(content, EncourageCache.atUsers.stream().map(User::getUsername).collect(Collectors.toList()));
+                        content += "       @批量艾特[" + EncourageCache.atUsers.size() + "]人";
+                    } else {
+                        toUsers = getToUsers(content, Collections.emptyList());
                     }
 
-                    if (sendCounter == -1) {
-                        sendCounter = 0;
-                    }
-                    if (++sendCounter >= 6) {
-                        sendCounter = 0;
-                    }
-                    if (sendCounter == 1) {
-                        sendCounterStartTime = System.currentTimeMillis();
-                    }
-
-                    MessageAction.send(new UserMsgDTO(content, toUsers), Action.CHAT);
+                    MessageAction.send(new UserMsgDTO(content, msgType, toUsers), Action.CHAT);
                 } else {
                     ConsoleAction.showLoginMsg();
                 }
@@ -348,6 +329,52 @@ public class InputAction implements MainWindowInitializedEventListener {
         }
 
         ConsoleAction.gotoConsoleLow();
+    }
+
+    private static boolean checkFreeze() {
+        if (sendCounter == 0 && System.currentTimeMillis() - sendCounterStartTime < INTERVAL_TIME) {
+            sendCounterStartTime = 0;
+            freezeEndTime = System.currentTimeMillis() + FREEZE_TIME;
+        }
+
+        long endTime = freezeEndTime - System.currentTimeMillis();
+        if (endTime > 0) {
+            ConsoleAction.showSimpleMsg("消息发送过于频繁，请于" + endTime / 1000 + "s后再发...");
+            return true;
+        }
+
+        if (sendCounter == -1) {
+            sendCounter = 0;
+        }
+        if (++sendCounter >= 6) {
+            sendCounter = 0;
+        }
+        if (sendCounter == 1) {
+            sendCounterStartTime = System.currentTimeMillis();
+        }
+        return false;
+    }
+
+    public static String[] getToUsers(String content, List<String> extraList) {
+        String[] toUsers = null;
+        List<String> toUserList = new ArrayList<>(ReUtil.findAll("(@)([^\\s]+)([\\s]*)", content, 2));
+        toUserList.addAll(extraList);
+        if (CollectionUtil.isNotEmpty(toUserList)) {
+            List<String> removeList = new ArrayList<>();
+            for (String toUser : toUserList) {
+                if (DataCache.getUser(toUser) == null) {
+                    removeList.add(toUser);
+                }
+            }
+            if (!removeList.isEmpty()) {
+                toUserList.removeAll(removeList);
+            }
+            if (!toUserList.isEmpty()) {
+                toUserList.add(DataCache.username);
+                toUsers = ArrayUtil.toArray(new HashSet<>(toUserList), String.class);
+            }
+        }
+        return toUsers;
     }
 
     public static void clean() {

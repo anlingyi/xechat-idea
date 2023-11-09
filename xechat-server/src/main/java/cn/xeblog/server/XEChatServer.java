@@ -2,6 +2,7 @@ package cn.xeblog.server;
 
 import cn.hutool.core.lang.Singleton;
 import cn.hutool.core.util.StrUtil;
+import cn.xeblog.server.action.handler.StatisticsActionHandler;
 import cn.xeblog.server.config.IpRegionProperties;
 import cn.xeblog.server.config.ServerConfig;
 import cn.xeblog.server.handler.DefaultChannelInitializer;
@@ -147,5 +148,8 @@ public class XEChatServer {
         XEChatServer server = new XEChatServer(serverConfig.getPort());
         server.enableWS = serverConfig.getEnableWS();
         server.run();
+
+        // 计时器 定时播报在线统计消息
+        StatisticsActionHandler.startTimerTask();
     }
 }

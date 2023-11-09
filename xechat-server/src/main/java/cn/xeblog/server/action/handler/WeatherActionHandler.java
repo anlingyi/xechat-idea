@@ -11,7 +11,6 @@ import cn.xeblog.commons.entity.weather.CityInfo;
 import cn.xeblog.commons.entity.weather.CurrentWeather;
 import cn.xeblog.commons.entity.weather.FutureWeather;
 import cn.xeblog.commons.enums.Action;
-import cn.xeblog.commons.enums.MessageType;
 import cn.xeblog.commons.enums.WeatherType;
 import cn.xeblog.server.annotation.DoAction;
 import cn.xeblog.server.builder.ResponseBuilder;
@@ -59,7 +58,7 @@ public class WeatherActionHandler extends AbstractActionHandler<WeatherDTO> {
             }
         } catch (Exception e) {
             log.error("出现异常：", e);
-            user.send(ResponseBuilder.build(null, "天气查询异常，请联系管理员！", MessageType.SYSTEM));
+            user.send(ResponseBuilder.system("天气查询异常，请联系管理员！"));
             return;
         }
 
@@ -83,7 +82,7 @@ public class WeatherActionHandler extends AbstractActionHandler<WeatherDTO> {
         }
 
         final String msg = StrUtil.CRLF + cityInfo.getLocationName() + " 天气预报" + StrUtil.CRLF + consoleTable;
-        user.send(ResponseBuilder.build(null, msg, MessageType.SYSTEM));
+        user.send(ResponseBuilder.system(msg));
     }
 
 }
