@@ -235,6 +235,7 @@ public class MinesweeperLogic {
             this.minesweeperUI.isGameOver = true;
             this.minesweeperUI.isStart = false;
             this.minesweeperUI.timer.stop();
+            JOptionPane.showMessageDialog(minesweeperUI, "恭喜您取得了胜利！");
         }
 
     }
@@ -321,7 +322,6 @@ public class MinesweeperLogic {
         }
         if (count == this.minesweeperUI.mineNum) {
             this.minesweeperUI.isGameOver = true;
-            JOptionPane.showMessageDialog(minesweeperUI, "恭喜您取得了胜利！");
             return true;
         }
 
